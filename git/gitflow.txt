@@ -1,0 +1,131 @@
+
+gitflow 种类挺多的，重点说，简化的，好上手的
+
+1.gitflow
+2.gitflow-avh
+3.git-hubflow
+其中，1 为传统的gitflow https://github.com/nvie/gitflow 七年前就已停更
+2 为目前流行的，上月还在更新
+https://github.com/petervanderdoes/gitflow-avh
+只看上面这个页面便可全部掌握
+3 为github推崇的敏捷模式，所有的功能分支都先deploy再merge，小步快跑，要求有极其完善的基础设施，目前看来我们很有差距
+
+如何选择
+如果单看名词，似乎应该选择敏捷 github flow，这个在现阶段是不现实的，它的流程中除了编码，其它全是自动化（deploy, testing, merge）。
+应该选择安全、流行、易上手的 gitflow-avh，现在主流的git工具内嵌的也是这个（比如sourcetree, smartgit）
+
+
+
+
+安装 gitflow
+
+OS X
+brew install git-flow
+
+Linux
+apt-get install git-flow
+
+Windows
+wget -q -O - --no-check-certificate https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | bash
+
+
+安装 gitflow-avh
+brew install git-flow-avh
+
+
+Help 文档
+git flow -help
+git flow init --help
+
+--showcommands
+
+
+使用
+
+
+
+
+一、初始化: git flow init -d         -d 所有选择使用默认
+会生成本地develop 分支、master 分支
+
+
+
+二、开始新 Feature: git flow feature start MYFEATURE
+代码是从 本地develop 切出 所有在新建 feature时 要保证 develop 代码是最新代码
+
+1. git config --local gitflow.branch.feature/xxx.base develop
+2. git checkout -b feature/xxx develop
+
+
+
+加入已进行的 Feature: git flow feature track MYFEATURE
+
+Publish一个Feature(也就是push到远程): git flow feature publish MYFEATURE
+
+获取Publish的Feature: git flow feature pull origin MYFEATURE
+
+
+
+完成一个Feature: git flow feature finish MYFEATURE
+代码被 本地develop 合并
+1. git checkout develop
+2. git merge --no-ff feature/xxx
+3. git branch -d feature/xxx
+
+
+
+
+
+三、开始一个Release: git flow release start RELEASE [BASE]
+代码是从 本地develop 切出
+1. git config --local gitflow.branch.release/1.0.base develop
+2. git checkout -b release/1.0 develop
+
+
+加入已进行的 Release: git flow release track RELEASE
+
+Publish一个Release: git flow release publish RELEASE
+
+发布Release: git flow release finish RELEASE
+会把代码合并到 master，并打上 tag
+develop 合并 上述tag
+别忘了git push --tags
+
+1. git checkout master
+2. git merge --no-ff release/1.0
+3. git tag -a 1.0
+4. git checkout develop
+5. git merge --no-ff 1.0
+6. git push origin :release/1.0
+7. git branch -d release/1.0
+
+
+四、开始一个Hotfix: git flow hotfix start VERSION [BASENAME]
+代码是从 本地master 切出
+
+发布一个Hotfix: git flow hotfix finish VERSION
+会把代码合并到 master，并打上 tag
+develop 合并 上述tag
+别忘了git push --tags
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

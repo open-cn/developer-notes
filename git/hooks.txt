@@ -1,0 +1,42 @@
+
+
+git钩子
+
+git 钩子就是在.git文件夹的hooks下，如下所示：
+
+applypatch-msg.sample
+commit-msg.sample
+fsmonitor-watchman.sample
+post-update.sample
+pre-applypatch.sample
+pre-commit.sample
+pre-push.sample
+pre-rebase.sample
+pre-receive.sample
+prepare-commit-msg.sample
+update.sample
+
+可以把sample去掉，直接编写shell脚本来执行。
+或者可以用插件husky与pre-commit，来使钩子生效。
+
+
+
+现在大前端主要有两种git钩子插件：husky（jquery与next.js都在用），pre-commit(antd在用)。
+
+
+pre-commit 用法
+"scripts": {
+  ...
+  "precommit": "pretty-quick --staged"
+}
+
+
+
+husky 用法
+
+"husky": {
+  "hooks": {
+    "pre-commit": "lint-staged"
+  }
+}
+

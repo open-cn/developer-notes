@@ -1,0 +1,28 @@
+
+
+brew install repo
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>//manifest 最顶层的XML元素
+  //设置远程git服务器
+  <remote  name="aosp" //名称
+           fetch=".."//
+           review="https://android-review.googlesource.com/" />//根URL地址
+  //
+  <default revision="master"
+           remote="aosp"
+           sync-j="4" />
+  //需要clone的Git仓库 path表示本机路径，name表示远程版本库的相对路径
+  <project path="build/make" name="platform/build" groups="pdk" >
+    <copyfile src="core/root.mk" dest="Makefile" />//执行拷贝操作，把URL/$src地址的文件拷贝到./$dest
+    <linkfile src="CleanSpec.mk" dest="build/CleanSpec.mk" />//链接,把URL/$src地址的文件链接到./$dest
+  </project>
+</manifest>
+
+（1） repo init   // 初始化repo仓库
+（2） repo sync   // 下载源码
+（3） repo start  // 创建分支
+（4） repo checkout //切换分支
+（5） repo branches //查看分支
+（6） repo status   //查看文件状态
