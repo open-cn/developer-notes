@@ -18,6 +18,7 @@ import urllib2,os,hashlib; h = '6f4c264a24d933ce70df5dedcf1dcaee' + 'ebe013ee18c
 
 ##安装插件
 1. Preferences => Package Control -> install package
+2. 组合键 Ctrl+Shift+P 调出命令面板
 
 ###设置Sublime Text3主题皮肤
 输入Spacegray.安装完成后在Preferrences->Color Scheme选择主题
@@ -48,7 +49,7 @@ Markdown Preview不能实时预览,但你可以设置快捷键让它在浏览器
 MarkdownLivePreview可以实现实时预览,在首选项->Package Setting里修改MarkdownLivePreview的user配置文件,设置在打开时同步预览
 "markdown_live_preview_on_open": true
 
-但是,这个插件的预览效果并不理想,很丑,而且不能横向滚动,也就是说如果一行显示不过来那你就看不到 了.而且装上它后虽然可以实时预览,但不知道因为什么原因输入的时候会有些卡.
+但是,这个插件的预览效果并不理想,很丑,而且不能横向滚动,也就是说如果一行显示不过来那你就看不到了.而且装上它后虽然可以实时预览,但不知道因为什么原因输入的时候会有些卡.
 
 ###图片粘贴支持
 imagepaste

@@ -1,4 +1,4 @@
-#Markdown 
+# Markdown 
 
 Markdown 设计灵感主要来源于纯文本电子邮件的格式，目标是让人们能够使用易读、易写的纯文本格式编写文档。
 
@@ -7,11 +7,11 @@ Markdown 语言在 2004 由约翰·格鲁伯（英语：John Gruber）创建。
 Markdown 编写的文档可以导出 HTML 、Word、图像、PDF、Epub 等多种格式的文档。  
 Markdown 编写的文档后缀为 .md, .markdownn, .mdown, .mkdn。  
 
-##语法说明
+## 语法说明
 
 ![](images/README0.png)
 
-###Markdown 标题
+### Markdown 标题
 Markdown 标题有两种格式。
 
 1. 使用 = 和 - 标记一级和二级标题  
