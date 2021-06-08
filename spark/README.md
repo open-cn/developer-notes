@@ -1,4 +1,4 @@
-#Spark
+## Spark
 
 Spark 支持四种运行模式：
 
@@ -15,7 +15,7 @@ Spark 支持四种运行模式：
 ./bin/spark-submit examples/src/main/python/pi.py
 ```
 
-##引入 Spark 初始化 SparkContext
+### 引入 Spark 初始化 SparkContext
 
 Read-Eval-Print-Loop 交互式 shell  
 ./bin/spark-shell  进入 scala 的 shell  
@@ -96,7 +96,7 @@ scala> accum.value
 
 
 
-##Spark Streaming
+### Spark Streaming
 Spark streaming是Spark核心API的一个扩展，它对实时流式数据的处理具有可扩展性、高吞吐量、可容错性等特点。我们可以从kafka、flume、Twitter、 ZeroMQ、Kinesis等源获取数据，也可以通过由高阶函数map、reduce、join、window等组成的复杂算法计算出数据。
 
 初始化 StreamingContext
@@ -163,7 +163,100 @@ ssc.stop()
 
 
 
-##SQL
+### Spark SQL
+`./bin/spark-sql # 启动交互式shell`
+```sql
+quit # 退出
+exit # 退出
+show databases; # 查看已有的database
+use databaseName; # 切换数据库
+create database myDatabase; # 创建数据库
+show tables; # 查看所有表
+show tables 'KHDX'; -- 支持模糊查询，表名包含KHDX
+
+
+-- 建表
+create table tab_test(
+name string,
+age int,
+num1 double,
+num2 bigint,
+msg varchar(80)    -- 最后一个字段后面不能有','号
+)
+partitioned by (p_age int,p_name string) -- 分区信息
+row format delimited fields terminated by ',' -- 数据中，属性间用逗号分隔
+stored as textfile location '/tab/test/tab_test';  -- 保存路径，最后也可带'/'，即写成 '/tab/test/tab_test/'
+
+-- stored as orc ;orc类型的表，手动推数据（txt / csv 文件；无需表头，行尾无需','，数据文件保存为unix utf-8 无bom格式）不行;
+-- 可以借助textfile类型的临时表插入数据；插入时，要注意字段顺序对应一致。
+
+
+-- 指定分区，追加插入;最好不要用 'seletc *  ' 表字段变化时,*指代的内容不一样
+insert into table tab_test_orc partition(p_age=10,p_name='lucy') select name,age,num1,num2,msg from tab_test_temp;
+-- 指定分区，覆盖插入
+insert overwrite table tab_test_orc partition(p_age=10,p_name='lucy') select name,age,num1,num2,msg from tab_test_temp;
+
+
+desc khdx_hy;   -- 显示表khdx_hy的表结构
+desc formatted khdx_hy; -- 格式化表khdx_hy的表结构信息，信息更详细，包括在hdfs的存储位置
+show partitions khdx_hy; -- 显示表khdx_hy的分区信息
+show create table khdx_hy; -- 查看建表语句
+ 
+
+-- 修改表结构
+alter table myDatabase.nbzz_ckmxz add partition(tjrq='20171231')add partition(tjrq='20180101')  -- 手动给分区表增加2个分区
+alter table myDatabase.nbzz_ckmxz drop if exists partition (tjrq='20171231');   -- 手动删除分区表某个分区
+alter table myDatabase.nbzz_ckmxz add columns (fh string);     -- 追加字段
+alter table myDatabase.nbzz_ckmxz change hydh hydh1 string;          -- 修改字段hydh名称为hydh1，类型为string
+
+
+drop table myDatabase.nbzz_ckmxz;  -- 删除表
+alter table myDatabase.tmp_nbzz_ckmxz rename to myDatabase.nbzz_ckmxz;  -- 重命名表
+
+-- 删表中数据：
+truncate table tab_test;   -- 执行后，分区依然存在
+truncate table tab_test partition(p_age=10,p_name='Tom'); -- 删除某分区 
+ 
+
+-- 操作表
+select * from myDatabase.khdx_hy order by hydh limit 10;    -- 查询表，显示前10条记录。
+truncate table khdx_hy;      -- 清空表数据
+insert overwrite table myDatabase.tmp_khdx_hy select * from myDatabase.khdx_hy;  -- 用khdx_hy的数据覆盖tmp_khdx_hy数据;
+insert into myDatabase.tmp_khdx_hy select * from myDatabase.khdx_hy;   -- 用khdx_hy的数据追加tmp_khdx_hy数据中，不覆盖原来数据。
+load data local inpath '/home/myDatabase/data/org_info.txt' overwrite into table myDatabase.org_info ;  -- 从文件中导入数据到表中
+load data local inpath '/home/myDatabase/data/t_ma_fct_etl_acct_liyang_20171231.dat' overwrite into table myDatabase.T_MA_FCT_ETL_ACCT partition(tjrq="20171231");
+ -- 从文件导入数据至表的某个分区。
+insert overwrite local directory '/home/myDatabase/data/khdx_hy.txt'  row format delimited  fields terminated by '\t' select * FROM myDatabase.KHDX_HY;
+ -- 从表khdx_hy导出数据至本地文件khdx_hy.txt
+
+
+-- 增加分区：
+alter table tab_test add if not exists partition(p_age=11,p_name="Tom"); -- 更完善写法
+
+alter table tab_test add partition(p_age=10,p_name='Tom'); -- 需要指定所有的分区，不能只是p_age或p_name;否则org.apache.spark.sql.execution.QueryExecutionException：doesn't contain all (2) partition columns 
+show partitions tab_test; -- 查看分区
+
+-- 删除分区
+alter table tab_test drop if exists partition(p_age=10); 
+-- 删除分区时，可以只指定局部 
+alter table tab_test drop partition(p_name='Tom'); 
+-- 只执行该条语句,p_age=10分区连同一起被删掉，show partitions 结果为空；hdfs dfs -ls 也看不到 p_age=10的分区
+
+alter table tab_test add partition(p_age=10,p_name='cat'); 
+-- 只drop p_name='Tome', p_name='cat' 的分区还存在，show partitions 可以查到
+
+
+-- 动态分区；动态分区匹配最后选出的字段；只与字段顺序有关系，与名字无关；同时存在静态和动态分区，动态分区必须在静态分区之后
+insert into table tab_test(p_age,p_name)
+select name,
+       age,
+       num1,
+       num2,
+       msg,
+       age as pppp_age,  -- 取不取别名都可以;分区需要出现在select出来的字段的最后位置，为了匹配。
+       name as p_name   -- 写个对应的别名，看上去好理解一点
+from tab_test_temp;
+```
 
 DataFrame
 ```
