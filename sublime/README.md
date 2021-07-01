@@ -1,6 +1,6 @@
 ## Sublime Text
 
-### 安装package control
+### 安装 package control
 https://packagecontrol.io/installation  
 View => Show Console
 
@@ -20,10 +20,10 @@ import urllib2,os,hashlib; h = '6f4c264a24d933ce70df5dedcf1dcaee' + 'ebe013ee18c
 1. Preferences => Package Control -> install package
 2. 组合键 Ctrl+Shift+P 调出命令面板
 
-#### 设置Sublime Text3主题皮肤
+#### 设置 Sublime Text 3 主题皮肤
 输入Spacegray.安装完成后在Preferrences->Color Scheme选择主题
 
-#### gbk编码支持
+#### gbk 编码支持
 CovertToUTF8 + Codecs33
 或者
 gbk support
@@ -31,7 +31,7 @@ gbk support
 
 convert 好像不能转换gbk 或者 utf-8
 
-#### markdown支持
+#### markdown 支持
 sublime自带的markdown语法高亮并不是很友好,推荐安装Markdown Editing
 
 安装完成后点击右下角或者在视图 => 语法=>MarkdownEditing->三种风格,分别是Standard Markdown, GitHub flavored Markdown, MultiMarkdown.
@@ -39,7 +39,7 @@ sublime自带的markdown语法高亮并不是很友好,推荐安装Markdown Edit
 Markdown Editing并不只是一个markdown的主题插件,它自定义许多markdown的快捷键
 
 
-#### markdown预览支持
+#### markdown 预览支持
 可以选择Markdown Preview或MarkdownLivePreview.
 
 Markdown Preview不能实时预览,但你可以设置快捷键让它在浏览器中预览,在首选项=> 快捷键设置里添加
@@ -80,6 +80,19 @@ Preferences =>Package Settings => Package Control => Settings - User
 ### Sublime 配置
 在Sublime Text3中,所有Default代码都不能直接更改，而是要在User里面把要更改的代码复制过来再进行更改,这是与之前版本不同的地方.
 
+{
+	"color_scheme": "Packages/MarkdownEditing/MarkdownEditor-Dark.tmTheme",
+	"highlight_line": true,
+	"ignored_packages":
+	[
+		"Markdown",
+		"Vintage"
+	],
+	"show_encoding": true,
+	"show_git_status": false,
+	"soda_classic_tabs": true,
+	"theme": "Soda Dark 3.sublime-theme"
+}
 
 
 
