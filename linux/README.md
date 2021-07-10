@@ -1,160 +1,138 @@
 ## Linux
 
+处理命令行参数是一个相似而又复杂的事情，为此，C提供了getopt/getopt_long等函数，
+C++的boost提供了Options库，在shell中，处理此事的是getopts和getopt。
 
-### Linux 服务管理两种方式 service 和 systemctl
+getopts和getopt功能相似但又不完全相同，其中getopt是独立的可执行文件，而getopts是由Bash内置的。
 
-#### init 和 service
+命令行选项的三种风格；原始的 Unix 风格、GNU 风格和 X 工具包风格。
+1   UNIX options, which may be grouped and must be preceded by a dash.
+2   BSD options, which may be grouped and must not be used with a dash.
+3   GNU long options, which are preceded by two dashes.
 
-历史上，Linux 的启动一直采用init 进程。
+在最初的 Unix 传统中，命令行选项是单个字母，前面有一个连字符。不接受以下参数的模式标志选项可以组合在一起；因此，如果 -a和-b是模式选项，则 -ab或-ba也是正确的并启用两者。选项的参数（如果有）跟在它后面（可选地用空格分隔）。在这种风格中，小写选项优先于大写。当您使用大写选项时，它们最好是小写选项的特殊变体。
 
-在类Unix 的计算机操作系统中，Init（初始化的简称）是在启动计算机系统期间启动的第一个进程。
+最初的 Unix 风格是在缓慢的 ASR-33 电传打字机上演变而来的，这使得简洁成为一种美德 因此是单字母选项。按住shift键需要实际的努力；因此偏好小写，并使用“-”（而不是可能更合乎逻辑的“+”）来启用选项。
 
-Init 是一个守护进程，它将持续运行，直到系统关闭。它是所有其他进程的直接或间接的父进程。
+GNU 样式使用以两个连字符开头的选项关键字（而不是关键字字母）。几年后，当一些相当复杂的 GNU 实用程序开始用完单字母选项键时，它发展了。它仍然很受欢迎，因为 GNU 选项比旧样式的字母汤更容易阅读。GNU 风格的选项不能在不分隔空格的情况下组合在一起。选项参数（如果有）可以由空格或单个“=”（等号）字符分隔。
 
-因为init 的参数全在/etc/init.d目录下，所以使用 init 启动一个服务，应该这样做：
+选择了 GNU 双连字符选项引导符，以便可以在同一命令行中明确混合传统的单字母选项和 GNU 样式的关键字选项。因此，如果您的初始设计只有很少且简单的选项，那么您可以使用 Unix 风格，而不必担心以后需要切换到 GNU 风格时会导致不兼容的“标志日”。另一方面，如果您使用的是 GNU 风格，那么至少为最常见的选项支持单字母等效项是一种很好的做法。
 
-$ sudo /etc/init.d/nginx start
+令人困惑的是，X 工具包样式使用单个连字符和关键字选项。它由 X 工具包解释，在将过滤后的命令行交给应用程序逻辑进行解释之前，过滤和处理某些选项（例如-geometry和 -display）。X 工具包样式与经典的 Unix 或 GNU 样式均不正确兼容，并且不应在新程序中使用，除非与旧 X 约定兼容的价值似乎非常高。
 
+许多工具接受不与任何选项字母相关联的裸连字符，作为指示应用程序从标准输入读取的伪文件名。将双连字符识别为停止选项解释并按字面处理所有以下参数的信号也是惯例。
 
-service命令用于对系统服务进行管理，比如启动（start）、停止（stop）、重启（restart）、查看状态（status）等。
-相关的命令还包括chkconfig、ntsysv等，chkconfig用于查看、设置服务的运行级别，ntsysv用于直观方便的设置各个服务是否自动启动。
+大多数 Unix 编程语言都提供了可以为您解析经典 Unix 或 GNU 风格的命令行的库（也解释双连字符约定）。
 
-service命令本身是一个shell脚本，它在/etc/init.d/目录查找指定的服务脚本，然后调用该服务脚本来完成任务。
+      
 
-service是一个运行System V init的脚本命令。
 
-$ sudo /etc/init.d/nginx start
-// 等价于
-$ service nginx start
 
+ss是Socket Statistics的缩写。顾名思义，ss命令可以用来获取socket统计信息，它可以显示和netstat类似的内容。但ss的优势在于它能够显示更多更详细的有关TCP和连接状态的信息，而且比netstat更快速更高效。
 
-但是这两种方式均有如下缺点：
+-h, --help 帮助信息
 
-- 启动时间长。init 进程是串行启动，只有前一个进程启动完，才会启动下一个进程。
-- 启动脚本复杂。init进程只是执行启动脚本，不管其他事情。脚本需要自己处理各种情况，这往往使得脚本变得很长。
+-V, --version 程序版本信息
 
+-n, --numeric 不解析服务名称
 
-#### systemd
+-r, --resolve        解析主机名
 
-Systemd 是Linux 系统中最新的初始化系统（init），它主要的设计目的是克服 System V init 固有的缺点，提高系统的启动速度。
+-a, --all 显示所有套接字（sockets）
 
-根据 Linux 惯例，字母d是守护进程（daemon）的缩写。 Systemd 这个名字的含义，就是它要守护整个系统。
+-l, --listening 显示监听状态的套接字（sockets）
 
-使用了 Systemd，就不需要再用init 了。Systemd 取代了initd（Initd 的PID 是0） ，成为系统的第一个进程（Systemd 的PID 等于 1），其他进程都是它的子进程。
+-o, --options        显示计时器信息
 
-Systemd 的优点是功能强大，使用方便，缺点是体系庞大，非常复杂。
+-e, --extended       显示详细的套接字（sockets）信息
 
-systemd作用是提高系统的启动速度，尽可能启动较少的进程，尽可能更多进程并发启动。
+-m, --memory         显示套接字（socket）的内存使用情况
 
-systemd的Unit放在目录/usr/lib/systemd/system(Centos)或/etc/systemd/system(Ubuntu)
+-p, --processes 显示使用套接字（socket）的进程
 
+-i, --info 显示 TCP内部信息
 
-Systemd 并不是一个命令，而是一组命令，涉及到系统管理的方方面面。
+-s, --summary 显示套接字（socket）使用概况
 
-##### systemctl是 Systemd 的主命令，用于管理系统
+-4, --ipv4           仅显示IPv4的套接字（sockets）
 
-systemctl 提供了一组子命令来管理单个的 unit，其命令格式为：
+-6, --ipv6           仅显示IPv6的套接字（sockets）
 
-systemctl [command] [unit]
+-0, --packet         显示 PACKET 套接字（socket）
 
+-t, --tcp 仅显示 TCP套接字（sockets）
 
-command 主要有：
+-u, --udp 仅显示 UCP套接字（sockets）
 
-start：立刻启动后面接的 unit。
+-d, --dccp 仅显示 DCCP套接字（sockets）
 
-stop：立刻关闭后面接的 unit。
+-w, --raw 仅显示 RAW套接字（sockets）
 
-restart：立刻关闭后启动后面接的 unit，亦即执行 stop 再 start 的意思。
+-x, --unix 仅显示 Unix套接字（sockets）
 
-reload：不关闭 unit 的情况下，重新载入配置文件，让设置生效。
+-f, --family=FAMILY  显示 FAMILY类型的套接字（sockets），FAMILY可选，支持  unix, inet, inet6, link, netlink
 
-enable：设置下次开机时，后面接的 unit 会被启动。
+-A, --query=QUERY, --socket=QUERY
 
-disable：设置下次开机时，后面接的 unit 不会被启动。
+      QUERY := {all|inet|tcp|udp|raw|unix|packet|netlink}[,QUERY]
 
-status：目前后面接的这个 unit 的状态，会列出有没有正在执行、开机时是否启动等信息。
+-D, --diag=FILE     将原始TCP套接字（sockets）信息转储到文件
 
-is-active：目前有没有正在运行中。
+-F, --filter=FILE   从文件中都去过滤器信息
 
-is-enable：开机时有没有默认要启用这个 unit。
+       FILTER := [ state TCP-STATE ] [ EXPRESSION ]
 
-kill ：不要被 kill 这个名字吓着了，它其实是向运行 unit 的进程发送信号。
+ss -tnlp
 
-show：列出 unit 的配置。
 
-mask：注销 unit，注销后你就无法启动这个 unit 了。
 
-unmask：取消对 unit 的注销。
 
+ps 提供了很多的选项参数，常用的有以下几个：
 
-// 重启系统
-$ sudo systemctl reboot
+l 长格式输出；
+u 按用户名和启动时间的顺序来显示进程；
+j 用任务格式来显示进程；
+f 用树形格式来显示进程；
+a 显示所有用户的所有进程（包括其它用户）；
+x 显示无控制终端的进程；
+r 显示运行中的进程；
+ww 避免详细参数被截断；
 
-// 启动进入救援状态（单用户状态）
-$ sudo systemctl rescue
+e 显示所有进程。
+f 全格式。
 
-// 管理服务
-$ sudo systemctl start nginx
+au(x) 输出格式 :USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND
 
+USER: 行程拥有者
+PID: pid
+%CPU: 占用的 CPU 使用率
+%MEM: 占用的记忆体使用率
+VSZ: 占用的虚拟记忆体大小
+RSS: 占用的记忆体大小
+TTY: 终端的次要装置号码 (minor device number of tty)
+STAT: 该行程的状态:
+    D    不可中断     Uninterruptible sleep (usually IO)
+    R    正在运行，或在队列中的进程　　runnable (on run queue)
+    S    处于休眠状态　　sleeping
+    T    停止或被追踪　　traced or stopped
+    Z    僵尸进程　　a defunct('zombie') process
+    W    进入内存交换（从内核2.6开始无效）
+    X    死掉的进程
+    <    高优先级
+    N    低优先级
+    L    有些页被锁进内存
+    s    包含子进程
+    +    位于后台的进程组；
+    l    多线程，克隆线程  multi-threaded (using CLONE_THREAD, like NPTL pthreads do)
+START: 行程开始时间
+TIME: 执行的时间
+COMMAND:所执行的指令
 
 
-.service文件定义了一个服务，分为[Unit]，[Service]，[Install]三个小节
 
-[Unit]
 
-Description:描述，
 
-After：在network.target,auditd.service启动后才启动
 
-ConditionPathExists: 执行条件
 
- 
 
-[Service]
-
-EnvironmentFile:变量所在文件
-
-ExecStart: 执行启动脚本
-
-Restart: fail时重启
-
- 
-
-[Install]
-
-Alias:服务别名
-
-WangtedBy: 多用户模式下需要的
-
-
-##### hostnamectl 命令用于查看当前主机的信息。
-
-// 显示当前主机信息
-$ hostnamectl
-
-// 设置主机名
-$ sudo hostnamectl set-hostname BoodeUbuntu
-
-
-##### localectl 命令用于查看本地化设置。
-
-// 查看本地化设置
-$ localectl
-
-// 设置本地化参数。
-$ sudo localectl set-locale LANG=en_GB.utf8
-$ sudo localectl set-keymap en_GB
-
-##### timedatectl 命令用于查看当前时区设置
-
-// 查看当前时区设置
-$ timedatectl
-
-// 显示所有可用的时区
-$ timedatectl list-timezones                                                                                   
-
-// 设置当前时区
-$ sudo timedatectl set-timezone America/New_York
-$ sudo timedatectl set-time YYYY-MM-DD
-$ sudo timedatectl set-time HH:MM:SS
 
