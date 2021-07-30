@@ -259,6 +259,11 @@ _   下划线
 
 #### Markdown 公式
 当需要在编辑器中插入数学公式时，可以使用两个美元符 $$ 包裹 TeX 或 LaTeX 格式的数学公式来实现。如：
+
+行内公式$y=a+b$
+
+公式块：
+
 ```
 $$
 \mathbf{V}_1 \times \mathbf{V}_2 =  \begin{vmatrix} 
@@ -277,18 +282,16 @@ $$
 \end{vmatrix}
 ${$tep1}{\style{visibility:hidden}{(x+1)(x+1)}}
 $$
-
-
-根据需要加载 Mathjax 对数学公式进行渲染。
 
 
 
 
 #### Markdown 流程图
 
-typora 画流程图、时序图(顺序图)、甘特图
+typora 画流程图、时序图(顺序图)、类图、甘特图、饼图
 
 1、横向流程图：
+
 ```mermaid
 graph LR
 A[方形] -->B(圆角)
@@ -299,6 +302,7 @@ A[方形] -->B(圆角)
 ```
 
 2、竖向流程图：
+
 ```mermaid
 graph TD
 A[方形] --> B(圆角)
@@ -309,6 +313,7 @@ A[方形] --> B(圆角)
 ```
 
 3、标准流程图：
+
 ```flow
 st=>start: 开始框
 op=>operation: 处理框
@@ -374,7 +379,34 @@ Note right of C: 没人陪我玩
     李四-->王五: 很好!
 ```
 
-8、甘特图：
+8、类图
+
+```mermaid
+classDiagram
+      Animal <|-- Duck
+      Animal <|-- Fish
+      Animal <|-- Zebra
+      Animal : +int age
+      Animal : +String gender
+      Animal: +isMammal()
+      Animal: +mate()
+      class Duck{
+          +String beakColor
+          +swim()
+          +quack()
+      }
+      class Fish{
+          -int sizeInFeet
+          -canEat()
+      }
+      class Zebra{
+          +bool is_wild
+          +run()
+      }
+```
+
+9、甘特图：
+
 ```mermaid
 %% 语法示例
         gantt
@@ -396,6 +428,19 @@ Note right of C: 没人陪我玩
         压力测试                               :after a1  , 20h
         测试报告                               : 48h
 ```
+
+10、饼图
+
+```mermaid
+pie
+	title Key elements in Product X
+    "Calcium" : 42.96
+    "Potassium" : 50.05
+    "Magnesium" : 10.01
+    "Iron" :  5
+```
+
+
 
 ### Markdown 解析器和扩展语法
 

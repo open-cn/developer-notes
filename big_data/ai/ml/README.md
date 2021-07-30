@@ -21,6 +21,7 @@
 3. 强化学习<br>
 '胡萝卜加大棒'的方法。如果神经网络产生连续动作，可以使用这个方法。用奖励来激励网络向正确的方向调整，如果走错了路则会受到惩罚。慢慢的网络会倾向于选择正确的动作，并避免错误的行为。
 
+#### 半监督学习
 
 
 #### Artificial Neural Network
@@ -100,7 +101,8 @@ sigmoid函数和tanh函数是研究早期被广泛使用的2种激活函数。�
 
 神经网络的基础模型是感知机，因此神经网络也可以叫做多层感知机(Multi-layer Perceptron)，简称MLP。单层感知机叫做感知机，多层感知机(MLP)≈人工神经网络(ANN)。
 
-#### CNN
+
+#### Convolutional Neural Network
 卷积神经网络，CNN
 
 #### RNN
@@ -108,6 +110,20 @@ sigmoid函数和tanh函数是研究早期被广泛使用的2种激活函数。�
 
 #### Deep Neural Network
 深度神经网络，DNN
+
+#### Graph Neural Network
+图神经网络，GNN
+
+
+#### Graph Convolutional Neural Network
+图卷积神经网络，GCNN
+
+#### （Gated Graph Neural Network）
+门控图神经网络，GGNN
+
+
+
+
 
 
 

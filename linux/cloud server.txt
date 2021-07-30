@@ -1,0 +1,206 @@
+ubuntu 16.04.04
+
+
+ssh root@server_ip_address
+
+adduser username
+usermod -aG sudo username
+
+
+
+3. Linux科学上网
+
+export https_proxy=http://proxy.example.com:8118
+export http_proxy=http://proxy.example.com:8118
+
+
+
+【ssh login】
+1. 安装 openssh-server， 并添加公钥
+
+sudo apt-get install openssh-server
+
+mkdir ~/.ssh && cd ~/.ssh
+
+echo xxx > authorized_keys
+
+sudo vi /etc/ssh/sshd_config
+...
+AuthorizedKeysFile      %h/.ssh/authorized_keys
+
+sudo service ssh restart
+
+2. 禁用密码登录
+sudo vi /etc/ssh/sshd_config
+...
+PasswordAuthentication no
+
+sudo service ssh restart
+
+3. 如果所使用的用户 /home/your-username 被加密
+sudo vi /etc/ssh/sshd_config
+...
+AuthorizedKeysFile /etc/ssh/%u/authorized_keys
+/etc/ssh/your-username/authorized_keys
+
+sudo service ssh restart
+
+4. 禁止 root 用户远程登录
+sudo vi /etc/ssh/sshd_config
+...
+PermitRootLogin no
+
+sudo service ssh restart
+
+5. 好像并不需要
+如果希望ssh公钥生效需满足至少下面两个条件：
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+
+
+【安装 nodejs】
+sudo apt-get update
+sudo apt-get install python gcc make g++
+
+1. 下载源码编译安装  太慢了
+cd /usr/src
+sudo wget http://nodejs.org/dist/v6.9.1/node-v6.9.1.tar.gz 
+sudo tar zxf node-v6.9.1.tar.gz
+cd node-v6.9.1
+sudo ./configure
+sudo make install 编译后的二进制文件将被放置到系统路径，默认情况下，Node二进制文件应该放在/user/local/bin/node文件夹下
+
+# wget https://nodejs.org/dist/v8.1.0/node-v8.1.0-linux-x64.tar.xz
+将node和npm设置为全局
+sudo ln /home/ubuntu/node-v8.1.0-linux-x64/bin/node /usr/local/bin/node
+sudo ln /home/ubuntu/node-v8.1.0-linux-x64/bin/npm /usr/local/bin/npm
+
+
+2. apt install
+# sudo apt-get install nodejs
+sudo apt-get install nodejs-legacy npm
+
+
+3. curl and apt install 
+# curl -sL https://deb.nodesource.com/setup | sudo bash -
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+# curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+
+
+sudo apt-get install git
+
+
+
+
+1.修改主机名
+sudo vi /etc/hostname
+...
+emmmm
+...
+:wq! // force write
+
+or: sudo hostname emmmm
+
+2.去除 sudo 出现unable to resolve host 提示
+sudo vi /etc/hosts
+...
+127.0.0.1     emmmm
+
+
+3.修改 dns
+重启生效：
+sudo vi /etc/resolvconf/resolv.conf.d/base（这个文件默认是空的）
+插入：
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+修改好保存，然后执行
+sudo resolvconf -u
+cat /etc/resolv.conf，最下面就多了2行
+
+重启失效：
+sudo vi /etc/resolv.conf
+插入：
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+再重启网络：sudo /etc/init.d/networking restart
+
+
+4.apt-get安装源替换 阿里云源
+sudo vim /etc/apt/sources.list
+同样的还有 /etc/apt/sources.list.d/*.list
+
+ubuntu 14
+deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse 
+deb http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse 
+deb http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse 
+deb http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse 
+deb http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse 
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse 
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse 
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse 
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse 
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse
+
+ubuntu 16
+deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse
+##测试版源
+deb http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse
+# 源码
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse
+##测试版源
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse
+# Canonical 合作伙伴和附加
+deb http://archive.canonical.com/ubuntu/ xenial partner
+deb http://extras.ubuntu.com/ubuntu/ xenial main
+
+
+
+
+
+
+
+
+
+
+VmWare的三种设置Bridge、nat、hostonly的区别
+1.bridged(桥接模式)
+
+在bridged模式下，VMWare虚拟出来的操作系统就像是局域网中的一台独立的主机，它可以访问网内任何一台机器。在bridged模式下，你需要手工为虚拟系统配置IP地址、子网
+
+掩码，而且还要和宿主机器处于同一网段，这样虚拟系统才能和宿主机器进行通信。同时，由于这个虚拟系统是局域网中的一个独立的主机系统，那么就可以手工配置它的TCP/IP配
+
+置信息，以实现通过局域网的网关或路由器访问互联网。 使用bridged模式的虚拟系统和宿主机器的关系，就像连接在同一个Hub上的两台电脑。想让它们相互通讯，你就需要为虚
+
+拟系统配置IP地址和子网掩码，否则就无法通信。 如果你想利用VMWare在局域网内新建一个虚拟服务器，为局域网用户提供网络服务，就应该选择bridged模式。
+
+2.NAT(网络地址转换模式)
+
+ 使用NAT模式，就是让虚拟系统借助NAT(网络地址转换)功能，通过宿主机器所在的网络来访问公网。也就是说，使用NAT模式可以实现在虚拟系统里访问互联网。NAT模式下的
+
+虚拟系统的TCP/IP配置信息是由VMnet8(NAT)虚拟网络的DHCP服务器提供的，无法进行手工修改，因此虚拟系统也就无法和本局域网中的其他真实主机进行通讯。采用NAT模式
+
+最大的优势是虚拟系统接入互联网非常简单，你不需要进行任何其他的配置，只需要宿主机器能访问互联网即可。 这种方式也可以实现Host OS与Guest OS的双向访问。但网络
+
+内其他机器不能访问Guest OS，Guest OS可通过Host OS用NAT协议访问网络内其他机器。NAT方式的IP地址配置方法是由VMware的虚拟DHCP服务器中分配一个IP ，在这个
+
+IP地址中已经设置好路由，就是指向192.168.138.1的。 如果你想利用VMWare安装一个新的虚拟系统，在虚拟系统中不用进行任何手工配置就能直接访问互联网，建议你采用
+
+NAT模式。
+
+host-only(主机模式)
+
+在某些特殊的网络调试环境中，要求将真实环境和虚拟环境隔离开，这时你就可采用host-only模式。在host-only模式中，所有的虚拟系统是可以相互通信的，但虚拟系统和真实
+
+的网络是被隔离开的。 提示:在host-only模式下，虚拟系统和宿主机器系统是可以相互通信的，相当于这两台机器通过双绞线互连。 在host-only模式下，虚拟系统的TCP/IP配置
+
+信息(如IP地址、网关地址、DNS服务器等)，都是由VMnet1(host-only)虚拟网络的DHCP服务器来动态分配的。 如果你想利用VMWare创建一个与网内其他机器相隔离的虚拟系
+
+统，进行某些特殊的网络调试工作，可以选择host-only模式。
