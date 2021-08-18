@@ -36,8 +36,29 @@ sublime自带的markdown语法高亮并不是很友好,推荐安装Markdown Edit
 
 安装完成后点击右下角或者在视图 => 语法=>MarkdownEditing->三种风格,分别是Standard Markdown, GitHub flavored Markdown, MultiMarkdown.
 
-Markdown Editing并不只是一个markdown的主题插件,它自定义许多markdown的快捷键
+Markdown Editing并不只是一个markdown的主题插件，它自定义许多markdown的快捷键。
 
+##### markdown GFM 配置
+{
+	"extensions":
+	[
+		"md",
+		"mdown"
+	],
+	"color_scheme": "Packages/MarkdownEditing/MarkdownEditor-Dark.tmTheme",
+
+	// Layout
+	"draw_centered": false,
+	"word_wrap": true,
+	"wrap_width": 120,
+	"rulers": [],
+
+	// Line
+	"line_numbers": true,
+	"highlight_line": true,
+
+	"mde.keep_centered": true,  // 可以保持你正在编辑的行始终处于屏幕的中间
+}
 
 #### markdown 预览支持
 可以选择Markdown Preview或MarkdownLivePreview.
@@ -56,7 +77,9 @@ imagepaste
 
 该插件存在一些问题，比如生成的图片质量不如直接保持的图片文件
 
-### Unable to download XXX
+### 安装FAQ
+
+#### Unable to download XXX
 Preferences =>Package Settings => Package Control => Settings - User
 {
 	"bootstrapped": true,
@@ -81,17 +104,25 @@ Preferences =>Package Settings => Package Control => Settings - User
 在Sublime Text3中,所有Default代码都不能直接更改，而是要在User里面把要更改的代码复制过来再进行更改,这是与之前版本不同的地方.
 
 {
-	"color_scheme": "Packages/MarkdownEditing/MarkdownEditor-Dark.tmTheme",
-	"highlight_line": true,
+	"theme": "Material-Theme-Palenight.sublime-theme",
+	"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
 	"ignored_packages":
 	[
 		"Markdown",
 		"Vintage"
 	],
-	"show_encoding": true,
-	"show_git_status": false,
-	"soda_classic_tabs": true,
-	"theme": "Soda Dark 3.sublime-theme"
+	"show_encoding": true,  // 显示编码
+	"show_git_status": false, // 显示 git 状态
+
+	"highlight_line": true, // 高亮正在编辑的行
+	// "line_numbers": true,   // 显示行号
+
+	// "tab_size": 4,          // tab宽度
+	"translate_tabs_to_spaces": true,   // tab转换为空格
+	"trim_trailing_white_space_on_save": true,  // 保存时去掉行尾空格
+
+	"word_wrap": true,      // 自动换行
+	"wrap_width": "auto",    // 换行的宽度,默认80会造成左侧大量留白
 }
 
 

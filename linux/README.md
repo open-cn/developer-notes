@@ -24,9 +24,13 @@ GNU 样式使用以两个连字符开头的选项关键字（而不是关键字�
 
 大多数 Unix 编程语言都提供了可以为您解析经典 Unix 或 GNU 风格的命令行的库（也解释双连字符约定）。
 
-      
+##### history search
 
+**failed reverse-i-search**
 
+Linux Bash now allows forward search using cntrl + S and backward search using cntrl + R . Please check if your terminal traps cntrl + S & cntrl + Q for flow control. If that's the case you can disable this by using stty -ixon.
+
+##### Socket Statistics
 
 ss是Socket Statistics的缩写。顾名思义，ss命令可以用来获取socket统计信息，它可以显示和netstat类似的内容。但ss的优势在于它能够显示更多更详细的有关TCP和连接状态的信息，而且比netstat更快速更高效。
 
@@ -84,8 +88,7 @@ ss是Socket Statistics的缩写。顾名思义，ss命令可以用来获取socke
 
 ss -tnlp
 
-
-
+##### ps
 
 ps 提供了很多的选项参数，常用的有以下几个：
 
