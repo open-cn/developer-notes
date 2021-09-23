@@ -94,7 +94,6 @@ Cloudera 2019 年宣布，从2019年11月开始，所有新版本，包括当前
 
 近日，Cloudera发布了Cloudera Data Platform Private Cloud(CDP私有云)，进一步完善了整套企业数据云愿景。
 
-
 ### Hadoop 发行版本
 Hadoop三大发行版本：Apache、Cloudera、Hortonworks。
 
@@ -350,7 +349,8 @@ HDFS的小文件问题被大家诟病，Ozone对象存储也是千呼万唤始�
 最关键的一点：CDP的组件代码在github上找不到，是不再开源了，CDP7以后就没有社区版了。
 
 
-### Hadoop 的架构
+### Hadoop 的原理
+#### Hadoop 的架构
 Hadoop 主要有两个层次，即：
 
 - 加工/计算层(MapReduce)
@@ -382,6 +382,824 @@ Hadoop 运行整个计算机集群代码。这个过程包括以下核心任务�
 - 执行发生映射之间，减少阶段的排序。
 - 发送排序的数据到某一计算机。
 - 为每个作业编写的调试日志。
+
+#### Hadoop 的特点
+Hadoop框架允许用户快速地编写和测试的分布式系统。有效并在整个机器和反过来自动分配数据和工作，利用CPU内核的基本平行度。 <br>
+Hadoop不依赖于硬件，以提供容错和高可用性（FTHA），而Hadoop库本身已被设计在应用层可以检测和处理故障。 <br>
+服务器可以添加或从集群动态删除，Hadoop可继续不中断地运行。 <br>
+Hadoop的的另一大优势在于，除了是开源的，因为它是基于Java并兼容所有的平台。 <br>
+
+### 最佳实践
+
+#### 作业类型
+
+MR作业，hive作业，hive sql作业，spark作业，spark sql作业，spark streaming作业，spark shell作业，shell作业
+
+sqoop作业，pig作业，Flink作业，Presto SQL作业，Impala SQL作业
+
+##### MapReduce 作业
+hadoop jar xxx.jar [MainClass] -D xxx ....
+
+作业内容：/path/to/hadoop-mapreduce-client-jobclient-2.6.0-tests.jar sleep -m 3 -r 3 -mt 100 -rt 100
+
+##### hive 作业
+hive [user provided parameters]
+
+作业内容：-f ossref://path/to/uservisits_aggre_hdfs.hive
+```hive
+USE DEFAULT;
+DROP TABLE uservisits;
+CREATE EXTERNAL TABLE IF NOT EXISTS uservisits (sourceIP STRING,destURL STRING,visitDate STRING,adRevenue DOUBLE,userAgent STRING,countryCode STRING,languageCode STRING,searchWord STRING,duration INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS SEQUENCEFILE LOCATION '/HiBench/Aggregation/Input/uservisits';
+DROP TABLE uservisits_aggre;
+CREATE EXTERNAL TABLE IF NOT EXISTS uservisits_aggre (sourceIP STRING, sumAdRevenue DOUBLE) STORED AS SEQUENCEFILE LOCATION '/HiBench/Aggregation/Output/uservisits_aggre';
+INSERT OVERWRITE TABLE uservisits_aggre SELECT sourceIP, SUM(adRevenue) FROM uservisits GROUP BY sourceIP;
+```
+
+##### hive sql 作业
+hive -e {SQL CONTENT}
+
+作业内容：
+```sql
+-- SQL语句最大不能超过64 KB。
+show databases;
+show tables;
+-- 系统会自动为SELECT语句加上'limit 2000'的限制。
+select * from test1;
+```
+
+##### pig 作业
+pig [user provided parameters]
+
+作业内容：-x mapreduce ossref://emr/checklist/jars/chengtao/pig/script1-hadoop-oss.pig
+
+```pig
+ -- Query Phrase Popularity (Hadoop cluster)
+ -- This script processes a search query log file from the Excite search engine and finds search phrases that occur with particular high frequency during certain times of the day. 
+ -- Register the tutorial JAR file so that the included UDFs can be called in the script.
+ REGISTER oss://emr/checklist/jars/chengtao/pig/tutorial.jar;
+ -- Use the  PigStorage function to load the excite log file into the “raw” bag as an array of records.
+ -- Input: (user,time,query) 
+ raw = LOAD 'oss://emr/checklist/data/chengtao/pig/excite.log.bz2' USING PigStorage('\t') AS (user, time, query);
+ -- Call the NonURLDetector UDF to remove records if the query field is empty or a URL. 
+ clean1 = FILTER raw BY org.apache.pig.tutorial.NonURLDetector(query);
+ -- Call the ToLower UDF to change the query field to lowercase. 
+ clean2 = FOREACH clean1 GENERATE user, time, org.apache.pig.tutorial.ToLower(query) as query;
+ -- Because the log file only contains queries for a single day, we are only interested in the hour.
+ -- The excite query log timestamp format is YYMMDDHHMMSS.
+ -- Call the ExtractHour UDF to extract the hour (HH) from the time field.
+ houred = FOREACH clean2 GENERATE user, org.apache.pig.tutorial.ExtractHour(time) as hour, query;
+ -- Call the NGramGenerator UDF to compose the n-grams of the query.
+ ngramed1 = FOREACH houred GENERATE user, hour, flatten(org.apache.pig.tutorial.NGramGenerator(query)) as ngram;
+ -- Use the  DISTINCT command to get the unique n-grams for all records.
+ ngramed2 = DISTINCT ngramed1;
+ -- Use the  GROUP command to group records by n-gram and hour. 
+ hour_frequency1 = GROUP ngramed2 BY (ngram, hour);
+ -- Use the  COUNT function to get the count (occurrences) of each n-gram. 
+ hour_frequency2 = FOREACH hour_frequency1 GENERATE flatten($0), COUNT($1) as count;
+ -- Use the  GROUP command to group records by n-gram only. 
+ -- Each group now corresponds to a distinct n-gram and has the count for each hour.
+ uniq_frequency1 = GROUP hour_frequency2 BY group::ngram;
+ -- For each group, identify the hour in which this n-gram is used with a particularly high frequency.
+ -- Call the ScoreGenerator UDF to calculate a "popularity" score for the n-gram.
+ uniq_frequency2 = FOREACH uniq_frequency1 GENERATE flatten($0), flatten(org.apache.pig.tutorial.ScoreGenerator($1));
+ -- Use the  FOREACH-GENERATE command to assign names to the fields. 
+ uniq_frequency3 = FOREACH uniq_frequency2 GENERATE $1 as hour, $0 as ngram, $2 as score, $3 as count, $4 as mean;
+ -- Use the  FILTER command to move all records with a score less than or equal to 2.0.
+ filtered_uniq_frequency = FILTER uniq_frequency3 BY score > 2.0;
+ -- Use the  ORDER command to sort the remaining records by hour and score. 
+ ordered_uniq_frequency = ORDER filtered_uniq_frequency BY hour, score;
+ -- Use the  PigStorage function to store the results. 
+ -- Output: (hour, n-gram, score, count, average_counts_among_all_hours)
+ STORE ordered_uniq_frequency INTO 'oss://emr/checklist/data/chengtao/pig/script1-hadoop-results' USING PigStorage();
+```
+
+##### Presto SQL 作业
+presto <options> -f {SQL_SCRIPT}
+
+SQL_SCRIPT中保存作业编辑器中填写的SQL语句。如：SELECT * from table1;
+
+默认情况下，Presto查询catalog=hive，schema=default下的数据表，可以通过设置Presto Cli参数来指定不同的Catalog和Schema。Presto SQL作业支持如下两种方式设置Presto Cli参数：
+
+1. 通过环境变量设置<br>
+设置密码：如果Presto服务开启了密码认证，可以通过添加名为PRESTO_PASSWORD的环境变量来传入密码。<br>
+设置其他参数：可以将参数设置到名为PRESTO_CLI_PARAMS的环境变量中，如PRESTO_CLI_PARAMS="--catalog mysql --schema db1 "。<br>
+
+2. 通过自定义变量<br>
+设置密码：在作业自定义变量中添加名为presto.password的变量，即可设置Presto认证密码。<br>
+设置其他参数：在作业自定义变量中添加如_presto.xxx的变量，都会被添加到Presto Cli参数列表中，对应的选项为--xxx。<br>
+
+支持如下自定义变量。
+```
+## 基本参数
+* _presto.schema <schema>
+* _presto.catalog <catalog>
+
+## 控制/调试参数
+* _presto.trace-token <trace token>
+* _presto.session <session>...
+* _presto.source <source>
+* _presto.resource-estimate <resource-estimate>...
+* _presto.log-levels-file <log levels file>
+
+## 连接参数
+* _presto.server <server>
+* _presto.http-proxy <http-proxy>  * ignore-errors
+* _presto.socks-proxy <socks-proxy>
+
+## 认证相关参数
+* _presto.user <user>
+* _presto.password <password>
+
+* _presto.client-info <client-info>
+* _presto.client-request-timeout <client request timeout>
+* _presto.client-tags <client tags>
+
+* _presto.access-token <access token>
+* _presto.truststore-password <truststore password>
+* _presto.truststore-path <truststore path>
+* _presto.keystore-password <keystore password>
+* _presto.keystore-path <keystore path>
+* _presto.extra-credential <extra-credential>...
+
+## 高安全相关参数
+* _presto.krb5-config-path <krb5 config path>
+* _presto.krb5-credential-cache-path <krb5 credential cache path>
+* _presto.krb5-disable-remote-service-hostname-canonicalization
+* _presto.krb5-keytab-path <krb5 keytab path>
+* _presto.krb5-principal <krb5 principal>
+* _presto.krb5-remote-service-name <krb5 remote service name>
+* _presto.krb5-service-principal-pattern <krb5 remote service principal pattern>
+```
+
+##### Impala SQL 作业
+impala-shell -f {SQL_CONTENT} [options];
+
+SQL_CONTENT 填写的SQL语句。
+
+options 添加环境变量IMPALA_CLI_PARAMS，例如IMAPAL_CLI_PARAMS="-u hive"。
+
+##### sqoop 作业
+sqoop [args]
+
+##### Spark 作业
+spark-submit [options] --class [MainClass] xxx.jar args
+
+作业内容： --master yarn-client --driver-memory 7G --executor-memory 5G --executor-cores 1 --num-executors 32 --class com.aliyun.emr.checklist.benchmark.SparkWordCount emr-checklist_2.10-0.1.0.jar oss://emr/checklist/data/wc oss://emr/checklist/data/wc-counts 32
+
+##### Spark Shell 作业
+spark-shell
+
+作业内容：
+```shell
+val count = sc.parallelize(1 to 100).filter { _ =>
+  val x = math.random
+  val y = math.random
+  x*x + y*y < 1
+}.count();
+println("Pi is roughly ${4.0 * count / 100}")
+```
+
+##### Spark Streaming 作业
+spark-submit [options] --class [MainClass] xxx.jar args
+
+作业内容：--master yarn-client --driver-memory 7G --executor-memory 5G --executor-cores 1 --num-executors 32 --class com.aliyun.emr.checklist.benchmark.SlsStreaming emr-checklist_2.10-0.1.0.jar <project> <logstore> <accessKey> <secretKey>
+
+##### Spark SQL 作业
+spark-sql [options] [cli options] {SQL_CONTENT}        
+       
+options 添加环境变量SPARK_CLI_PARAMS，例如SPARK_CLI_PARAMS="--executor-memory 1g --executor-cores"
+
+cli options 示例如下：<br>
+ -e <quoted-query-string> ：表示运行引号内的SQL查询语句。<br>
+-f <filename>：表示运行文件中的SQL语句。<br>
+
+SQL_CONTENT 填写的SQL语句。
+
+##### streaming sql 作业
+streaming-sql -f {sql_script}
+
+sql_script中保存着作业编辑器中填写的SQL语句。
+```sql
+
+--- 创建SLS数据表。 
+CREATE TABLE IF NOT EXISTS ${slsTableName} 
+   USING loghub 
+   OPTIONS ( 
+        sls.project = '${logProjectName}', 
+        sls.store = '${logStoreName}', 
+        access.key.id = '${accessKeyId}', 
+        access.key.secret = '${accessKeySecret}', 
+        endpoint = '${endpoint}'
+   ); 
+--- 导入数据至HDFS。
+INSERT INTO 
+    ${hdfsTableName} 
+SELECT 
+    col1, col2 
+FROM  ${slsTableName} 
+WHERE ${condition}
+
+```
+
+##### Flink 作业
+
+run -m yarn-cluster -yjm 1024 -ytm 2048 ossref://path/to/oss/of/WordCount.jar --input oss://path/to/oss/to/data --output oss://path/to/oss/to/result
+
+**PyFlink作业**
+
+run -m yarn-cluster -yjm 1024 -ytm 2048 -py ossref://path/to/oss/of/word_count.py
+
+#### 作业配置
+在作业编辑的过程中，支持在作业参数中设置时间变量通配符。
+
+##### 变量通配符格式
+阿里云 E-MapReduce 所支持的变量通配符的格式为${dateexpr-1d}或者${dateexpr-1h}。其中dateexpr表示标准的时间格式表达式，对应的规则如下。
+
+注意 请注意时间格式的大小写。
+
+| 格式 | 描述 |
+| ---|--- |
+| yyyy | 表示4位的年份。 |
+| MM | 表示月份。 |
+| dd | 表示天。 |
+| HH | 表示24小时制，12小时制使用hh。 |
+| mm | 表示分钟。 |
+| ss | 表示秒。 |
+
+时间变量可以是包含yyyy年份的任意时间组合，同时支持用加号（+）和减号（-）来分别表示延后和提前。例如，变量${yyyy-MM-dd}表示当前日期，则：
+后1年的表示方式：${yyyy+1y}或者${yyyy-MM-dd hh:mm:ss+1y}。
+后3月的表示方式：${yyyyMM+3m}或者${yyyy-MM-dd hh:mm:ss+3m}。
+前5天的表示方式：${yyyyMMdd-5d}或者${yyyy-MM-dd hh:mm:ss-5d}。
+
+
+阿里云 E-MapReduce 仅支持小时和天维度的加减，即只支持在dateexpr后面+Nd、-Nd、+Nh、-Nh的形式（dateexpr为时间格式表达式，N为整数）。
+
+时间变量参数必须以yyyy开始，如${yyyy-MM}。如果希望单独获取月份等特定时间区域的值，可以在作业内容中使用如下两个函数提取：
+
+- parseDate(<参数名称>, <时间格式>)：将给定参数转换为Date对象。其中，参数名称为上述配置参数中设置的一个变量名，时间格式为设置该变量时所使用的时间格式。如设置一个变量current_time = ${yyyyMMddHHmmss-1d}，则此处时间格式应设置为yyyyMMddHHmmss。
+
+- formatDate(<Date对象>, <时间格式>)：将给定Date对象转换为给定格式的时间字符串。
+
+函数使用示例：<br>
+获取current_time变量的小时字面值：${formatDate(parseDate(current_time, 'yyyyMMddHHmmss'), 'HH')}<br>
+获取current_time变量的年字面值：${formatDate(parseDate(current_time, 'yyyyMMddHHmmss'), 'yyyy')}<br>
+
+#### 参数配置
+```hdfs-site.xml
+dfs.replication 2
+
+dfs.datanode.data.dir {% set comma = joiner(',') %}{% for idx in range(diskCnt) -%}{% if idx+1 not in faulty -%}{{ comma() }}file:///mnt/disk{{ idx + 1 }}/hdfs{% endif %}{% endfor %}
+
+dfs.http.address 0.0.0.0:50070
+
+dfs.namenode.checkpoint.dir file:///mnt/disk1/hdfs/namesecondary
+dfs.namenode.http-address 50070
+dfs.namenode.name.dir file:///mnt/disk1/hdfs/name
+
+fs.oss.buffer.dirs {% set comma = joiner(',') %}{% for idx in range(diskCnt) -%}{% if idx+1 not in faulty -%}{{ comma() }}file:///mnt/disk{{ idx + 1 }}/data{% endif %}{% endfor %}
+
+
+hadoop.home hdfs://emr-header-1.cluster-245192:9000
+httpfs.buffer.size 4096
+
+nfs.dump.dir /tmp/.hdfs-nfs
+```
+
+```core-site.xml
+fs.defaultFS hdfs://emr-header-1.cluster-245192:9000
+hadoop.registry.zk.quorum localhost:2181
+hadoop.home /usr/lib/hadoop
+io.file.buffer.size 4096
+hadoop.tmp.dir /mnt/disk1/hadoop/tmp
+
+```
+
+```yarn-site.xml
+yarn.resourcemanager.nodemanagers.heartbeat-interval-ms 1000
+yarn.scheduler.fair.dynamic.max.assign true
+yarn.web-proxy.address emr-header-1.cluster-245192:20888
+yarn.nodemanager.container-monitor.interval-ms 3000
+yarn.log.server.url http://emr-header-1.cluster-245192:19888/jobhistory/logs
+yarn.resourcemanager.address emr-header-1.cluster-245192:8032
+yarn.client.failover-proxy-provider org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider
+yarn.fail-fast false
+yarn.resourcemanager.resource-tracker.client.thread-count 64
+yarn.application.classpath $HADOOP_CONF_DIR,$HADOOP_COMMON_HOME/share/hadoop/common/*,$HADOOP_COMMON_HOME/share/hadoop/common/lib/*,$HADOOP_HDFS_HOME/share/hadoop/hdfs/*,$HADOOP_HDFS_HOME/share/hadoop/hdfs/lib/*,$HADOOP_YARN_HOME/share/hadoop/yarn/*,$HADOOP_YARN_HOME/share/hadoop/yarn/lib/*,/opt/apps/extra-jars/*,$HADOOP_HOME/share/hadoop/tools/lib/*
+yarn.scheduler.fair.update-interval-ms 500
+yarn.scheduler.fair.sizebasedweight false
+yarn.admin.acl has
+yarn.scheduler.increment-allocation-vcores 1
+yarn.resourcemanager.bind-host 0.0.0.0
+yarn.resourcemanager.nodemanager-connect-retries 10
+yarn.nodemanager.delete.thread-count 4
+yarn.timeline-service.hostname emr-header-1.cluster-245192
+yarn.resourcemanager.webapp.address emr-header-1.cluster-245192:8088
+yarn.resourcemanager.proxy-user-privileges.enabled false
+yarn.acl.enable false
+yarn.scheduler.fair.allow-undeclared-pools true
+yarn.client.application-client-protocol.poll-interval-ms 200
+yarn.scheduler.maximum-allocation-vcores 32
+yarn.nodemanager.sleep-delay-before-sigkill.ms 250
+yarn.scheduler.fair.preemption.cluster-utilization-threshold 0.8f
+yarn.scheduler.fair.preemption false
+yarn.nodemanager.labels MASTER
+yarn.nm.liveness-monitor.expiry-interval-ms 600000
+yarn.nodemanager.process-kill-wait.ms 2000
+yarn.timeline-service.enabled true
+yarn.am.liveness-monitor.expiry-interval-ms 600000
+yarn.dispatcher.exit-on-error true
+yarn.timeline-service.http-cross-origin.enabled true
+yarn.nodemanager.aux-services mapreduce_shuffle,spark_shuffle
+yarn.resourcemanager.client.thread-count 50
+yarn.nodemanager.resource.cpu-vcores 8
+yarn.nodemanager.local-dirs {% set comma = joiner(',') %}{% for idx in range(diskCnt) -%}{% if idx+1 not in faulty -%}{{ comma() }}file:///mnt/disk{{ idx + 1 }}/yarn{% endif %}{% endfor %}
+yarn.nodemanager.container-manager.thread-count 20
+yarn.scheduler.fair.locality.threshold.node -1.0
+yarn.resourcemanager.zk-timeout-ms 60000
+yarn.resourcemanager.max-completed-applications 10000
+yarn.resourcemanager.am.max-attempts 2
+yarn.resourcemanager.ha.automatic-failover.enabled true
+yarn.nodemanager.aux-services.spark_shuffle.class org.apache.spark.network.yarn.YarnShuffleService
+yarn.nodemanager.localizer.client.thread-count 5
+yarn.scheduler.increment-allocation-mb 1024
+yarn.app.mapreduce.am.labels CORE
+yarn.log-aggregation-enable true
+yarn.resourcemanager.store.class org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore
+yarn.scheduler.fair.max.assign -1
+yarn.nodemanager.disk-health-checker.max-disk-utilization-per-disk-percentage 90.0
+yarn.nodemanager.container-executor.class org.apache.hadoop.yarn.server.nodemanager.DefaultContainerExecutor
+yarn.resourcemanager.nodes.exclude-path /etc/ecm/hadoop-conf/yarn.exclude
+yarn.resourcemanager.resource-tracker.address emr-header-1.cluster-245192:8025
+yarn.resourcemanager.scheduler.client.thread-count 50
+yarn.nodemanager.delete.debug-delay-sec 0
+am.liveness-monitor.expiry-interval-ms 600000
+yarn.dispatcher.drain-events.timeout 300000
+yarn.log-aggregation.retain-seconds 604800
+yarn.nodemanager.resource.memory-mb 11584
+yarn.nodemanager.disk-health-checker.min-healthy-disks 0.25
+yarn.nodemanager.bind-host 0.0.0.0
+yarn.scheduler.fair.user-as-default-queue false
+yarn.resourcemanager.hostname 0.0.0.0
+yarn.resourcemanager.connect.max-wait.ms 900000
+yarn.resourcemanager.connect.retry-interval.ms 30000
+yarn.scheduler.minimum-allocation-mb 32
+yarn.resourcemanager.scheduler.class org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler
+yarn.resourcemanager.system-metrics-publisher.enabled true
+yarn.nodemanager.disk-health-checker.min-free-space-per-disk-mb 0
+yarn.nodemanager.container-metrics.enable false
+yarn.scheduler.fair.assignmultiple false
+yarn.scheduler.fair.allocation.file /etc/ecm/hadoop-conf/fair-scheduler.xml
+yarn.nodemanager.remote-app-log-dir hdfs://emr-header-1.cluster-245192:9000/tmp/logs
+yarn.timeline-service.store-class org.apache.hadoop.yarn.server.timeline.RollingLevelDBTimelineStore
+yarn.scheduler.maximum-allocation-mb 11584
+yarn.timeline-service.bind-host 0.0.0.0
+yarn.resourcemanager.container.liveness-monitor.interval-ms 600000
+yarn.nodemanager.vmem-check-enabled false
+yarn.scheduler.fair.locality.threshold.rack -1.0
+yarn.resourcemanager.ha.automatic-failover.embedded true
+yarn.label.enabled true
+yarn.nodemanager.localizer.fetch.thread-count 4
+yarn.resourcemanager.recovery.enabled false
+yarn.nodemanager.vmem-pmem-ratio 5000
+yarn.resourcemanager.scheduler.address emr-header-1.cluster-245192:8030
+yarn.resourcemanager.amlauncher.thread-count 50
+yarn.nodemanager.log-dirs {% set comma = joiner(',') %}{% for idx in range(diskCnt) -%}{% if idx+1 not in faulty -%}{{ comma() }}file:///mnt/disk{{ idx + 1 }}/log/hadoop-yarn/containers{% endif %}{% endfor %}
+
+```
+
+
+```mapred-site.xml
+mapreduce.jobtracker.addressemr-header-1.cluster-245192:8021
+mapreduce.map.speculative true
+mapreduce.jobhistory.recovery.store.class org.apache.hadoop.mapreduce.v2.hs.HistoryServerFileSystemStateStoreService
+mapreduce.cluster.temp.dir ${hadoop.tmp.dir}/mapred/temp
+mapreduce.shuffle.ssl.enabled false
+mapreduce.tasktracker.http.threads 60
+mapreduce.job.counters.max 1000
+mapreduce.shuffle.port 13562
+mapreduce.reduce.log.level INFO
+mapreduce.outputcommitter.class com.aliyun.emr.fs.oss.commit.JindoOssCommitter
+mapreduce.shuffle.transfer.buffer.size 131072
+mapreduce.jobhistory.admin.acl *
+mapreduce.shuffle.transferTo.allowed
+mapreduce.jobhistory.recovery.enable false
+mapreduce.shuffle.max.connections 0
+mapreduce.map.log.level INFO
+mapreduce.tasktracker.taskcontroller org.apache.hadoop.mapred.DefaultTaskController
+mapreduce.job.reduces 7
+yarn.app.mapreduce.am.staging-dir /tmp/hadoop-yarn/staging
+mapreduce.job.acl-modify-job
+mapreduce.cluster.acls.enabled false
+mapreduce.tasktracker.reduce.tasks.maximum 1
+mapreduce.output.fileoutputformat.compress false
+mapreduce.jobhistory.http.policy HTTP_ONLY
+yarn.app.mapreduce.am.jhs.backup-dir file:///mnt/disk1/log/hadoop-mapreduce/history
+mapreduce.job.queuename default
+mapreduce.jobtracker.taskscheduler org.apache.hadoop.mapred.JobQueueTaskScheduler
+mapreduce.application.classpath $HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*,$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*,/usr/lib/hadoop-lzo/lib/*
+mapreduce.job.jvm.numtasks 20
+mapreduce.reduce.java.opts -Xmx2316m -XX:ParallelGCThreads=2 -XX:CICompilerCount=2
+mapreduce.map.output.compress true
+mapreduce.job.userlog.retain.hours 48
+mapreduce.job.reducer.preempt.delay.sec 0
+mapreduce.job.running.map.limit 0
+mapreduce.map.output.compress.codec org.apache.hadoop.io.compress.DefaultCodec
+mapreduce.job.acl-view-job
+map.sort.class org.apache.hadoop.util.QuickSort
+mapreduce.job.classloader false
+mapreduce.jobtracker.http.address emr-header-1.cluster-245192:50030
+yarn.app.mapreduce.am.job.task.listener.thread-count 60
+mapreduce.reduce.speculative true
+yarn.app.mapreduce.am.resource.cpu-vcores 1
+mapreduce.output.fileoutputformat.compress.type BLOCK
+mapreduce.task.io.sort.mb 200
+yarn.app.mapreduce.am.admin.user.env
+mapreduce.jobhistory.recovery.store.fs.uri ${hadoop.tmp.dir}/mapred/history/recoverystore
+yarn.app.mapreduce.am.jhs.backup.enabled true
+mapred.local.dir {% set comma = joiner(',') %}{% for idx in range(diskCnt) -%}{% if idx+1 not in faulty -%}{{ comma() }}file:///mnt/disk{{ idx + 1 }}/mapred/local{% endif %}{% endfor %}
+mapreduce.job.maps 16
+mapreduce.cluster.local.dir {% set comma = joiner(',') %}{% for idx in range(diskCnt) -%}{% if idx+1 not in faulty -%}{{ comma() }}file:///mnt/disk{{ idx + 1 }}/mapred/local{% endif %}{% endfor %}
+mapreduce.reduce.cpu.vcores 1
+mapreduce.jobhistory.address emr-header-1.cluster-245192:10020
+mapreduce.map.sort.spill.percent 0.8
+mapreduce.map.memory.mb 1448
+mapreduce.task.timeout 600000
+mapreduce.jobtracker.jobhistory.location
+mapreduce.am.max-attempts 2
+mapreduce.job.log4j-properties-file
+mapreduce.reduce.memory.mb 2896
+mapreduce.framework.name yarn
+mapreduce.map.cpu.vcores 1
+mapreduce.jobhistory.admin.address emr-header-1.cluster-245192:10033
+mapreduce.reduce.shuffle.parallelcopies 20
+yarn.app.mapreduce.am.env
+mapreduce.output.fileoutputformat.compress.codec org.apache.hadoop.io.compress.DefaultCodec
+mapreduce.shuffle.max.threads 0
+mapreduce.job.running.reduce.limit 0
+mapreduce.jobhistory.webapp.address emr-header-1.cluster-245192:19888
+mapreduce.tasktracker.map.tasks.maximum 1
+mapreduce.jobtracker.restart.recover false
+mapreduce.shuffle.manage.os.cache false
+mapreduce.task.io.sort.factor 48
+mapreduce.jobhistory.store.class
+yarn.app.mapreduce.client.job.max-retries 0
+mapreduce.tasktracker.group
+mapreduce.job.tags
+mapreduce.tasktracker.http.address emr-header-1.cluster-245192:50060
+yarn.app.mapreduce.am.command-opts -Xmx2316m
+mapreduce.map.java.opts -Xmx1158m -XX:ParallelGCThreads=2 -XX:CICompilerCount=2
+yarn.app.mapreduce.am.resource.mb 2896
+
+```
+
+
+```zoo.cfg
+admin_serverAddress DEFAULT
+maxSessionTimeout 360000
+syncLimit 30
+zookeeper_hosts emr-header-1,emr-worker-1,emr-worker-2
+clientPortAddress 0.0.0.0
+admin_enableServer true
+server.2 emr-worker-1:2888:3888
+server.1 emr-header-1:2888:3888
+admin_serverPort 28080
+initLimit 10
+tickTime 2000
+clientPort 2181
+autopurge_snapRetainCount 3
+server.3 emr-worker-2:2888:3888
+autopurge_purgeInterval 1
+zk_data_dirs /mnt/disk1/zookeeper
+maxClientCnxns 60
+
+```
+
+```hbase-env.sh
+hbase_thrift_opts $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10103
+hbase_regionserver_opts -Xms1536m -Xmx1536m -Xmn256m -verbose:gc -XX:+PrintGCDetails -XX:SurvivorRatio=2 -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=85 -Xloggc:$HBASE_LOG_DIR/gc-regionserver.log -XX:PermSize=64m $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10102
+hbase_master_opts -Xms128m -Xmx128m -Xmn64m -verbose:gc -XX:+PrintGCDetails -XX:SurvivorRatio=2 -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=85 -Xloggc:$HBASE_LOG_DIR/gc-hmaster.log -XX:PermSize=64m $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10101
+hbase_opts
+hbase_jmx_base -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false
+hbase_security_opts 
+```
+
+```hbase-site.xml
+hbase.server.thread.wakefrequency 10000
+hbase.zookeeper.property.syncLimit 5
+hbase.rs.cacheblocksonwrite false
+hbase.zookeeper.property.dataDir /mnt/disk1/hbase/zk-data/zookeeper
+hbase.regionserver.thread.compaction.large 1
+hbase.regionserver.hlog.splitlog.writer.threads 3
+hbase.master.port 16000
+hbase.regionserver.info.port.auto false
+hbase.storescanner.parallel.seek.enable false
+hbase.local.dir ${hbase.tmp.dir}/local/
+hbase.master.hfilecleaner.plugins org.apache.hadoop.hbase.master.cleaner.TimeToLiveHFileCleaner
+hbase.dfs.client.read.shortcircuit.buffer.size 131072
+replication.source.nb.capacity 2000
+hbase.master.catalog.timeout 600000
+replication.sleep.before.failover 5000
+hbase.regionserver.regionSplitLimit 1000
+hbase.regionserver.dns.nameserver default
+hbase.hstore.compaction.max 10
+hbase.zookeeper.quorum emr-worker-2.cluster-245192,emr-header-1.cluster-245192,emr-worker-1.cluster-245192
+hbase.rpc.shortoperation.timeout 10000
+io.storefile.bloom.block.size 131072
+hbase.thrift.maxWorkerThreads 1000
+hbase.status.multicast.address.ip 226.1.1.3
+replication.source.ratio 1
+hbase.data.umask 000
+hbase.master.logcleaner.plugins org.apache.hadoop.hbase.master.cleaner.TimeToLiveLogCleaner
+hbase.hstore.useExploringCompation true
+hbase.coprocessor.enabled true
+hbase.rootdir hdfs://emr-header-1.cluster-245192:9000/hbase
+hbase.zookeeper.dns.nameserver default
+hbase.hregion.majorcompaction 864000000
+hbase.coprocessor.user.enabled true
+hbase.hstore.compaction.min 3
+hbase.hregion.memstore.mslab.enabled true
+master_hostname emr-header-1
+hbase.dynamic.jars.dir ${hbase.rootdir}/lib
+hbase.status.multicast.address.port 16100
+hbase.hstore.flusher.count 2
+hbase.data.umask.enable false
+hbase.column.max.version 1
+hbase.snapshot.enabled true
+hbase.regionserver.checksum.verify true
+hbase.regionserver.hlog.blocksize 268435456
+hbase.snapshot.restore.take.failsafe.snapshot true
+hbase.regionserver.thrift.framed false
+hbase.regionserver.catalog.timeout 600000
+hbase.hstore.blockingStoreFiles 50
+zookeeper.session.timeout 180000
+hbase.cells.scanned.per.heartbeat.check 10000
+hbase.metrics.exposeOperationTimes true
+hbase.rest.readonly false
+hbase.master.loadbalancer.class org.apache.hadoop.hbase.master.balancer.StochasticLoadBalancer
+hbase.regionserver.dns.interface default
+hbase.hregion.majorcompaction.jitter 0.50
+hbase.coprocessor.abortonerror true
+hbase.regionserver.msginterval 3000
+hbase.regionserver.logroll.period 3600000
+hbase.ipc.server.callqueue.handler.factor 0.1
+hbase.config.read.zookeeper.config false
+hbase.tmp.dir ${java.io.tmpdir}/hbase-${user.name}
+hbase.regionserver.handler.abort.on.error.percent 0.5
+hbase.rest.support.proxyuser false
+hbase.hstore.compactionThreshold 3
+hbase.replication false
+hbase.status.publisher.class org.apache.hadoop.hbase.master.ClusterStatusPublisher$MulticastPublisher
+hbase.master.logcleaner.ttl 600000
+hbase.hstore.bytes.per.checksum 16384
+hbase.hstore.checksum.algorithm CRC32
+hbase.coprocessor.region.classes
+hbase.regionserver.handler.count 100
+hbase.bulkload.staging.dir ${hbase.fs.tmp.dir}
+hbase.regionserver.port 16020
+hbase.hregion.memstore.block.multiplier 24
+hbase.snapshot.restore.failsafe.name
+hbase-failsafe-{snapshot.name}-{restore.timestamp}
+hbase.coprocessor.master.classes
+hfile.block.cache.size 0.4
+hbase.zookeeper.dns.interface default
+hbase.coordinated.state.manager.class org.apache.hadoop.hbase.coordination.ZkCoordinatedStateManager
+hbase.procedure.master.classes null
+hbase.metrics.showTableName true
+hbase.server.compactchecker.interval.multiplier 1000
+zookeeper.znode.acl.parent acl
+zookeeper.znode.rootserver root-region-server
+hbase.zookeeper.property.initLimit 10
+hbase.master.distributed.log.replay false
+hbase.status.published false
+hbase.server.versionfile.writeattempts 3
+hbase.hstore.time.to.purge.deletes 0
+hbase.lease.recovery.dfs.timeout 64000
+hbase.regionserver.thread.compaction.small 1
+hbase.regionserver.thrift.compact false
+hbase.regionserver.info.port 16030
+hbase.table.lock.enable true
+hbase.regionserver.thread.compaction.throttle 268435456
+hbase.thrift.htablepool.size.max 1000
+hbase.hregion.memstore.chunkpool.maxsize 0.1
+zookeeper.znode.parent /hbase
+hbase.master.info.port 16010
+hbase.cluster.distributed true
+hbase.hregion.memstore.chunkpool.initialsize 1
+hbase.rest.port 8080
+hbase.regionserver.storefile.refresh.period 0
+hbase.regions.slop 0.2
+hbase.fs.tmp.dir /user/${user.name}/hbase-staging
+hbase.hstore.compaction.min.size 33554432
+hfile.block.bloom.cacheonwrite false
+hbase.ipc.server.callqueue.scan.ratio 0
+hbase.hstore.compaction.max.size 2147483648
+hbase.hregion.percolumnfamilyflush.size.lower.bound 16777216
+hbase.regionserver.hlog.writer.impl org.apache.hadoop.hbase.regionserver.wal.ProtobufLogWriter
+hbase.regionserver.maxlogs 32
+hbase.zookeeper.leaderport 3888
+hbase.thrift.minWorkerThreads 16
+hbase.zookeeper.useMulti true
+hbase.master.infoserver.redirect true
+hbase.rest.threads.max 100
+hbase.master.info.bindAddress 0.0.0.0
+hbase.regionserver.global.memstore.lowerLimit 0.3
+hbase.lease.recovery.timeout 900000
+hbase.regionserver.thrift.framed.max_frame_size_in_mb 2
+hfile.block.index.cacheonwrite false
+hbase.zookeeper.property.maxClientCnxns 300
+hbase.ipc.server.callqueue.read.ratio 0
+hbase.hstore.compaction.kv.max 10
+hbase.hregion.memstore.flush.size 134217728
+hbase.online.schema.update.enable true
+hbase.hregion.max.filesize 8589934592
+hbase.server.scanner.max.result.size 104857600
+hbase.rest.threads.min 2
+hbase.balancer.period 300000
+hbase.status.listener.class org.apache.hadoop.hbase.client.ClusterStatusListener$MulticastListener
+hbase.storescanner.parallel.seek.threads 10
+hbase.regionserver.global.memstore.size 0.35
+hbase.hregion.preclose.flush.size 5242880
+hbase.regionserver.region.split.policy org.apache.hadoop.hbase.regionserver.IncreasingToUpperBoundRegionSplitPolicy
+hbase.regionserver.logroll.errors.tolerated 2
+hbase.rest.filter.classes org.apache.hadoop.hbase.rest.filter.GzipFilter
+hbase.rootdir.perms 700
+hbase.regionserver.hlog.reader.impl org.apache.hadoop.hbase.regionserver.wal.ProtobufLogReader
+hfile.index.block.max.size 131072
+replication.source.size.capacity 2097152
+hbase.procedure.regionserver.classes
+hbase.rpc.timeout 60000
+hbase.regionserver.optionalcacheflushinterval 3600000
+hbase.regionserver.info.bindAddress 0.0.0.0
+hbase.server.hostname.useip true
+hbase.zookeeper.peerport 2888
+hbase.thrift.maxQueuedRequests 1000
+hbase.table.max.rowsize 1073741824
+hbase.zookeeper.property.clientPort 2181
+hbase.hstore.blockingWaitTime 3000
+
+```
+
+##### 参数调优
+
+1. 增大MapReduce作业内存，在YARN服务的配置页面，调大mapreduce.map.java.opts或mapreduce.reduce.java.opts的值。
+
+2. 增大Spark 作业内存，在YARN服务的配置页面，调大spark.executor.memory或 spark.driver.memory的值。
+
+3. 作业Task数目过多或Spark Executor数目过多，导致AppMaster调度启动Task的时间过长，单个Task运行时间较短，作业调度的Overhead较大。
+
+    + 减少Task数目，使用CombinedInputFormat。
+    + 提高前序作业产出数据的Block Size（dfs.blocksize）。
+    + 提高mapreduce.input.fileinputformat.split.maxsize。
+    + 对于Spark作业，在Spark服务的配置页面，调节spark.executor.instances减少Executor数目，或者调节spark.default.parallelism降低并发数。
+
+4. 在MR作业中使用本地共享库
+<property>  
+    <name>mapred.child.java.opts</name>  
+    <value>-Xmx1024m -Djava.library.path=/usr/local/share/</value>  
+  </property>  
+  <property>  
+    <name>mapreduce.admin.user.env</name>  
+    <value>LD_LIBRARY_PATH=$HADOOP_COMMON_HOME/lib/native:/usr/local/lib</value>  
+</property>
+
+5. Spark作业报错 "java.lang.IllegalArgumentException: Size exceeds Integer.MAX_VALUE"
+在Shuffle时，Partition数量过少使得Block Size超过Integer.MAX_VALUE最大值。您可以尝试增大Partition数目，在YARN服务的配置页面，调大spark.default.parallelism和spark.sql.shuffle.partitions，或者在Shuffle前执行Repartition。
+
+6. sqoop 导入RDS数据至hdfs时，时间字段显示延迟8小时如何处理？
+```bash
+sqoop import \
+--connect jdbc:mysql://rm-2ze****341.mysql.rds.aliyuncs.com:3306/s***o_sqoopp_db \
+--username s***o \
+--password ****** \
+--table play_evolutions \
+--target-dir /user/hadoop/output \
+--delete-target-dir \
+--direct \
+--split-by id \
+--fields-terminated-by '|' \
+-m 1
+```
+解决方法：在使用TIMESTAMP字段导入数据至HDFS时，请删除--direct参数。
+
+7. 如何修改Spark服务的spark-env配置？
+登录集群的Header节点，修改/etc/ecm/spark-conf/spark-env.sh和/var/lib/ecm-agent/cache/ecm/service/SPARK/<版本号>/package/templates/spark-env.sh中的配置。
+
+如果您在Worker节点提交任务，则需要同步修改Worker节点相关配置。
+
+8. 设置HiveServer2的认证方式为LDAP？
+```hiveserver2-site
+hive.server2.authentication LDAP
+hive.server2.authentication.ldap.url ldap://${emr-header-1-hostname}:10389
+hive.server2.authentication.ldap.baseDN ou=people,o=emr
+```
+在E-MapReduce集群中，OpenLDAP组件是LDAP的服务，默认用于管理Knox的用户账号，HiveServer2的LDAP认证方式可以复用Knox的账号体系。
+
+
+
+
+#### 健康检查
+##### HOST
+
+- 主机内存使用情况检查：检查近半个小时主机内存使用率的平均值是否大于90%
+- 主机磁盘利用率情况检查：检查近半个小时主机所有磁盘分区中最高利用率的平均值是否大于90%
+- 主机磁盘利用率情况检查：检查近半个小时主机所有磁盘分区中最大IO操作等待时间的平均值是否大于100ms
+- 主机心跳情况检查：检查近5分钟内主机是否上报心跳
+- 主机监控日志检查：检查近30分钟内主机监控日志是否缺失检查
+
+##### HDFS
+
+**NameNode**
+
+- 集群HDFS总容量检查：检查近半个小时集群HDFS总容量是否超过80%
+- 集群HDFS总容量检查：检查近半个小时DataNode节点HDFS容量是否超过85%
+- NameNode HTTP端口状态检查：检查近半个小时NameNode HTTP端口（50070）状态是否正常
+- NameNode IPC端口状态检查：检查近半个小时NameNode IPC端口（9000/8020）状态是否正常
+- NameNode是否进入安全模式：检查近5分钟NameNode是否已进入安全模式
+
+**DateNode**
+
+- DateNode端口状态检查：检查近5分钟DateNode端口是否正常
+- DateNode IPC端口（50020）状态检查：检查近5分钟DateNode IPC端口是否正常
+- DateNode HTTP端口（50075）状态检查：检查近5分钟DateNode进程状态是否正常
+
+**JournalNode**
+
+- JournalNode RPC端口（8485）状态检：检查近5分钟JournalNode RPC端口（8485）状态是否正常
+- JournalNode RPC端口（8480）状态检查：检查近5分钟JournalNode RPC端口（8480）状态是否正常
+
+##### YARN
+- JobHistory端口（10020）状态检查：检查近5分钟JobHistory端口（10020）状态是否正常
+- JobHistory WebApp端口（19888）状态检查：检查近5分钟JobHistory WebApp端口（19888）状态是否正常
+- ResourceManager WebApp端口（8088）状态检查：检查近5分钟ResourceManager WebApp端口（8088）状态是否正常
+- ResourceManager Admin端口（8033）状态检查：检查近5分钟ResourceManager Admin端口（8033）状态是否正常
+- TimeLineServer端口（10200）状态检查：检查近5分钟TimeLineServer端口（10200）状态是否正常
+- TimeLineServer WebApp端口（8188）状态检查：检查近5分钟TimeLineServer WebApp端口（8188）状态是否正常
+- ProxyServer端口（20888）状态检查：检查近5分钟ProxyServer端口（20888）状态是否正常
+- NodeManager HTTP端口（8042）状态检查：检查近5分钟NodeManager HTTP端口（8042）状态是否正常
+
+##### HBASE
+
+**HMaster**
+
+- HMaster端口（16000）状态检查：检查近5分钟HMaster端口（16000）状态是否正常
+- HMaster HTTP端口（16010）状态检查：检查近5分钟HTTP端口（16010）状态是否正常
+- HMaster JMX端口（10101）状态检查：检查近5分钟HMaster JMX端口（10101）状态是否正常
+
+**HRegionServer**
+
+- HRegionServer端口（16020）状态检查：检查近5分钟HRegionServer端口（16020）状态是否正常
+- HRegionServer HTTP端口（16030）状态检查：检查近5分钟HRegionServer HTTP端口（16030）状态是否正常
+- HRegionServer JMX端口（10102）状态检查：检查近5分钟HRegionServer JMX端口（10102）状态是否正常
+
+**ThriftServer**
+
+- HBase ThriftServer端口（9099）状态检查：检查近5分钟HBase ThriftServer端口（9099）状态是否正常
+- HBase ThriftServer INFO端口（9095）状态检查：检查近5分钟HBase ThriftServer INFO端口（9095）状态是否正常
+- HBase ThriftServer JMX端口（10103）状态检查：检查近5分钟HBase ThriftServer JMX端口（10103）状态是否正常
+
+##### Hive
+
+**HiveServer**
+
+- HiveServer2端口（10000）状态检查：检查近5分钟HiveServer2端口（10000）状态是否正常
+- HiveServer2 WebUI端口（10002）状态检查：检查近5分钟HiveServer2 WebUI端口（10002）状态是否正常
+
+**HiveMetaStore**
+
+- HiveMetaStore端口（9083）状态检查：检查近5分钟HiveMetaStore端口（9083）状态是否正常
+
+##### HUE
+- Hue端口（8888）状态检查：检查近5分钟Hue端口（8888）状态是否正常
+
+##### Kafka
+
+**Broker**
+
+- Kafka 状态检查：检查近5分钟Kafka1分钟跨度内的每秒FailedFetchRequests平均数目是否大于1000
+- Kafka 状态检查：检查近5分钟Kafka1分钟跨度内的每秒FailedProduceRequests平均数目是否大于1000
+
+##### OOZIE
+- OOZIE HTTP端口（11000）状态检查：检查近5分钟OOZIE HTTP端口（11000）状态是否正常
+- OOZIE Admin端口（11001）状态检查：检查近5分钟OOZIE Admin端口（11001）状态是否正常
+
+##### PRESTO
+- PrestoMaster端口（9090）状态检查：检查近5分钟PrestoMaster端口（9090）状态是否正常
+- PrestoWorker端口（9090）状态检查：检查近5分钟PrestoWorker端口（9090）状态是否正常
+
+##### Spark
+- SparkHistory端口（18080）状态检查：检查近5分钟SparkHistory端口（18080）状态是否正常
+
+##### Storm
+- Nimbus Thrift端口（6627）状态检查：检查近5分钟Nimbus Thrift端口（6627）状态是否正常
+- Storm UI端口（9999）状态检查：检查近5分钟Storm UI端口（9999）状态是否正常
+
+##### Zeppelin
+- Zeppelin端口（8080）状态检查：检查近5分钟Zeppelin端口（8080）状态是否正常
+
+##### Zookeeper
+- Zookeeper Client端口（2181）状态检查：检查近5分钟Zookeeper Client端口（2181）状态是否正常
+- Zookeeper Leader端口（3888）状态检查：检查近5分钟Zookeeper Leader端口（3888）状态是否正常
+- Zookeeper Peer端口（2888）状态检查：检查近5分钟Zookeeper Peer端口（2888）状态是否正常
 
 ### Hadoop 运行模式
 Hadoop 运行模式包括：本地模式、伪分布式模式以及完全分布式模式。
@@ -652,15 +1470,9 @@ mvn package -Pdist,native -DskipTests -Dtar
 情况，同时推荐2.7.0版本的问题汇总帖子http://www.tuicool.com/articles/IBn63qf
 ```
 
-### Hadoop 的特点
-Hadoop框架允许用户快速地编写和测试的分布式系统。有效并在整个机器和反过来自动分配数据和工作，利用CPU内核的基本平行度。 <br>
-Hadoop不依赖于硬件，以提供容错和高可用性（FTHA），而Hadoop库本身已被设计在应用层可以检测和处理故障。 <br>
-服务器可以添加或从集群动态删除，Hadoop可继续不中断地运行。 <br>
-Hadoop的的另一大优势在于，除了是开源的，因为它是基于Java并兼容所有的平台。 <br>
-
 ### Hadoop 生态圈
 ![](images/README0.jpg)
-![](images/README3.png)
+![](images/README4.png)
 
 Hadoop生态圈由以下内容组成：
 

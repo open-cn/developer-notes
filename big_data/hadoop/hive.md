@@ -54,7 +54,7 @@ Hive 通过给用户提供的一系列交互接口，接收到用户的指令(SQ
 
 - Hive 的 HiveQL 表达能力有限
     + 迭代算法无法表达
-    + 数据挖掘方便不擅长
+    + 数据挖掘方面不擅长
 - 由于 Hadoop 通常有较高的延迟并且在作业和调度的时候需要大量的开销，所以 Hive 的执行效率相对较低。
     + 不适合要求延迟比较的场景。 比如为了处理在线事务。
     + Hive 自动生成的 MapReduce 作业通常情况下并不智能，不能满足复杂场景。
@@ -110,7 +110,7 @@ Hive 通过给用户提供的一系列交互接口，接收到用户的指令(SQ
 
 ### 使用
 运行 Hive 前必须先启动 Hadoop 的 HDFS 和 Yarn
-hive相对于 Hadoop 集群来说仅仅是个客户端, 所以不用分发其他设备上使用.
+hive相对于 Hadoop 集群来说仅仅是个客户端，所以不用分发其他设备上使用.
 
 #### 数据类型
 
@@ -169,7 +169,7 @@ Hive 的原子数据类型是可以进行隐式转换的，类似于 Java 的类
 #### DDL 数据定义
 DDL(Data Definition Language)是涉及到创建数据、创建表、创建视图等一系列的数据定义动作。不涉及到对数据本身的操作。
 
-在 Hive中, 主要有两种 DDL：数据库级别和表级别。
+在 Hive中，主要有两种 DDL：数据库级别和表级别。
 
 Hive 中的数据库的概念本质上仅仅是表的一个目录或者命名空间而已。然而，对于具有很多组或者用户的的大集群来说，这是很有用的，因为可以避免命名冲突。如果用户没有显示的指定数据库，那么将会使用默认的数据库default。
 
@@ -178,6 +178,9 @@ Hive 中的数据库的概念本质上仅仅是表的一个目录或者命名空
 ```sql
 desc database default; -- 显示数据库信息
 desc database extended default; -- 显示数据库详细信息
+
+desc t_xxx; -- 显示数据表信息
+show create table t_xxx; -- 显示数据表DDL信息
 ```
 
 ##### 内部表和外部表
@@ -300,9 +303,21 @@ show partitions dept_partition2 partition(month='201709')
     load data local inpath '/opt/module/datas/dept.txt' into table dept_partition2 partition(month='201709',day='10');
 
 
+##### 分桶表
+分桶表是通过对数据进行Hash，放到不同文件存储，方便抽样和join查询。分桶表主要是将内部表、外部表和分区表进一步组织，可以指定表的某些列通过Hash算法进一步分解成不同的文件存储。创建分桶表是需要使用关键字clustered by并指定分桶的个数。
+
+```
+#创建分桶表buk_table根据id分桶，放入3个桶中
+create table buk_table(id string,name string) clustered by(id) into 3 buckets ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+#加载数据，将inner_table中数据加载到buk_table;
+insert into buk_table select * from inner_table;
+#桶中数据抽样：select * from table_name tablesample(bucket X out of Y on field);
+# X表示从哪个桶中开始抽取，Y表示相隔多少个桶再次抽取
+select * from buk_table tablesample(bucket 1 out of 1 on id);
+```
+
 #### DML 数据操作
 DML(Data Manipulation Language)执行的是对表中的数据增删改的操作。
-
 ##### 数据导入
 
 **向表中装载文件**
@@ -440,8 +455,58 @@ truncate table student_3;
     2. 创建function， create [temporary] function [dbname.]function_name AS class_name;
 4. 在hive的命令行窗口删除函数 Drop [temporary] function [if exists] [dbname.]function_name;
 
+#### hive 结合 hbase
+
+Hive和Hbase在大数据架构中处在不同位置，Hive是一个构建在Hadoop基础之上的数据仓库，Hbase是一种NoSQL数据库，非常适用于海量明细数据的随机实时查询，在大数据架构中，Hive和HBase是协作关系如果两者结合，可以利用MapReduce的优势针对HBase存储的大量内容进行离线的计算和分析。
+
+Hive与HBase利用两者本身对外的API来实现整合，主要是靠HBaseStorageHandler进行通信，利用HBaseStorageHandler，Hive可以获取到Hive表对应的HBase表名，列簇以及列，InputFormat和 OutputFormat类，创建和删除HBase表等。
+
+Hive访问HBase中表数据，实质上是通过MapReduce读取HBase表数据，其实现是在MR中，使用HiveHBaseTableInputFormat完成对HBase表的切分，获取RecordReader对象来读取数据。
+
+对HBase表的切分原则是一个Region切分成一个Split，即表中有多少个Regions，MR中就有多少个Map；
+
+读取HBase表数据都是通过构建Scanner，对表进行全表扫描，如果有过滤条件，则转化为Filter。当过滤条件为rowkey时，则转化为对rowkey的过滤；
+
+Scanner通过RPC调用RegionServer的next()来获取数据；
+
+在使用Hive over HBase，对HBase中的表做统计分析时候，需要特别注意以下几个方面：
+
+1. 对HBase表进行预分配Region，根据表的数据量估算出一个合理的Region数；
+2. rowkey设计上需要注意，尽量使rowkey均匀分布在预分配的N个Region上；
+3. 通过set hbase.client.scanner.caching设置合理的扫描器缓存；
+4. 关闭mapreduce的推测执行：<br>
+    set mapred.map.tasks.speculative.execution = false;<br>
+    set mapred.reduce.tasks.speculative.execution = false;<br>
+
+### Hive over HBase和Hive over HDFS性能比较
+
+查询性能比较
+query1:
+select count(1) from on_hdfs;
+select count(1) from on_hbase;
+
+query2(根据key过滤)
+select * from on_hdfs
+where key = '13400000064_1388056783_460095106148962';
+select * from on_hbase
+where key = '13400000064_1388056783_460095106148962′;
+
+query3(根据value过滤)
+select * from on_hdfs where value = ‘XXX';
+select * from on_hbase where value = ‘XXX';
+
+ 
+
+on_hdfs (20万记录，150M，TextFile on HDFS)
+on_hbase(20万记录，160M，HFile on HDFS)
+
+on_hdfs (2500万记录，2.7G，TextFile on HDFS)
+on_hbase(2500万记录，3G，HFile on HDFS)
 
 
+对于全表扫描，hive_on_hbase查询时候如果不设置catching，性能远远不及hive_on_hdfs；
 
+根据rowkey过滤，hive_on_hbase性能上略好于hive_on_hdfs，特别是数据量大的时候；
 
+设置了caching之后，尽管比不设caching好很多，但还是略逊于hive_on_hdfs；
 

@@ -5,7 +5,7 @@ Apache Flink 是一个分布式的大数据处理引擎，可对有限数据流�
 Flink具备7X24小时高可用的SOA（面向服务架构），原因是在实现上 Flink 提供了一致性的 Checkpoint。Checkpoint 是 Flink 实现容错机制的核心，它周期性的记录计算过程中 Operator 的状态，并生成快照持久化存储。当 Flink 作业发生故障崩溃时，可以有选择的从 Checkpoint 中恢复，保证了计算的一致性。
 
 
-### 流数据
+##### 流数据
 从广义上说，所有大数据的生成均可以看作是一连串发生的离散事件。这些离散的事件以时间轴为维度看就形成了一条条事件流/数据流。数据是指由数千个数据源持续生成的数据，流数据通常也以数据记录的形式发送，但相较于离线数据，流数据普遍的规模较小。
 
 在典型的大数据业务场景下数据业务最通用的做法是：选出批处理的技术处理全量数据，采用流式计算处理实时增量数据。
@@ -22,7 +22,7 @@ Flink具备7X24小时高可用的SOA（面向服务架构），原因是在实�
 4. 如何更新结果？
 
 
-### Flink 基石
+##### Flink 基石
 state checkpoint time window 
 
 Flink是有状态的计算！
@@ -39,25 +39,28 @@ Flink是有状态的计算！
 在大数据系统中，离线批处理技术可以满足非常多的数据使用场景需求，但是在DT时代，每天面对的信息是瞬息万变的，越来越多的应用场景对 数据的时效性提出更高的要求。数据是价值是具有效性的：一条数据产生的时候，如果不能及时处理并在业务系统中使用，就不能让数据保持最高的'新鲜度'和价值最大化。
 
 
-### 实时ETL
+##### 实时ETL
 
 实时ETL&数据流的目的是实时的把数据从A点投递到B点。中间可能会加上一些数据清洗和集成的工作，比如实时构建搜索系统的索引，实时数仓中的ETL过程等eg：尾号限行（对违反限行车辆进行初步筛选，再进行汇总）   车辆轨迹（将一辆车一天轨迹拼接成一条，时间列表 点位列表 过车间隔列表）
 
 
-### 实时数据分析（实时指标汇总）
+##### 实时数据分析（实时指标汇总）
 
 数据分析指的是根据业务目标从原始数据中抽取对应信息并整合的过程。比如查看每天卖的最好的十种商品，仓库平均周转时间，文章平均点击率，推送打开率等等。实时数据分析则是上述过程的实时化，一般最终体现为实时报表或实时大屏。eg：30s流量统计 高频车 重点路段/区域  流量/拥堵   在途车辆归属地分析
 
 
-### 事件驱动应用（实时预警）
+#### 事件驱动应用（实时预警）
 
 事件驱动应用是对一系列订阅事件进行处理或作出响应的系统。事件驱动应用往往还会依赖内部状态，比如点击欺诈检测，风控系统，运维异常检测系统等当用户的行为触发某些风险控制点时，系统会捕获这个事件，并根据当前行为和用户之前的行为进行分析，决定是否对用户进行风险控制。eg： 套牌车  流量突发预警   路段突发拥堵预警  
 
 --------------------Flink应用场景------------------------
 
-1. 实时智能推荐 2. 复杂事件处理
-3. 实时欺诈检测 4. 实时数仓与ETL
-5. 流数据分析   6. 实时报表分析
+1. 实时智能推荐
+2. 复杂事件处理
+3. 实时欺诈检测
+4. 实时数仓与ETL
+5. 流数据分析
+6. 实时报表分析
 7. 监控平台
 
 实时ETL：实时消费Kafka数据进行清洗、转换、结构化处理用于下游计算处理。
@@ -282,9 +285,7 @@ nohup bin/flink run -s hdfs：///flink/savepoint/savepoint-8b08d3-c077f4bd59b0  
 
 ---------------- 流处理系统 ----------------
 
-包括 Flink 在内的分布式流处理引擎一般采用 DAG 图来表示整个计算逻辑，
-DAG的每个点都代表一个基本的逻辑单元，即算子
-Source接入-->transformation网络传输/本地传输在算子间进行发送和处理-->sink发送到外部系统或数据库
+包括 Flink 在内的分布式流处理引擎一般采用 DAG 图来表示整个计算逻辑，DAG的每个点都代表一个基本的逻辑单元，即算子Source接入-->transformation网络传输/本地传输在算子间进行发送和处理-->sink发送到外部系统或数据库
 
 
 ---------   基本模型 --------- 
@@ -346,7 +347,7 @@ getRuntimeContext()方法提供了函数的RuntimeContext的一些信息，例�
 
 
 
-----------------  DataStream操作分类：（四类）   ----------------
+----------------  DataStream 操作分类：（四类）   ----------------
 1：基于单条记录（filter，map） 
 2：基于窗口（window）  
 3：合并多条流（union，join，connect）  
@@ -458,7 +459,7 @@ Flink的DBMS风格的运算符本身在二进制数据上运行，在必要时�
 flink发布命令并没有指定yarn 怎么就在yarn上运行了？
 配置一个容器yarn-session，再发布一个flink程序  会自动找到 JobManager address （如果创建容器的时间和程序发布的时间间隔太久 会抛找不到jobManager address的异常） 使用 -yid 可以指定flink程序发布到 yarn cluster 集群上运行
 
-flink  on yarn  两种运行方式 1：yarn-session  2：per job
+flink on yarn  两种运行方式 1：yarn-session  2：per job
 
 # yarn-session
 nohup bin/yarn-session.sh \
@@ -755,8 +756,7 @@ TimeEvictor 设定一个阈值 interval，删除所有不再 max_ts - interval �
 flink触发当前窗口计算的前提是下一条数据的时间在当前窗口的结束时间之后
 
 
----------------------------- Trigger ------------------------------
-Trigger 触发器
+##### Trigger 触发器
 触发器是决定某个窗口何时输出的一种机制
     作用跟照相机的快门相同，按下去，就能拿到某个时间点计算结果的快照
 通过触发器，能多次看到某个窗口的输出结果。因此可以实现迟到数据（late event）的处理
@@ -775,21 +775,22 @@ Watermark： 解决乱序的问题
 Watermark会携带一个单调递增的时间戳t，watermark（t）表示所有时间戳不大于t的都已经到来
 未来小于t的数据不会到来，因此可以放心触发和销毁窗口
 
-# 迟到的数据 late elements
+##### 迟到的数据 late elements
 问题：
 watermater的时间不好设置 ：要么不正确 要么耗费太大 ，所以在设置watermark(t)之后，还有较小概率接收到时间戳（t）之前的数据，这部分称为 late elements
 
 解决方式：指定允许延迟的最大时间（默认0） 
+```
 DataStream<T> input = ... ;
 input
     .keyBy（<key selector>)
     .window（<window assigner>)
     .allowedLateness（<time>)
     .<windowed  transformation>（window function)
-
+```
 设置allowedLateness之后，迟到的数据同样可以触发窗口，进行计算
 利用Flink的side output机制，我们可以获取到这些迟到的数据
-
+```
 final OutputTag<T>  lateOutputTag = new OutputTag[T]（"late-data"){};
 DataStream<T> input = ... ;
 
@@ -801,9 +802,8 @@ SingleOutputStreamOperator<T> result = input
     .<windowed  transformation>（window function)
 
 DataStream<T> lateStream = result.getSideOutput（lateOutputTag);
-
-# 设置allowedLateness之后，迟到的数据也可能触发窗口，如果使用的是Session window 
-  可能会对窗口进行合并，产生预期外的行为  
+```
+设置allowedLateness之后，迟到的数据也可能触发窗口，如果使用的是Session window，可能会对窗口进行合并，产生预期外的行为  
  
 3：Window 内部实现
 每条过车数据进来后，会先由WindowAssigner 分配到对应的window（滚动/滑动..）
@@ -811,97 +811,91 @@ DataStream<T> lateStream = result.getSideOutput（lateOutputTag);
 然后处理UserFunction（用户处理的逻辑代码）
 
 ###  Window中状态存储  
-#Flink 是支持 Exactly Once 处理语义的，那么 Window 中的状态存储和普通的状态存储又有什么不一样的地方呢？
+Flink 是支持 Exactly Once 处理语义的，那么 Window 中的状态存储和普通的状态存储又有什么不一样的地方呢？
 A：从接口上可以认为没有区别，但是每个 Window 会属于不同的 namespace，
 而非 Window 场景下，则都属于 VoidNamespace ，最终由 State/Checkpoint 来保证数据的 Exactly Once 语义
 简单说：Window 中的的元素同样是通过 State 进行维护！！！ 然后由 Checkpoint 机制保证 Exactly Once 语义
 Kafka Connector 也是在 Flink 中使用 Operator State 的一个示例：维护topic 分区和offset的映射到Operator State
 
-------------------- flink精确一次优势 ------------------
+##### flink 精确一次优势
 Spark Streaming 的端到端 Exactly-once 需要下游支持幂等、上游支持流量重放，
 Spark Streaming 这一层做到了 At-least-once，正常情况下数据不重不少，但在程序重启时可能
 会重发部分数据，为了实现全局的 Exactly-once，在下游做了去重逻辑
 通过快照机制，Flink 获得了端到端数据一致性
 
 
-------------- 怎样判断是否是新用户 ------------
+##### 怎样判断是否是新用户
 跟判断是否首次入城车一样，redis 缓存数据库 永不过期  数据流实时对比判断  
 
 Flink 现在大部分开发属于实时汇总 ：  简单算子+业务函数+水印+分组+聚合+json格式输出
 
-
 source  transformation  sink
 
--------------------------- 怎样确定Flink集群所需资源 --------------------------
 
-#吞吐量：
+##### 怎样确定Flink集群所需资源
+
+吞吐量：
 估算预期进入流计算系统每秒的记录数（吞吐量），以及每条记录数的大小
 
-#不同key的数量以及每个key存储的state大小
+不同key的数量以及每个key存储的state大小
 key的数量和key所需state的大小，都将会影响Flink应用程序所需的资源。可以通过查看反压状态
 
-#状态的更新频率和状态后端的访问模式：
+状态的更新频率和状态后端的访问模式：
 不同的状态后端（RocksDB，java Heap）的访问模式差距很大。RocksDB每次读取和更新会进行序列化
 反序列化以及JNI操作，Java Heap不支持增量checkpoint，会导致状态大的场景每次持久化的数据量很大
 都会影响Flink作业所需的资源
 
-#网络容量
+网络容量
 网络容量不仅会受flink内部，也会受到Flink跟正在交互的kafka，hdfs等外部服务
 比如启动kafka的replication会增加额外的网络容量
 
-#磁盘带宽
+磁盘带宽
 如果应用程序依赖 RocksDB Kafka  HDFS
 
-#机器数量以及可用的CPU和内存
+机器数量以及可用的CPU和内存
 
 另外需要提供额外的资源来保证：
 当你的 Flink 发生故障时，系统会需要额外的资源来做恢复工作以及从 Kafka topic 或其他消息客户端追上最新的数据
 
--------------------------- Flink 分支库 --------------------------
-## Flink CEP
+
+### Flink 分支库
+#### Flink CEP
 
 复杂事件处理，模式匹配
+
 flink的CEP跟DataStream Api 都是对流式数据处理，有什么区别？
+
 CEP：更看重流式数据中查找，也就是对源数据不做处理
 DataStream：更看重对数据的加工和处理，一般不会在数据中查找匹配
 
 
+##### Chandy-Lamport 算法
+将流计算看作成一个流式的拓扑，定期在这个拓扑的头部source点开始插入特殊的barriers（栅栏），从上游开始不断向下游广播这个Barriers。每一个节点收到所有的barriers，会将state做一次snapshot（快照）。当每个节点都做完Snapshot之后，整个拓扑就算做完一次checkpoint。接下来不管出现任何故障，都会从最近的checkpoint进行恢复。
 
-
---------------- Chandy-Lamport 算法 --------------- 
-将流计算看作成一个流式的拓扑，定期在这个拓扑的头部source点开始插入特殊的barriers（栅栏）
-从上游开始不断向下游广播这个Barriers。
-每一个节点收到所有的barriers，会将state做一次snapshot（快照）
-当每个节点都做完Snapshot之后，整个拓扑就算做完一次checkpoint
-接下来不管出现任何故障，都会从最近的checkpoint进行恢复
-
-Flink用这套算法，保证了强一致性的语义，
-    也是Flink区别于其他无状态流计算引擎的核心区别
+Flink用这套算法，保证了强一致性的语义，也是Flink区别于其他无状态流计算引擎的核心区别。
     
 
--------------- 实时计算的趋势  StreamSQL ---------
+### 实时计算的趋势 StreamSQL
 实时任务SQL化
 阿里的实时计算方案就是Flink SQL   1CU  一天6 RMB
 
 使用sql 开发实时计算程序
 
 
-
-
-
-
------------- 源表  &&  维表  &&  结果表 --------------
+### 源表 && 维表 && 结果表
 源表： 流数据分析的源表是指流式数据存储，流式数据存储驱动流数据分析的运行  相当于ods层
 
 事实表&&维表   dwd层
-事实表：事实表是数据聚合后依据某个维度生成的结果表，一般很大
-维表：对数据分析时所用的一个量，你可以选择按类别来进行分析，或按区域来分析。 这样的按..分析就构成一个维度
+
+事实表：事实表是数据聚合后依据某个维度生成的结果表，一般很大。
+维表：对数据分析时所用的一个量，你可以选择按类别来进行分析，或按区域来分析。 这样的按..分析就构成一个维度。
 
 结果表： 数据统计后的结果        dws层
-        mysql phoenix 
+
+mysql phoenix 
 
 
---------------   flink程序调优   --------------
+### flink程序调优
 DataStream性能调优
 
 A：配置内存
@@ -977,7 +971,7 @@ D：设计分区方法 （#####）
 
 
 
-------------------    程序优化  --------------------
+### 程序优化
 
 南昌 全流量计算优化：早晚高峰，数据延迟
      早高峰500-685/s   3w-4w/min
@@ -1000,7 +994,7 @@ D：设计分区方法 （#####）
 Solr冷热数据分离：分表  问题解决
  
 
----------------- 怎样学习flink ----------------
+### 怎样学习flink
 
 1.先对flink有宏观视野上理解，看阿里大会整理的文档资料，其中也有可运行的demo。
 2.看各个flink 大V的博客，对架构和原理逐步深入理解（可以微信和google搜索关键词）
@@ -1012,12 +1006,12 @@ Solr冷热数据分离：分表  问题解决
 提高解决问题的能力
 
 
----------------- flink知识点 ----------------
+### flink知识点
 state  checkpoint  time  window  watermark  processFunction
 join trigger sideoutput   sink  source   asyncio
 table  sql   cep
 
-------------------------华为大数据平台flink安全模式部署----------------
+### 华为大数据平台flink安全模式部署
 
 kerberos + flink
 3个月证书过期 需要重新生成认证证书  同时替换掉原有的文件，flink-conf.yaml文件需要修改配置

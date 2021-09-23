@@ -2,13 +2,14 @@
 
 HBase是Hadoop Database的简称，是建立在Hadoop文件系统之上的分布式面向列的数据库，为横向发展类型数据库，提供快速随机访问海量结构化数据，它是Hadoop生态系统，提供对数据的随机实时读/写访问，是Hadoop文件系统的一部分，利用了Hadoop的文件系统(HDFS)提供的容错能力。
 
-HBase是分布式、面向列族的开源数据库，HDFS为HBase提供可靠的底层数据存储服务，MapReduce为HBase提供高性能的计算能力，Zookeeper为HBase提供稳定服务和Failover机制，可以说,HBase是一个通过大量廉价的机器解决海量数据的高速存储和读取的分布式数据库解决方案。
+HBase是分布式、面向列族的开源数据库，HDFS为HBase提供可靠的底层数据存储服务，MapReduce为HBase提供高性能的计算能力，Zookeeper为HBase提供稳定服务和Failover机制，可以说，HBase是一个通过大量廉价的机器解决海量数据的高速存储和读取的分布式数据库解决方案。
 
 HBase 是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用 Hbase 技术可在廉价 PC Server 上搭建起大规模结构化存储集群。
 
 HBase 的目标是存储并处理大型的数据，更具体来说是仅需使用普通的硬件配置，就能够处理由成千上万的行和列所组成的大型数据。
 
 Hbase是一种NoSQL数据库，非常适用于海量明细数据（十亿、百亿）的随机实时查询，如交易清单、轨迹行为等。
+
 
 HBase并不快，只是当数据量很大的时候它慢的不明显。
 
@@ -78,18 +79,19 @@ ZooKeeper 在 HBase 中扮演的角色类似一个管家。ZooKeeper 管理了 H
 
 客户端每次与 HBase 连接，其实都是先与 ZooKeeper 通信，查询出哪个 RegionServer 需要连接，然后再连接 RegionServer。
 
-#### Master
-可能你们会想当然地觉得 Master 是 HBase 的领导，所有的数据、所 有的操作都会经过它。错！其实在HBase中Master的角色不像领导，更像是打杂的。
 
-客户端从 ZooKeeper 获取了 RegionServer 的地址后，会直接从RegionServer 获取数据。其实不光是获取数据，包括插入、删除等所有的数据操作都是直接操作 RegionServer，而不需要经过 Master。
+#### Master
+可能你们会想当然地觉得 Master 是 HBase 的领导，所有的数据、所有的操作都会经过它。错！其实在HBase中Master的角色不像领导，更像是打杂的。
+
+客户端从 ZooKeeper 获取了 RegionServer 的地址后，会直接从 RegionServer 获取数据。其实不光是获取数据，包括插入、删除等所有的数据操作都是直接操作 RegionServer，而不需要经过 Master。
 
 Master 只负责各种协调工作（其实就是打杂），比如建表、删表、移动Region、合并等操作。它们的共性就是需要跨 RegionServer，这些操作由哪个 RegionServer 来执行都不合适，所以 HBase 就将这些操作放到了 Master 上了。
 
-这种结构的好处是大大降低了集群对 Master 的依赖。而 Master 节点一般只有一个到两个，一旦宕机，如果集群对Master的依赖度很大，那么就会产生单点故障问题。
+这种结构的好处是大大降低了集群对 Master 的依赖。而 Master 节点一般只有一个到两个，一旦宕机，如果集群对 Master 的依赖度很大，那么就会产生单点故障问题。
 
-在 HBase 中，即使Master宕机了，集群依然可以正常地运行，依然可以存储和删除数据。
+在 HBase 中，即使 Master 宕机了，集群依然可以正常地运行，依然可以存储和删除数据。
 
-但是, 如果 Master 长时间宕机也是不行的, 毕竟他还是有一些工作需要做的.
+但是，如果 Master 长时间宕机也是不行的，毕竟他还是有一些工作需要做的.
 
 主要功能：
 
@@ -122,6 +124,10 @@ RegionServer 主要工作：
 #### Region
 Region 就是一段数据的集合。HBase中的表一般拥有一个到多个 Region。
 
+最初，每张表只有一个 region，当一个 region 变得太大时，它就分裂成 2 个子 region。2个子 region，各占原始 region 的一半数据，仍然被相同的 region server 管理。然后 Region server 向 HBase master 节点汇报拆分完成.
+
+如果集群内还有其他 region server，master 节点倾向于做负载均衡，所以 master 节点有可能调度新的 region 到其他 region server，由其他 region 管理新的分裂出的 region。
+
 Region有以下特性：
 
 - Region 不能跨服务器，一个 RegionServer 上有一个或者多个 Region。
@@ -134,7 +140,7 @@ Region有以下特性：
 
 最基本的存储单位是列（column），一个列或者多个列形成一行 （row）。
 
-传统数据库是严格的行列对齐。比如这行有三个列a、b、c， 下一行肯定也有三个列a、b、c。
+传统数据库是严格的行列对齐。比如这行有三个列a、b、c，下一行肯定也有三个列a、b、c。
 
 而在HBase中，这一行有三个列 a、b、 c，下一个行也许是有 4 个列a、e、f、g。在HBase 中，行跟行的列可以完全不一样，这个行的数据跟另外一个行的数据也可以存储在不同的机器上，甚至同一行内的列也可以存储在完全不同的机器上！
 
@@ -144,8 +150,23 @@ Region有以下特性：
 
 ![hbase 表结构](images/hbase1.png)
 
+#### 三维有序存储
+Hfile是HBase中Key-value数据的存储格式。key就是{row key，column(=< family> + < label>)，version} ，而value就是cell中的值。
 
-#### OLTP和OLAP
+HBase的三维有序存储中的三维是指：rowkey（行主键），column key(columnFamily+< label>)，timestamp(时间戳或者版本号)三部分组成的三维有序存储。
+
+##### rowkey
+rowkey是行的主键，它是以字典顺序排序的。所以 rowkey的设计是至关重要的，关系到你应用层的查询效率。我们在根据rowkey范围查询的时候，我们一般是知道startRowkey，如果我们通过scan只传startRowKey ：d开头的，那么查询的是所有比d大的都查了，而我们只需要d开头的数据，那就要通过endRowKey来限制。我们可以通过设定endRowKey为：d 开头，后面的根据你的rowkey组合来设定，一般是加比startKey大一位。
+
+##### column key
+column key是第二维，数据按rowkey字典排序后，如果rowkey相同，则是根据column key来排序的，也是按字典排序。
+
+我们在设计table的时候要学会利用这一点。比如我们的收件箱。我们有时候需要按主题排序，那我们就可以把主题这设置为我们的column key，即设计为columnFamily+主题这样的设计。
+
+##### timestamp
+timestamp 时间戳，是第三维，这是个按降序排序的，即最新的数据排在最前面。
+
+#### OLTP 和 OLAP
 数据处理大致可以分成两大类：联机事务处理OLTP（on-line transaction processing）、联机分析处理OLAP（On-Line Analytical Processing）。
 
 OLTP是传统的关系型数据库的主要应用，主要是基本的、日常的事务处理，例如银行交易。
@@ -207,14 +228,89 @@ HBase会把相同列族的列尽量放在同一台机器上，所以说，如果
 一个 Region 就是多个行的集合。在 Region 中行的排序按照行键（rowkey）字典排序。
 
 
-
-
 ### 安装和使用
 Hbase 也有 3 种运行模式:
 
 - 单机模式
 - 伪分布模式
 - 完全分布式模式
+
+#### hbase shell
+
+```bash
+help # 帮助命令
+
+list # 查看当前数据库中有哪些表
+
+
+# 创建一个表，表名叫student，这个表内有一个列族叫info
+# 定义表的时候不需要定义列.
+create 'student','info'
+
+
+# Hbase 是使用 put 命令向表中插入数据的.
+put 'student','1001','info:sex','male'
+put 'student','1001','info:age','20'
+
+put 'student','1002','info:name','zhiling'
+put 'student','1002','info:sex','female'
+put 'student','1002','info:age','18'
+
+
+# 查看表数据 - 全表扫描
+scan 'student'
+
+# 查看表数据 - 限制起始行和结束行的扫描
+# STARROW和STOPROW必须大写.
+# 显示的结果也是前闭后开的区间
+scan 'student', {STARTROW => '1002'}
+scan 'student', {STARTROW => '1001', STOPROW => '1001'}
+
+# 查看表数据 - 获取指定行或者指定列的数据
+get 'student', '1001' # 指定行
+get 'student', '1001', 'info:age' # 指定列
+get 'student', '1001', {COLUMN =>  'info:age', VERSIONS => 2} # 指定版本数
+
+
+# 统计表数据行
+count 'student'
+
+
+# 更新指定列的数据
+# 更新数据和添加数据的操作是一样的，都是使用的 put 命令.
+# 如果指定行的列不存在就是添加，如果存在就是更新值. 但是旧值还存在，只是形成了不同的版本.
+put 'student','1002','info:name','lisi'
+put 'student','1002','info:name','fengjie'
+
+# 删除数据
+deleteall 'student', '1001' # 删除某行所有数据
+delete 'student','1002','info:sex' # 删除某列数据
+
+# 清空表数据
+# 清空表会自动先 disable，然后再 truncate。
+truncate 'student'
+
+# 删除表
+# 需要先把表 disable，然后再 drop
+disable 'student'
+drop 'student'
+
+# 查看表结构
+describe 'student'
+
+# 变更表结构
+alter 'student', {NAME => 'info', VERSIONS => 3} #  设置表 student 中ifno列族每列可以保存 3 个版本的数据
+
+```
+
+#### 最佳实践
+如何设计rowkey 使写入数据时尽量均匀地写到各个 Region 中，起到负载均衡的作用。读取数据时要把一次查询的数据聚集到一个 Region 中，加速查询。
+
+
+### MapReduce
+
+Hbase 只是一个单纯的数据存储框架，没有任何的分析能力。我们可以让 Hbase 和 MapReduce 结合起来，就扩展出来了数据分析功能。
+
 
 ### Hive
 Hive是一个构建在Hadoop基础之上的数据仓库，主要解决分布式存储的大数据处理和计算问题，Hive提供了类SQL语句，叫HiveQL
@@ -238,7 +334,7 @@ Hive诞生于FaceBook，它最初就是为方便FaceBook的数据分析人员而
 
 - 数据库：是一种面向列存储的非关系型数据库。
 - 用于存储结构化和非结构化的数据：适用于单表非关系型数据的存储，不适合做关联查询，类似JOIN等操作。
-- 基于 HDFS 数据持久化存储的体现形式是Hfile，存放于DataNode中，被ResionServer以region的形式进行管理。
+- 基于 HDFS 数据持久化存储的体现形式是 Hfile，存放于 DataNode 中，被 ResionServer 以 region 的形式进行管理。
 - 延迟较低，接入在线业务使用：面对大量的企业数据，HBase 可以直线单表大量数据的存储，同时提供了高效的数据访问速度。
 
 #### Hive 和 HBase 整合
