@@ -1,0 +1,47 @@
+WebGL（Web Graphics Library）
+
+
+
+WebGL 1.0基于OpenGL ES 2.0，并提供了3D图形的API。它使用HTML5Canvas并允许利用文档对象模型接口。
+
+WebGL 2.0基于OpenGL ES 3.0，确保了提供许多选择性的WebGL 1.0扩展，并引入新的API。可利用部分Javascript实现自动存储器管理。
+
+【历史】
+
+WebGL起源于Mozilla员工弗拉基米尔·弗基西维奇的一项称为Canvas 3D实验项目。
+2006年，弗基西维奇首次展示了Canvas 3D的原型。
+2007年底在Firefox和Opera被实现。
+
+在2009年初，非营利技术联盟Khronos Group启动了WebGL的工作组，最初的工作成员包括Apple、Google、Mozilla、Opera等。
+
+2011年3月发布WebGL 1.0规范。截至2012年3月，工作组的主席由肯·罗素（Ken Russell，全名“Kenneth Bradley Russell”）担任。
+
+WebGL的早期应用包括Zygote Body。
+
+WebGL 2规范的发展始于2013年，并于2017年1月完成。该规范基于OpenGL ES 3.0。首度实现在Firefox 51、Chrome 56和Opera 43中。
+
+
+
+【WebGL 框架和引擎】
+
+WebGL 框架和引擎按照定位可以分成这三种类型：
+
+1、WebGL 封装，定位是简化 WebGL 开发，最大的特点是必须自己写 GLSL 才能用。
+主要解决的问题是 WebGL 的 API 过于繁琐。
+
+[twgl.js](https://github.com/greggman/twgl.js) 定位只是减少重复代码，并没有进一步抽象。
+[regl](https://github.com/regl-project/regl)
+[OGL](https://github.com/oframe/ogl) 封装成熟度不如 regl，因为缺乏单元测试，当成渲染库在功能上又没法和 Three.js 比，因此主要优势似乎只有体积小了。
+[luma.gl](https://luma.gl) 主要用它开发地理可视化框架，比如 Desk.gl 和 Kepler.gl，还有无人车数据可视化 AVS。
+
+
+2、渲染引擎，定位是三维物体及场景展示，一般会抽象出场景、相机、灯光等概念，上手门槛低，不需要自己写 GLSL。
+
+由于 WebGL 本身只是光栅引擎，基于它开发需要了解矩阵变换并编写着色器，所以 WebGL 学习门槛很高，光入门就要看特别长的文档。
+
+
+3、游戏引擎，定位是游戏开发，在前面的渲染引擎基础上，还提供了骨骼动画、物理引擎、AI、GUI 等功能，以及可视化编辑器来设计关卡，支撑大型游戏的开发。
+
+
+
+

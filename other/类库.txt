@@ -1,0 +1,53 @@
+静态导入类.* 使用时就可以直接通过方法名调用 一般不这样用 多个静态导入容易混乱
+
+包装类   
+
+
+
+数字处理类  数字格式化java.text.DecimalFormat  查表
+1、
+Math类中的方法都是静态方法，直接使用“类.方法名称()”的形式调用即可
+求平方根 Math.sqrt(9.0)
+求两数的最大值 Math.max(10,30) ;最小值Math.min(10,30))
+2的3次方Math.pow(2,3)) ;
+四舍五入Math.round(33.6)) ;
+默认产生[0.0,1.0)内double型随机数Math.random();
+
+2、Random r = new Random() ;int x=r.nextInt(101);//100以内随机数;int y=r.nextInt(9000)+1000;//随机四位数   java的区间[a,b)
+
+
+
+
+3、Array数组
+		int temp[] = {3,4,5,7,9,1,2,6,8} ;	// 声明一个整型数组
+		Arrays.sort(temp) ;		// 进行排序的操作
+		System.out.print("排序后的数组：") ;
+		System.out.println(Arrays.toString(temp)) ;	// 以字符串输出数组
+		// 如果要想使用二分法查询的话，则必须是排序之后的数组
+		int point = Arrays.binarySearch(temp,3) ;	// 检索位置
+		System.out.println("元素‘3’的位置在：" + point) ;
+		Arrays.fill(temp,3)	;// 填充数组
+		System.out.print("数组填充：") ;
+		System.out.println(Arrays.toString(temp)) ;
+4、Calendar 日历类、含时区
+java.uil.Date日期类、不含时区
+java.sql.date类仅能表示日期
+java.sql.time类仅能表示时间
+dateformat.format(Date date)日期格式化
+String.format(Sring 格式,Date date) 格式可以是正则表达式   字符串格式化:  日期、时间格式化;常规类型格式化        格式查表
+
+关于java.uil.Date类（建议使用Calendar类、可能有时区差异性 天数也不对）
+1.年份 y 由整数 y - 1900 表示。 
+2.月份由从 0 至 11 的整数表示；0 是一月、1 是二月等等；因此 11 是十二月。  
+4.小时由从 0 至 23 的整数表示。因此，从午夜到 1 a.m. 的时间是 0 点，从中午到 1 p.m. 的时间是 12 点。 
+6.秒由 0 至 61 的整数表示；值 60 和 61 只对闰秒发生，尽管那样，也只用在实际正确跟踪闰秒的 Java 实现中。于按当前引入闰秒的方式，两个闰秒在同一分钟内发生是极不可能的，但此规范遵循 ISO C 的日期和时间约定。 
+
+
+5、Object.equals和"=="都只是比较地址 String重写了equals,比较其字符串内容
+String类 对象池 不可改变对象:最终类(final)
+(String s).charAt(int index) 返回指定索引处的 char 值。
+	.getbyte(String charsetName)//"utf-8" 字符串编码转换 
+	.contains(CharSequence s) 当且仅当此字符串包含指定的 char 值序列时，返回 true
+Character.isDigit('d') 判断字符是否是数字
+
+6、八大基本数据类型对应的封装类及其静态方法

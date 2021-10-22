@@ -1,0 +1,90 @@
+"configs": [
+    {
+      "automock": false,
+      "browser": false,
+      "cache": true,
+      "cacheDirectory": "/var/folders/ds/g38ng82s4vn056f2yqfbfhww0000gp/T/jest_dy",
+      "clearMocks": false,
+      "coveragePathIgnorePatterns": [
+        "/node_modules/"
+      ],
+      "globals": {},
+      "haste": {
+        "providesModuleNodeModules": []
+      },
+      "moduleDirectories": [
+        "node_modules"
+      ],
+      "moduleFileExtensions": [
+        "js",
+        "json",
+        "jsx",
+        "node"
+      ],
+      "moduleNameMapper": {},
+      "modulePathIgnorePatterns": [],
+      "name": "50d75d88a93a4f0fd70c00b781fb11e7",
+      "resetMocks": false,
+      "resetModules": false,
+      "rootDir": "/Volumes/work/DHMS/app/cougar",
+      "roots": [
+        "/Volumes/work/DHMS/app/cougar"
+      ],
+      "runner": "jest-runner",
+      "setupFiles": [
+        "/Volumes/work/DHMS/app/cougar/node_modules/regenerator-runtime/runtime.js"
+      ],
+      "snapshotSerializers": [],
+      "testEnvironment": "jest-environment-jsdom",
+      "testMatch": [
+        "**/__tests__/**/*.js?(x)",
+        "**/?(*.)(spec|test).js?(x)"
+      ],
+      "testPathIgnorePatterns": [
+        "/node_modules/"
+      ],
+      "testRegex": "",
+      "testRunner": "/Volumes/work/DHMS/app/cougar/node_modules/jest-jasmine2/build/index.js",
+      "testURL": "about:blank",
+      "timers": "real",
+      "transform": [
+        [
+          "^.+\\.jsx?$",
+          "/Volumes/work/DHMS/app/cougar/node_modules/babel-jest/build/index.js"
+        ]
+      ],
+      "transformIgnorePatterns": [
+        "/node_modules/"
+      ],
+      "watchPathIgnorePatterns": []
+    }
+],
+"globalConfig": {
+    "bail": false,
+    "changedFilesWithAncestor": false,
+    "coverageDirectory": "/Volumes/work/DHMS/app/cougar/coverage",
+    "coverageReporters": [
+      "json",
+      "text",
+      "lcov",
+      "clover"
+    ],
+    "expand": false,
+    "listTests": false,
+    "mapCoverage": false,
+    "maxWorkers": 3,
+    "noStackTrace": false,
+    "nonFlagArgs": [],
+    "notify": false,
+    "rootDir": "/Volumes/work/DHMS/app/cougar",
+    "runTestsByPath": false,
+    "testFailureExitCode": 1,
+    "testPathPattern": "",
+    "testResultsProcessor": null,
+    "updateSnapshot": "new",
+    "useStderr": false,
+    "verbose": null,
+    "watch": false,
+    "watchman": true
+},
+"version": "21.2.1"

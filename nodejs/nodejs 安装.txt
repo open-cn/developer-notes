@@ -1,0 +1,345 @@
+Node.js
+Node.js 的包管理器 npm，是全球最大的开源库生态系统。
+
+
+【安装】：node-v0.10.33-x64.msi
+win8权限问题 使用管理员运行控制台，msiexec指令安装msi程序			msiexec /package xxx.msi
+macOs: brew install node
+
+【nvm维护】：使用Node Version Manager(nvm)管理node.js和io.js https://github.com/cnpm/nvm
+cd %nvm%
+source nvm.sh
+安装
+nvm install node = nvm install stable - 安装最新稳定版node.js
+nvm install unstable - 安装最新版node.js（不稳定版）
+nvm install iojs - 安装最新版io.js
+nvm install $version - 安装指定版本
+删除
+nvm uninstall $version - 删除指定版本
+查看
+nvm ls 查看本地nodejs版本库
+nvm ls-remote 查看远程nodejs版本库
+使用(切换当前版本)
+
+nvm use $version - 使用指定版本
+默认版本
+nvm default $version - 指定默认版本
+
+注意：
+1.node.js和io.js有一个重要的共同点。他们都依赖于Chrome的V8 Javascript引擎。但是他们使用的是不同的V8版本。
+2.io.js和node.js是运行兼容且使用互斥的，也就是说，你可以用io.js去运行node.js的程序，但是，nvm同一时间只能指定使用io.js或node.js中的某一个版本，且命令iojs和node指向同一个执行文件。
+
+
+NODE_MODULE_VERSION 指的是 Node.js 的 ABI (application binary interface) 版本号，用来确定编译 Node.js 的 C++ 库版本，以确定是否可以直接加载而不需重新编译。在早期版本中其作为一位十六进制值来储存，而现在表示为一个整数。
+
+
+【npm维护】Node Package Manager
+NPM的全称是Node Package Manager，是一个NodeJS包管理和分发工具，已经成为了非官方的发布Node模块（包）的标准。
+升级 npm update -g npm
+
+
+[npm install 安装模块]
+npm install 在安装 npm 包时，有多种命令参数可以把它们的信息写入 package.json 文件：
+-S: --save          会把依赖包名称添加到 package.json 文件 dependencies 键下
+-D: --save-dev      添加到 package.json 文件 devDependencies 键下
+-O: --save-optional 添加到 package.json 文件 optionalDependencies 键下
+-B: --save-bundle   添加到 package.json 文件 bundleDependencies 键下
+-E: --save-exact  与 --save, --save-dev or --save-optional 一起使用，保存为精确的版本号
+
+dependency，devDependency，peerDependency, optionalDependencies, bundleDependencies
+
+devDependencies 下列出的模块，是我们开发时用的，比如 grunt-contrib-uglify，我们用它混淆 js 文件，它们不会被部署到生产环境。
+dependencies 下的模块，则是我们生产环境中需要的依赖。
+
+npm install 会安装 dependency，devDependency，optionalDependencies，但是不安装 dependency 依赖的 devDependency
+npm install --production 不安装自身的 devDependency
+npm install --only=production
+npm install --only=dev 仅安装devDependency，但不安装devDependency 依赖的 dependency？？？
+npm install --no-optional 不安装 optionalDependencies，但不会删除已安装的 optionalDependencies
+
+peerDependencies
+如果某个package把我列为依赖的话，那么那个package也需要有对PackageB的依赖。如果没有则 npm 2 会强制安装；npm 3 会在安装结束后打印警告提示
+
+optionalDependencies
+安装与否不影响程序运行
+
+bundleDependencies
+在发布时会将这个对象中的包打包到最终的发布包里。
+这个对象中的包必须先在devDependencies或dependencies声明过，否则打包会报错。
+
+npm install [<@scope>/]<name>
+npm install [<@scope>/]<name>@<tag>
+npm install [<@scope>/]<name>@<version>
+npm install [<@scope>/]<name>@<version range>
+npm install <git-host>:<git-user>/<repo-name>
+            <githubname>/<githubrepo>[#<commit-ish>]:
+            github:<githubname>/<githubrepo>[#<commit-ish>]
+            gitlab:<gitlabname>/<gitlabrepo>[#<commit-ish>]
+            bitbucket:<bitbucketname>/<bitbucketrepo>[#<commit-ish>]
+            gist:[<githubname>/]<gistID>[#<commit-ish>|#semver:<semver>]
+npm install <git repo url>
+            <protocol>://[<user>[:<password>]@]<hostname>[:<port>][:][/]<path>[#<commit-ish> | #semver:<semver>]
+            <protocol> is one of git, git+ssh, git+http, git+https, or git+file.
+npm install <tarball file>
+npm install <tarball url>
+npm install <folder>
+
+
+
+npm是有本地缓存的，它保存了已经下载的每个版本的压缩包。本地缓存的内容可以通过 npm cache ls 命令进行查看。本地缓存的设计有助于减少安装时间。
+
+npm 2 会安装每一个包所依赖的所有依赖项。
+npm 3 采用了扁平依赖关系树来解决这个问题
+
+自npm 5.0版本发布以来，npm i的规则发生了三次变化。
+
+1、npm 5.0.x 版本，不管package.json怎么变，npm i 时都会根据lock文件下载
+
+package-lock.json file not updated after package.json file is changed · Issue #16866 · npm/npm
+https://github.com/npm/npm/issues/16866
+这个 issue 控诉了这个问题，明明手动改了package.json，为啥不给我升级包！然后就导致了5.1.0的问题...
+
+2、5.1.0版本后 npm install 会无视lock文件 去下载最新的npm
+
+然后有人提了这个issue why is package-lock being ignored? · Issue #17979 · npm/npm
+https://github.com/npm/npm/issues/17979
+控诉这个问题，最后演变成5.4.2版本后的规则。
+
+3、5.4.2版本后 大致意思是，如果改了package.json，且package.json和lock文件不同，那么执行`npm i`时npm会根据package中的版本号以及语义含义去下载最新的包，并更新至lock。
+
+如果两者是同一状态，那么执行`npm i `都会根据lock下载，不会理会package实际包的版本是否有新。
+
+4、 5.7.0 npm install --package-lock-only
+ npm ci
+npm install --from-lock-file
+
+
+备注：
+1、npm 5 开始出现lock文件。
+2、npm 5.0.x 版本，只能手动用npm install xxx@yy指定版本号来安装，然后它会自动更新 package-lock.json 文件。
+
+
+算法：
+1、load the existing node_modules tree from disk
+2、clone the tree
+3、获取package.json和各种元数据并将其添加到克隆树
+4、遍历克隆树并添加任何缺少的依赖项，依赖项将尽可能靠近顶部添加，不破坏任何其他模块
+5、比较原始树和克隆树，并列出转换所要采取的措施
+6、执行所有动作，最深的优先。各种操作包括安装，更新，删除和移动
+
+
+[npm uninstall 卸载模块]
+
+
+[npm update 更新模块]
+
+
+[npm outdated 检查模块是否已经过时]
+
+
+[npm ls 查看安装的模块]
+
+
+[npm init 在项目中引导创建一个package.json文件]
+
+
+[npm help 查看某条命令的详细帮助]
+npm help install
+
+
+[npm root 查看包的安装路径]
+npm root [-g]
+
+
+[npm config 管理npm的配置路径]
+npm config set <key> <value> [-g|--global]
+npm config get <key>
+npm config delete <key>
+npm config list
+npm config edit
+npm get <key>
+npm set <key> <value> [-g|--global]
+
+设置代理
+npm config set registry="http://r.cnpmjs.org"
+npm install -g cnpm --registry=https://registry.npm.taobao.org
+
+
+[npm cache 管理模块的缓存]
+npm cache add <tarball file>
+npm cache add <folder>
+npm cache add <tarball url>
+npm cache add <name>@<version>
+
+npm cache ls [<path>]
+
+npm cache clean [<path>]
+
+npm cache clean -f(--force)
+npm cache verify
+
+[npm start 启动模块]
+
+
+[npm stop 停止模块]
+
+
+[npm restart 重新启动模块]
+
+
+[npm test 测试模块]
+
+
+[npm version 查看模块版本]
+
+
+[npm view 查看模块的注册信息]
+npm view gulp dependencies // 查看模块的依赖关系
+npm view gulp repository.url // 查看模块的源文件地址
+npm view npm contributors // 查看模块的贡献者，包含邮箱地址
+
+
+[npm adduser  用户登录]
+
+
+[npm publish 发布模块]
+
+npm publish
+
+npm unpublish package version
+不带 version 全部撤销
+--force 强制撤销
+cannot be republished until 24 hours have passed.
+
+
+[npm access 在发布的包上设置访问级别]
+
+
+[npm package.json的语法]
+
+
+
+
+
+
+
+【nrm维护】 管理切换 npm 远程库的源
+npm install -g nrm
+nrm ls
+nrm add sinopia http://192.168.1.17:4873
+nrm use sinopia
+
+
+
+【npm 模块发布】
+注册 npm 账户 https://www.npmjs.com/
+添加账号信息 npm adduser --registry http://registry.npmjs.org
+
+发布npm插件：
+
+1、在命令行工具中，切换当前路径到要发布的插件的路径下，发布必须有package.json文件，这是使用npm init命令生成的，根据自己插件的具体信息再进行输入。下面代码是react-native-zkbanner组件的package.json文件。
+{
+  "name": "react-native-zkbanner",
+  "version": "1.0.0",
+  "description": "zkbanner",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react-native",
+    "banner",
+    "react-native-zkbanner"
+  ],
+  "author": "Cain",
+  "license": "MIT"
+}
+
+2、将插件发布到npm上：npm publish --registry http://registry.npmjs.org
+查看发布情况：https://www.npmjs.com/ + 插件名
+
+npm login
+...
+cd xxx && npm init && npm publish
+
+3、发布文件
+.npmignore,.gitignore 前者优先级高，会递归文件夹查找这两个文件
+
+默认发布的文件，加入.gitignore和.npmignore都是不会生效的
+package.json
+README(and its variants)
+CHANGELOG(and its variants)
+LICENSE/LICENCE
+
+4、查看打包了哪些文件
+npm pack && tar -xvzf *.tgz && rm -rf package *.tgz
+
+
+
+【npm 私有仓库】
+
+npm install -g sinopia
+
+
+
+npx
+
+npm v5.2.0后新增的命令，引入这个命令的目的是为了提升开发者使用包内提供的命令行工具的体验。
+当我们执行 npx parcel index.html 时，会自动去./node_modules/.bin目录下搜索。
+npx 还允许我们单次执行命令而不需要安装，例如
+npx create-react-app my-cool-new-app
+这条命令会临时安装 create-react-app 包，命令完成后 create-react-app 会删掉，不会出现在 global 中。下次再执行，还是会重新临时安装。
+
+
+
+
+
+
+
+
+Yarn
+Yarn发布于2016年10月，并在Github上迅速拥有了2.4万个Star。而npm只有1.2万个Star。这个项目由一些高级开发人员维护
+Yarn 是 Facebook 贡献 Javascript 包管理器，用于替代现有的 npm 客户端或者其他兼容 npm 仓库的包管理工具。Yarn 保留了现有工作流的特性，优点是更快、更安全、更可靠。
+像npm一样，yarn使用本地缓存。与npm不同的是，yarn无需互联网连接就能安装本地缓存的依赖项，它提供了离线模式。这个功能在2012年的npm项目中就被提出来过，但一直没有实现。
+
+yarn还提供了一些其他改进，例如，它允许合并项目中使用到的所有的包的许可证，这一点让人很高兴。
+
+yarn init / npm init
+yarn start / npm start
+yarn run / npm run
+yarn list / npm ls
+
+yarn add xxx
+-D, --dev
+-P, --peer
+yarn install xxx
+-S, --save
+-D, --save-dev
+-P, --save-peer
+
+yarn remove
+yarn global add
+yarn global remove
+
+注意 yarn global 命令，global 必须紧贴着 yarn 字样，并不像 npm 的 -g 参数，可以随便换地方的。
+
+yarn cache ls  列出当前缓存的包列表。
+yarn cache dir 显示缓存数据的目录。
+yarn cache clean  清除所有缓存数据。
+
+
+离线安装
+yarn 默认会使用 “prefer-online” 的模式，也就是先尝试从远程仓库下载，如果连接失败则尝试从缓存读取。yarn 也提供了 --offline 参数，即通过 yarn add --offline 安装依赖。
+
+另外 yarn 还支持配置离线镜像，通过以下命令设置离线缓存仓库。
+yarn config set yarn-offline-mirror ./npm-packages-offline-cache
+
+
+npm 提供了离线安装模式，使用 --offline, --prefer-offline, --prefer-online 可以指定离线模式。
+
+
+yarn 全局安装 到 当前用户目录/.config/yarn/global/ 下。
+npm 全局安装 到 /usr/local/lib/node_modules/ 下，与其本身位置一致。
+
+
+

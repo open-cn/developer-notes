@@ -455,30 +455,208 @@ truncate table student_3;
     2. 创建function， create [temporary] function [dbname.]function_name AS class_name;
 4. 在hive的命令行窗口删除函数 Drop [temporary] function [if exists] [dbname.]function_name;
 
-#### hive 结合 hbase
 
-Hive和Hbase在大数据架构中处在不同位置，Hive是一个构建在Hadoop基础之上的数据仓库，Hbase是一种NoSQL数据库，非常适用于海量明细数据的随机实时查询，在大数据架构中，Hive和HBase是协作关系如果两者结合，可以利用MapReduce的优势针对HBase存储的大量内容进行离线的计算和分析。
+### 最佳实践
 
-Hive与HBase利用两者本身对外的API来实现整合，主要是靠HBaseStorageHandler进行通信，利用HBaseStorageHandler，Hive可以获取到Hive表对应的HBase表名，列簇以及列，InputFormat和 OutputFormat类，创建和删除HBase表等。
+Hive 中出现 OOM 的异常原因大致分为以下几种：
 
-Hive访问HBase中表数据，实质上是通过MapReduce读取HBase表数据，其实现是在MR中，使用HiveHBaseTableInputFormat完成对HBase表的切分，获取RecordReader对象来读取数据。
+1. Map 阶段 OOM：发生 OOM 的几率很小，除非你程序的逻辑不正常，亦或是程序写的不高效，产生垃圾太多。
+2. Reduce 阶段 OOM：
+    1. data skew 数据倾斜是引发这个的一个原因。 key 分布不均匀，导致某一个 reduce 所处理的数据超过预期，导致 jvm 频繁 GC。
+    2. value 对象过多或者过大：某个 reduce 中的 value 堆积的对象过多，导致 jvm 频繁 GC。
+    
+    解决办法：
 
-对HBase表的切分原则是一个Region切分成一个Split，即表中有多少个Regions，MR中就有多少个Map；
+    1. 增加 reduce 个数，set mapred.reduce.tasks=300。
+    2. 在 hive-site.xml 中设置，或者在 hive shell 里设置 set mapred.child.java.opts = -Xmx512m 或者只设置 reduce 的最大 heap 为 2G，并设置垃圾回收器的类型为并行标记回收器，这样可以显著减少 GC 停顿，但是稍微耗费 CPU。set mapred.reduce.child.java.opts=-Xmx2g -XX:+UseConcMarkSweepGC;
+    3. 使用 map join 代替 common join. 可以 set hive.auto.convert.join = true
+    4. 设置 hive.optimize.skewjoin = true 来解决数据倾斜问题
 
-读取HBase表数据都是通过构建Scanner，对表进行全表扫描，如果有过滤条件，则转化为Filter。当过滤条件为rowkey时，则转化为对rowkey的过滤；
+3. Driver 提交 Job 阶段 OOM：job 产生的执行计划的条目太多，比如扫描的分区过多，上到4k-6k个分区的时候，并且是好几张表的分区都很多时，这时做join。
 
-Scanner通过RPC调用RegionServer的next()来获取数据；
+究其原因，是因为序列化时，会将这些分区，即 hdfs 文件路径，封装为 Path 对象，这样，如果对象太多了，而且 Driver 启动的时候设置的 heap size 太小，则会导致在 Driver 内序列化这些 MapRedWork 时，生成的对象太多，导致频繁 GC，则会引发如下异常:
+```java
+java.lang.OutOfMemoryError: GC overhead limit exceeded
+at sun.nio.cs.UTF_8.newEncoder(UTF_8.java:53)
+at java.beans.XMLEncoder.createString(XMLEncoder.java:572)
+```
 
-在使用Hive over HBase，对HBase中的表做统计分析时候，需要特别注意以下几个方面：
+    解决办法：
 
-1. 对HBase表进行预分配Region，根据表的数据量估算出一个合理的Region数；
-2. rowkey设计上需要注意，尽量使rowkey均匀分布在预分配的N个Region上；
-3. 通过set hbase.client.scanner.caching设置合理的扫描器缓存；
-4. 关闭mapreduce的推测执行：<br>
+    1. 减少分区数量，将历史数据做成一张整合表，做成增量数据表，这样分区就很少了。
+    2. 调大 Hive CLI Driver 的 heap size, 默认是 256MB，调节成 512MB或者更大。具体做法是在 bin/hive bin/hive-config 里可以找到启动 CLI 的 JVM OPTIONS。设置 export HADOOP_HEAPSIZE=512
+
+
+#### 数据倾斜
+Hive 在执行 MapReduce 任务时经常会碰到数据倾斜的问题，表现为一个或者几个 reduce 节点运行很慢，延长了整个任务完成的时间，这是由于某些 key 的条数比其他 key 多很多，这些 Key 所在的reduce节点所处理的数据量比其他节点就大很多，从而导致某几个节点迟迟运行不完。
+
+那么经常有哪些情况会产生数据倾斜呢，又该如何解决，这里梳理了几种最常见的数据倾斜场景。
+
+##### 小表与大表JOIN
+
+小表与大表Join时容易发生数据倾斜，表现为小表的数据量比较少但key却比较集中，导致分发到某一个或几个reduce上的数据比其他reduce多很多，造成数据倾斜。
+
+优化方法：使用Map Join将小表装入内存，在map端完成join操作，这样就避免了reduce操作。有两种方法可以执行Map Join：
+
+(1) 通过hint指定小表做MapJoin
+
+ select /*+ MAPJOIN(time_dim) */ count(*) from store_sales join time_dim on ss_sold_time_sk = t_time_sk;
+
+(2) 通过配置参数自动做MapJoin
+
+核心参数：
+
+| 参数名称                         | 默认值   | 说明                                            |
+| -------------------------------- | -------- | ----------------------------------------------- |
+| hive.auto.convert.join           | false    | 是否将common join（reduce端join）转换成map join |
+| hive.mapjoin.smalltable.filesize | 25000000 | 判断为小表的输入文件大小阈值，默认25M           |
+
+因此，巧用MapJoin可以有效解决小表关联大表场景下的数据倾斜。
+
+
+##### 大表与大表JOIN
+
+大表与大表Join时，当其中一张表的NULL值（或其他值）比较多时，容易导致这些相同值在reduce阶段集中在某一个或几个reduce上，发生数据倾斜问题。
+
+优化方法：
+
+(1) 将NULL值提取出来最后合并，这一部分只有map操作；非NULL值的数据分散到不同reduce上，不会出现某个reduce任务数据加工时间过长的情况，整体效率提升明显。但这种方法由于有两次Table Scan会导致map增多。
+
+```sql
+SELECT a.user_Id,a.username,b.customer_id FROM user_info a 
+LEFT JOIN customer_info b ON a.user_id = b.user_id where a.user_id IS NOT NULL
+UNION ALL SELECT a.user_Id,a.username,NULL FROM user_info a WHERE a.user_id IS NULL
+ ```
+
+(2) 在Join时直接把NULL值打散成随机值来作为reduce的key值，不会出现某个reduce任务数据加工时间过长的情况，整体效率提升明显。这种方法解释计划只有一次map，效率一般优于第一种方法。
+
+```sql
+SELECT a.user_id,a.username,b.customer_id FROM user_info a
+LEFT JOIN customer_info b
+ ON
+  CASE WHEN
+   a.user_id IS NULL
+  THEN
+   CONCAT ('dp_hive', RAND())
+  ELSE
+   a.user_id
+  END = b.user_id;
+```
+
+##### GROUP BY 操作
+
+Hive做group by查询，当遇到group by字段的某些值特别多的时候，会将相同值拉到同一个reduce任务进行聚合，也容易发生数据倾斜。
+
+优化方法：
+
+(1) 开启Map端聚合
+
+参数设置：
+
+参数名称|默认值|说明
+---|---|---
+hive.map.aggr|true（Hive 0.3+）|是否开启Map端聚合
+hive.groupby.mapaggr.checkinterval|100000|在Map端进行聚合操作的条目数目
+
+(2) 有数据倾斜时进行负载均衡
+
+参数设置：
+
+参数名称|默认值|说明
+---|---|---
+hive.groupby.skewindata|false|当GROUP BY有数据倾斜时是否进行负载均衡
+
+当设定 hive.groupby.skewindata 为 true 时，生成的查询计划会有两个 MapReduce 任务。在第一个 MapReduce 中，map 的输出结果集合会随机分布到 reduce 中， 每个 reduce 做部分聚合操作，这样处理之后，相同的 Group By Key 有可能分发到不同的 reduce 中，从而达到负载均衡的目的。在第二个 MapReduce 任务再根据第一步中处理的数据按照Group By Key 分布到 reduce 中，（这一步中相同的 key 在同一个 reduce 中），最终生成聚合操作结果。
+
+##### COUNT(DISTINCT) 操作
+
+当在数据量比较大的情况下，由于 COUNT DISTINCT 操作是用一个 reduce 任务来完成，这一个 reduce 需要处理的数据量太大，就会导致整个 job 很难完成，这也可以归纳为一种数据倾斜。
+
+优化方法：将 COUNT DISTINCT 使用先 GROUP BY 再 COUNT 的方式替换。例如：
+```sql
+  select count(id) from (select id from bigtable group by id) a
+```
+因此，count distinct的优化本质上也是转成group by操作。
+
+#### FAQ
+##### return code 2 from org.apache.hadoop.hive.ql.exec.mr.MapRedTask
+
+```java
+java.lang.OutOfMemoryError: Java heap space
+```
+
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+
+
+
+### hive 结合 hbase
+
+Hive 和 Hbase 在大数据架构中处在不同位置，Hive 是一个构建在 Hadoop 基础之上的数据仓库，Hbase 是一种 NoSQL 数据库，非常适用于海量明细数据的随机实时查询，在大数据架构中，Hive 和 HBase 是协作关系如果两者结合，可以利用MapReduce的优势针对HBase存储的大量内容进行离线的计算和分析。
+
+Hive 与 HBase 利用两者本身对外的 API 来实现整合，主要是靠 HBaseStorageHandler 进行通信，利用 HBaseStorageHandler，Hive 可以获取到 Hive 表对应的 HBase 表名，列簇以及列，InputFormat 和 OutputFormat 类，创建和删除 HBase 表等。
+
+Hive 访问 HBase 中表数据，实质上是通过 MapReduce 读取 HBase 表数据，其实现是在 MR 中，使用 HiveHBaseTableInputFormat 完成对 HBase 表的切分，获取 RecordReader 对象来读取数据。
+
+对 HBase 表的切分原则是一个 Region 切分成一个 Split，即表中有多少个 Regions，MR 中就有多少个 Map；
+
+读取 HBase 表数据都是通过构建 Scanner，对表进行全表扫描，如果有过滤条件，则转化为 Filter。当过滤条件为 rowkey 时，则转化为对 rowkey 的过滤；
+
+Scanner 通过 RPC 调用 RegionServer 的 next()来获取数据；
+
+在使用 Hive over HBase，对 HBase 中的表做统计分析时候，需要特别注意以下几个方面：
+
+1. 对 HBase 表进行预分配 Region，根据表的数据量估算出一个合理的 Region 数；
+2. rowkey 设计上需要注意，尽量使 rowkey 均匀分布在预分配的 N 个 Region 上；
+3. 通过 set hbase.client.scanner.caching 设置合理的扫描器缓存；
+4. 关闭 mapreduce 的推测执行：<br>
     set mapred.map.tasks.speculative.execution = false;<br>
     set mapred.reduce.tasks.speculative.execution = false;<br>
 
-### Hive over HBase和Hive over HDFS性能比较
+#### 配置
+
+HIVE_HOME 和 HBASE_HOME 都进行配置.
+
+检查 Hive 自带的 hive-hbase-handler-xxx.jar 文件是否兼容已安装的 HBase 版本。
+
+要连接到 Zookeeper 的话，打开hive-site.xml 文件，添加如下配置:
+```xml
+<!-- zookeeper 地址-->
+<property>
+    <name>hive.zookeeper.quorum</name>
+    <value>hadoop201,hadoop202,hadoop203</value>
+    <description>The list of ZooKeeper servers to talk to. This is only needed for read/write locks.</description>
+</property>
+<!-- zookeeper 端口号 -->
+<property>
+    <name>hive.zookeeper.client.port</name>
+    <value>2181</value>
+    <description>The port of ZooKeeper servers to talk to. This is only needed for read/write locks.</description>
+</property>
+```
+
+```sql
+-- 在 Hive 中创建表同时关联 HBase
+CREATE TABLE hive_hbase_emp_table(
+    empno int,
+    ename string,
+    job string,
+    mgr int,
+    hiredate string,
+    sal double,
+    comm double,
+    deptno int
+)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,info:ename,info:job,info:mgr,info:hiredate,info:sal,info:comm,info:deptno")
+TBLPROPERTIES ("hbase.table.name" = "hbase_emp_table");
+```
+
+#### Hive over HBase 和 Hive over HDFS 性能比较
 
 查询性能比较
 query1:

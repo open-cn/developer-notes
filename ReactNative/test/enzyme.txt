@@ -1,0 +1,183 @@
+
+shallow(node[, options]) => ShallowWrapper 对官方的Shallow Rendering的封装
+浅渲染在将一个组件作为一个单元进行测试的时候非常有用，可以确保你的测试不会去间接断言子组件的行为。shallow方法只会渲染出组件的第一层DOM结构，其嵌套的子组件不会被渲染出来，从而使得渲染的效率更高，单元测试的速度也会更快。
+const app = shallow(<App />）
+expect(app.find('Todo')).to.have.length(3)
+
+mount(node[, options]) => ReactWrapper 将React组件渲染为真实的DOM节点，特别是在你依赖真实的DOM结构必须存在的情况下，比如说按钮的点击事件。
+完全的DOM渲染需要在全局范围内提供完整的DOM API，这也就意味着它必须在至少“看起来像”浏览器环境的环境中运行，如果不想在浏览器中运行测试，推荐使用mount的方法是依赖于一个名为jsdom的库，它本质上是一个完全在JavaScript中实现的headless浏览器。
+const app = mount(<App />）
+app.find('button.delete').at(0).simulate('click')
+
+render(node[, options]) => CheerioWrapper 将React组件渲染成静态的HTML字符串
+返回的是一个Cheerio实例对象，采用的是一个第三方的HTML解析库Cheerio。
+const app = render(<App />）
+expect(app.contains(<div className="todo" />)).to.equal(true)
+
+
+
+
+
+
+
+{
+    "length": 1,
+    Symbol(enzyme.__root__): [Circular],
+    Symbol(enzyme.__unrendered__):
+        <GridView data={
+            [
+                {"checked": true, "pic": "issue", "text": "振动分析"},
+                {"checked": false, "pic": "issue", "text": "远程控制"},
+                {"checked": false, "pic": "issue", "text": "工单处理"},
+                {"checked": false, "pic": "issue", "text": "维护保养"},
+                {"pic": "issue", "text": "更多"}
+                ]
+        } numColumns={4} renderItem={[Function renderItem]} />,
+    Symbol(enzyme.__renderer__): {
+        "batchedUpdates": [Function batchedUpdates],
+        "getNode": [Function getNode],
+        "render": [Function render],
+        "simulateEvent": [Function simulateEvent],
+        "unmount": [Function unmount]
+    },
+    Symbol(enzyme.__node__): {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "class",
+        "props": {
+            "children":
+                <FlatList
+                    ItemSeparatorComponent={[Function anonymous]}
+                    ListEmptyComponent={undefined}
+                    ListFooterComponent={[Function anonymous]}
+                    ListHeaderComponent={[Function anonymous]}
+                    data={
+                        [
+                            {"checked": true, "pic": "issue", "text": "振动分析"},
+                            {"checked": false, "pic": "issue", "text": "远程控制"},
+                            {"checked": false, "pic": "issue", "text": "工单处理"},
+                            {"checked": false, "pic": "issue", "text": "维护保养"},
+                            {"pic": "issue", "text": "更多"}, {}
+                            ]
+                    }
+                    disableVirtualization={false}
+                    horizontal={false}
+                    initialNumToRender={10}
+                    keyExtractor={[Function anonymous]}
+                    maxToRenderPerBatch={10}
+                    numColumns={3}
+                    onEndReached={undefined}
+                    onEndReachedThreshold={0.5}
+                    onRefresh={undefined}
+                    refreshing={false}
+                    renderItem={[Function anonymous]}
+                    scrollEventThrottle={50}
+                    style={{}}
+                    updateCellsBatchingPeriod={50}
+                    windowSize={21} />,
+            "style": [{"height": 503}, undefined]
+        },
+        "ref": null,
+        "rendered": {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "class",
+            "props": {
+                "ItemSeparatorComponent": [Function anonymous],
+                "ListEmptyComponent": undefined,
+                "ListFooterComponent": [Function anonymous],
+                "ListHeaderComponent": [Function anonymous],
+                "data": [{"checked": true, "pic": "issue", "text": "振动分析"}, {"checked": false, "pic": "issue", "text": "远程控制"}, {"checked": false, "pic": "issue", "text": "工单处理"}, {"checked": false, "pic": "issue", "text": "维护保养"}, {"pic": "issue", "text": "更多"}, {}],
+                "disableVirtualization": false,
+                "horizontal": false,
+                "initialNumToRender": 10,
+                "keyExtractor": [Function anonymous],
+                "maxToRenderPerBatch": 10,
+                "numColumns": 3,
+                "onEndReached": undefined,
+                "onEndReachedThreshold": 0.5,
+                "onRefresh": undefined,
+                "refreshing": false,
+                "renderItem": [Function anonymous],
+                "scrollEventThrottle": 50,
+                "style": {},
+                "updateCellsBatchingPeriod": 50,
+                "windowSize": 21
+            },
+            "ref": null,
+            "rendered": null,
+            "type": [Function FlatList]
+        },
+        "type": [Function Component]},
+    Symbol(enzyme.__nodes__): [
+        {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "class",
+            "props": {
+                "children":
+                    <FlatList
+                        ItemSeparatorComponent={[Function anonymous]}
+                        ListEmptyComponent={undefined}
+                        ListFooterComponent={[Function anonymous]}
+                        ListHeaderComponent={[Function anonymous]}
+                        data={[{"checked": true, "pic": "issue", "text": "振动分析"}, {"checked": false, "pic": "issue", "text": "远程控制"}, {"checked": false, "pic": "issue", "text": "工单处理"}, {"checked": false, "pic": "issue", "text": "维护保养"}, {"pic": "issue", "text": "更多"}, {}]}
+                        disableVirtualization={false}
+                        horizontal={false}
+                        initialNumToRender={10}
+                        keyExtractor={[Function anonymous]}
+                        maxToRenderPerBatch={10}
+                        numColumns={3}
+                        onEndReached={undefined}
+                        onEndReachedThreshold={0.5}
+                        onRefresh={undefined}
+                        refreshing={false}
+                        renderItem={[Function anonymous]}
+                        scrollEventThrottle={50}
+                        style={{}}
+                        updateCellsBatchingPeriod={50}
+                        windowSize={21} />,
+                "style": [{"height": 503}, undefined]
+            },
+            "ref": null,
+            "rendered": {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "class",
+                "props": {
+                    "ItemSeparatorComponent": [Function anonymous],
+                    "ListEmptyComponent": undefined,
+                    "ListFooterComponent": [Function anonymous],
+                    "ListHeaderComponent": [Function anonymous],
+                    "data": [{"checked": true, "pic": "issue", "text": "振动分析"}, {"checked": false, "pic": "issue", "text": "远程控制"}, {"checked": false, "pic": "issue", "text": "工单处理"}, {"checked": false, "pic": "issue", "text": "维护保养"}, {"pic": "issue", "text": "更多"}, {}],
+                    "disableVirtualization": false,
+                    "horizontal": false,
+                    "initialNumToRender": 10,
+                    "keyExtractor": [Function anonymous],
+                    "maxToRenderPerBatch": 10,
+                    "numColumns": 3,
+                    "onEndReached": undefined,
+                    "onEndReachedThreshold": 0.5,
+                    "onRefresh": undefined,
+                    "refreshing": false,
+                    "renderItem": [Function anonymous],
+                    "scrollEventThrottle": 50,
+                    "style": {},
+                    "updateCellsBatchingPeriod": 50,
+                    "windowSize": 21
+                },
+                "ref": null,
+                "rendered": null,
+                "type": [Function FlatList]
+            },
+            "type": [Function Component]
+        }
+    ],
+    Symbol(enzyme.__options__): {
+        "adapter": {
+            "options": {
+                "enableComponentDidUpdateOnSetState": true
+            }
+        }
+    }
+}

@@ -1,0 +1,237 @@
+浏览器对象模型(Browser Object Model，简称BOM)是浏览器的内置对象管理模型。
+
+Browser对象：指BOM提供的多个对象，包括：Window、Navigator、Screen、History、Location等。其中Window对象为顶层对象，其他对象都为Window对象的子对象
+
+
+
+【Window 对象】
+显示对话框
+显示带有折行的对话框
+显示确认框
+显示提示框
+通过点击按钮来打开一个窗口
+打开一个新窗口，并控制其外观
+通过一次点击打开多个窗口
+把用户带到一个新的地址
+重新加载文档
+在窗口的状态栏设置文本
+打印页面
+跳出框架
+调整窗口的大小
+把窗口调整为指定的大小
+滚动文档
+把窗口滚动到指定的位置
+简单的计时
+另一个简单的计时
+无穷循环中的计时
+无穷循环中的计时 - 带有一个停止按钮
+一个时钟
+创建 pop-up
+
+窗口事件
+interface WindowEventHandlersEventMap {
+    "afterprint": Event;
+    "beforeprint": Event;
+    "beforeunload": BeforeUnloadEvent;
+    "hashchange": HashChangeEvent;
+    "languagechange": Event;
+    "message": MessageEvent;
+    "messageerror": MessageEvent;
+    "offline": Event;
+    "online": Event;
+    "pagehide": PageTransitionEvent;
+    "pageshow": PageTransitionEvent;
+    "popstate": PopStateEvent;
+    "rejectionhandled": Event;
+    "storage": StorageEvent;
+    "unhandledrejection": PromiseRejectionEvent;
+    "unload": Event;
+}
+
+interface WindowEventHandlers {
+    onXxx: ((this: WindowEventHandlers, ev: XxxEvent) => any) | null;
+}
+
+全局处理事件
+interface GlobalEventHandlersEventMap {
+    "abort": UIEvent;
+    "animationcancel": AnimationEvent;
+    "animationend": AnimationEvent;
+    "animationiteration": AnimationEvent;
+    "animationstart": AnimationEvent;
+    "auxclick": MouseEvent;
+    "blur": FocusEvent;
+    "cancel": Event;
+    "canplay": Event;
+    "canplaythrough": Event;
+    "change": Event;
+    "click": MouseEvent;
+    "close": Event;
+    "contextmenu": MouseEvent;
+    "cuechange": Event;
+    "dblclick": MouseEvent;
+    "drag": DragEvent;
+    "dragend": DragEvent;
+    "dragenter": DragEvent;
+    "dragexit": Event;
+    "dragleave": DragEvent;
+    "dragover": DragEvent;
+    "dragstart": DragEvent;
+    "drop": DragEvent;
+    "durationchange": Event;
+    "emptied": Event;
+    "ended": Event;
+    "error": ErrorEvent;
+    "focus": FocusEvent;
+    "gotpointercapture": PointerEvent;
+    "input": Event;
+    "invalid": Event;
+    "keydown": KeyboardEvent;
+    "keypress": KeyboardEvent;
+    "keyup": KeyboardEvent;
+    "load": Event;
+    "loadeddata": Event;
+    "loadedmetadata": Event;
+    "loadend": ProgressEvent;
+    "loadstart": Event;
+    "lostpointercapture": PointerEvent;
+    "mousedown": MouseEvent;
+    "mouseenter": MouseEvent;
+    "mouseleave": MouseEvent;
+    "mousemove": MouseEvent;
+    "mouseout": MouseEvent;
+    "mouseover": MouseEvent;
+    "mouseup": MouseEvent;
+    "pause": Event;
+    "play": Event;
+    "playing": Event;
+    "pointercancel": PointerEvent;
+    "pointerdown": PointerEvent;
+    "pointerenter": PointerEvent;
+    "pointerleave": PointerEvent;
+    "pointermove": PointerEvent;
+    "pointerout": PointerEvent;
+    "pointerover": PointerEvent;
+    "pointerup": PointerEvent;
+    "progress": ProgressEvent;
+    "ratechange": Event;
+    "reset": Event;
+    "resize": UIEvent;
+    "scroll": Event;
+    "securitypolicyviolation": SecurityPolicyViolationEvent;
+    "seeked": Event;
+    "seeking": Event;
+    "select": Event;
+    "selectionchange": Event;
+    "selectstart": Event;
+    "stalled": Event;
+    "submit": Event;
+    "suspend": Event;
+    "timeupdate": Event;
+    "toggle": Event;
+    "touchcancel": TouchEvent;
+    "touchend": TouchEvent;
+    "touchmove": TouchEvent;
+    "touchstart": TouchEvent;
+    "transitioncancel": TransitionEvent;
+    "transitionend": TransitionEvent;
+    "transitionrun": TransitionEvent;
+    "transitionstart": TransitionEvent;
+    "volumechange": Event;
+    "waiting": Event;
+    "wheel": WheelEvent;
+}
+
+对应的
+interface GlobalEventHandlers {
+    onXxx: ((this: GlobalEventHandlers, ev: XxxEvent) => any) | null;
+}
+
+window 对象所有的事件
+interface WindowEventMap extends GlobalEventHandlersEventMap, WindowEventHandlersEventMap {
+    // 补充了一些被继承对象两者没有的事件
+}
+
+window 对象实现了以下接口，并且实现了 WindowEventMap 中补充的事件处理
+interface Window extends EventTarget, WindowTimers, WindowSessionStorage, WindowLocalStorage, WindowConsole, GlobalEventHandlers, IDBEnvironment, WindowBase64, GlobalFetch, WindowOrWorkerGlobalScope, WindowEventHandlers {...}
+
+
+window.addEventListener('error': string, fn: (event) => {})
+window.onerror = fn: (message, ...) => {}
+
+
+
+
+
+
+
+
+
+
+
+
+【Navigator 对象】
+检测访问者的浏览器和版本号
+有关访问者的浏览器的更多信息
+有关访问者的浏览器的全部细节
+根据浏览器来提醒用户
+
+
+【Screen 对象】
+检测有关客户机的屏幕的细节
+
+
+【History 对象】     https://wangdoc.com/javascript/bom/history.html
+返回一个url的历史清单
+创建一个后退按钮
+创建一个前进按钮
+从url的历史清单转到指定的url
+
+出于安全考虑，History对象不允许我们通过JavaScript代码访问其他会话历史记录中其他页面的URL，但是它允许我们在不同页面间进行导航。
+
+属性
+History.length  只读的整数，标志包括当前页面在内的会话历史中的记录数量。
+History.scrollRestoration  允许web应用在会话历史导航时显式地设置默认滚动复原，其值为auto或manual。
+History.state  只读，返回代表会话历史堆栈顶部记录的任意可序列化类型数据值。
+
+方法
+History.back()  返回会话历史记录中的上一个页面，等价于window.history.go(-1)和点击浏览器的后退按钮。
+History.forward()  进入会话历史记录中的下一个页面，等价于window.history.go(1)和点击浏览器的前进按钮。
+History.go()  加载会话历史记录中的某一个页面，通过该页面与当前页面在会话历史中的相对位置定位，如，-1代表当前页面的上一个记录，1代表当前页面的下一个页面。若不传参数或传入0，则会重新加载当前页面；若参数超出当前会话历史纪录数，则不进行操作。
+
+
+HTML5中，提供history.pushState()和history.replaceState()方法，还提供window.onpopstate事件支持我们对该操作进行监听。
+
+History pushState()  在会话历史堆栈顶部插入一条记录，参数包括，任意可序列化的object对象数据（可选），页面标题（可选），页面URL（非空）。
+History.replaceState()  更新会话历史堆栈顶部记录信息，包括特定的任意可序列化的object对象数据（可选），页面标题（可选），页面URL。
+
+
+无论是replaceState()方法还是pushState()方法，改变的只是浏览器关于当前页面的标题和URL的记录情况，并不会刷新或改变页面展示。
+
+ window.onpopstate = function(event) {}
+
+
+
+【Location 对象】
+把用户带到一个新的地址
+重新加载文档
+跳出框架
+锚的数组
+
+location.reload(beForceGet)  beForceGet默认为false，表示是否从客户端缓存读取当前页；为true时，则从服务端重新请求页面（相当于F5刷新和history.go(0)方法）。
+location.replace(url) 效果与使用history.replaceState()方法修改URL相同；
+location.href = url; 或 location.assign(url);  等效于使用pushState()。
+
+
+
+
+
+
+
+
+【存储对象 localStorage\sessionStorage】
+
+
+
+
+

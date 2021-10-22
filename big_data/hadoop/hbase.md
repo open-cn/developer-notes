@@ -128,6 +128,10 @@ Region 就是一段数据的集合。HBase中的表一般拥有一个到多个 R
 
 如果集群内还有其他 region server，master 节点倾向于做负载均衡，所以 master 节点有可能调度新的 region 到其他 region server，由其他 region 管理新的分裂出的 region。
 
+Region 的拆分分为自动拆分和手动拆分。
+
+自动拆分采用不同的策略。0.94 版本之前采用的是 ConstantSizeRegionSplitPolicy 策略。从名字上就可以看出这个策略就是按照固定大小来拆分Region。它唯一用到的参数是： hbase.hregion.max.filesize, 默认值是 10G。0.94 版本之后，默认使用 IncreasingToUpperBoundRegionSplitPolicy 策略。这种策略从名字上就可以看出是限制不断增长的文件尺寸的策略。我们以前使用传统关系型数据库的时候或许有这样的经验，有的数据库的文件增长是翻倍增长的，比如第一个文件是64MB，第二个就是 128MB，第三个就是256MB。
+
 Region有以下特性：
 
 - Region 不能跨服务器，一个 RegionServer 上有一个或者多个 Region。
@@ -191,7 +195,9 @@ Hbase只支持3种查询方式：
 
 因此，Rowkey对Hbase的性能影响非常大，Rowkey的设计就显得尤为的重要。设计的时候要兼顾基于Rowkey的单行查询也要兼顾Rowkey的范围扫描。
 
-rowkey 行键可以是任意字符串(最大长度是64KB，实际应用中长度一般为 10-100bytes)，最好是16。在 HBase 内部，rowkey 保存为字节数组。
+在 HBase 内部，rowkey 保存为字节数组。
+
+rowkey 行键可以是任意字符串，最大长度是64KB，实际应用中长度一般为 10~100bytes。不过建议是越短越好，控制在 64 个字节以内是比较好。目前操作系统是都是 64 位系统，内存 8 字节对齐。控制在 8 个字节的次幂比较好: 比如，16字节，32字节，64字节比较好。
 
 HBase 中无法根据某个column来排序 系统永远是根据 rowkey 来排序的。因此，rowkey 就是决定 row 存储顺序的唯一凭证。而这个排序也很简单：根据字典排序。
 
@@ -303,8 +309,176 @@ alter 'student', {NAME => 'info', VERSIONS => 3} #  设置表 student 中ifno列
 
 ```
 
-#### 最佳实践
+### 最佳实践
+
+##### 高可用
+HBase 集群支持对 Hmaster 的高可用配置。
+
+##### 预分区
+
+每一个 region 维护着 startRow 与 endRowKey，如果加入的数据符合某个region 维护的 rowKey 范围，则该数据交给这个 region 维护。
+
+那么依照这个原则，我们可以将数据所要投放的分区提前大致的规划好，以提高HBase 性能。在生产环境中，基本都会对表进行预分区。
+
+有几种预分区的方式:
+
+1. 手动设定分区点
+create 'staff1','info','partition1',SPLITS =>['1000','2000','3000','4000']
+
+2. 生成16进制序列预分区
+create 'staff2','info','partition2',{NUMREGIONS => 15, SPLITALGO => 'HexStringSplit'}
+
+
+3. 按照文件中设置的规则预分区
+创建splits.txt文件内容如下：
+```txt
+aaaa
+bbbb
+cccc
+dddd
+```
+
+然后执行：create 'staff3','partition3',SPLITS_FILE => 'splits.txt'
+
+4. 使用 JavaAPI 创建预分区
+```java
+//自定义算法，产生一系列Hash散列值存储在二维数组中
+byte[][] splitKeys = 某个散列值函数
+//创建HBaseAdmin实例
+HBaseAdmin hAdmin = new HBaseAdmin(HBaseConfiguration.create());
+//创建HTableDescriptor实例
+HTableDescriptor tableDesc = new HTableDescriptor(tableName);
+//通过HTableDescriptor实例和散列值二维数组创建带有预分区的HBase表
+hAdmin.createTable(tableDesc, splitKeys);
+```
+例如：
+```java
+public static void customSplitRegion(String tableName, String f1) throws IOException {
+    if (isTableExists(tableName)) return;
+
+
+    HTableDescriptor desc = new HTableDescriptor(TableName.valueOf(tableName));
+    desc.addFamily(new HColumnDescriptor(f1));
+    byte[][] keys = {
+            Bytes.toBytes("aa"),
+            Bytes.toBytes("bb"),
+            Bytes.toBytes("cc"),
+            Bytes.toBytes("dd"),
+    };
+    admin.createTable(desc, keys);
+
+}
+```
+
+#### RowKey 设计
+一条数据的唯一标识就是 rowkey，那么这条数据存储于哪个分区，取决于 rowkey 处于哪个一个预分区的区间内。设计 rowkey 的主要目的 ，就是让数据均匀的分布于所有的 region 中，在一定程度上防止数据倾斜。
+
 如何设计rowkey 使写入数据时尽量均匀地写到各个 Region 中，起到负载均衡的作用。读取数据时要把一次查询的数据聚集到一个 Region 中，加速查询。
+
+rowkey既想要能够快速检索，就想要内容最好集中到少量的region中，但是一旦集中了，就会产生热点问题，所以，他们是相伴相生。
+
+
+**字符串类型**
+
+虽然行键在 HBase 中是以 byte[] 字节数组的形式存储的，但是建议在系统开发过程中将其数据类型设置为String类型，保证通用性；如果在开发过程中将 RowKey 规定为其他类型，譬如Long型，那么数据的长度将可能受限于编译环境等所规定的数据长度。
+
+常用的行键字符串有以下几种：
+
+- 纯数字字符串，譬如9559820140512；
+- 数字+特殊分隔符，譬如95598-20140512;
+- 数字+英文字母，譬如city20140512；
+- 数字+英文字母+特殊分隔符，譬如city_20140512。
+
+
+**有明确的意义**
+
+RowKey 的主要作用是为了进行数据记录的唯一性标示，但是唯一性并不是其全部，具有明确意义的行键对于应用开发、数据检索等都具有特殊意义。
+
+譬如上面的数字字符串9559820140512，其实际意义是这样：95598（电网客服电话）+20140512（日期）。
+
+行键往往由多个值组合而成，而各个值的位置顺序将影响到数据存储和检索效率，所以在设计行键时，需要对日后的业务应用开发有比较深入的了解和前瞻性预测，才能设计出可尽量高效率检索的行键。
+
+
+**具有有序性**
+
+RowKey 是按照字典序存储，因此，设计 RowKey 时，要充分利用这个排序特点，将经常一起读取的数据存储到一块，将最近可能会被访问的数据放在一块。
+
+举个例子：如果最近写入 HBase 表中的数据是最可能被访问的，可以考虑将时间戳作为RowKey 的一部分，由于是字典序排序，所以可以使用 Long.MAX_VALUE–timestamp作为 RowKey，这样能保证新写入的数据在读取时可以被快速命中。
+
+如果 Rowkey 是按时间戳的方式递增，不要将时间放在二进制码的前面，建议将Rowkey的高位作为散列字段，由程序循环生成，低位放时间字段，这样将提高数据均衡分布在每个 Regionserver 实现负载均衡的几率。
+
+如果没有散列字段，首字段直接是时间信息将产生所有新数据都在一个 RegionServer 上堆积的热点现象，这样在做数据检索的时候负载将会集中在个别 RegionServer，降低查询效率。
+
+
+**具有定长性**
+
+行键具有有序性的基础便是定长。
+
+譬如20140512080500、20140512083000，这两个日期时间形式的字符串是递增的，不管后面的秒数是多少，我们都将其设置为 14 位数字形式，如果我们把后面的 0 去除了，那么 201405120805 将大于 20140512083，其有序性发生了变更。
+
+##### 解决热点问题
+
+检索habse的记录首先要通过row key来定位数据行。当大量的client访问hbase集群的一个或少数几个节点，造成少数region server的读/写请求过多、负载过大，而其他region server负载却很小，就造成了“热点”现象。
+
+**热点的解决办法**
+
+预分区：预分区的目的让表的数据可以均衡的分散在集群中，而不是默认只有一个region分布在集群的一个节点上。
+
+加盐：这里所说的加盐不是密码学中的加盐，而是在rowkey的前面增加随机数，具体就是给rowkey分配一个随机前缀以使得它和之前的rowkey的开头不同。
+
+哈希：哈希会使同一行永远用一个前缀加盐。哈希也可以使负载分散到整个集群，但是读却是可以预测的。使用确定的哈希可以让客户端重构完整的rowkey，可以使用get操作准确获取某一个行数据。
+
+反转：反转固定长度或者数字格式的rowkey。这样可以使得rowkey中经常改变的部分（最没有意义的部分）放在前面。这样可以有效的随机rowkey，但是牺牲了rowkey的有序性。
+
+
+#### 内存优化
+HBase 操作过程中需要大量的内存开销，毕竟 Table 是可以缓存在内存中的，一般会分配整个可用内存的 70% 给 HBase 的 Java 堆。
+
+但是不建议分配非常大的堆内存，因为 GC 过程持续太久会导致 RegionServer 处于长期不可用状态，一般 16~48G 内存就可以了，如果因为框架占用内存过高导致系统内存不足，框架一样会被系统服务拖死。
+
+
+#### 基础优化
+1. 允许在HDFS的文件中追加内容 hdfs-site.xml、hbase-site.xml 属性：dfs.support.append 解释：开启 HDFS 追加同步，可以优秀的配合 HBase 的数据同步和持久化。默认值为true。
+
+2. 优化 DataNode 允许的最大传输的文件数 hdfs-site.xml 属性：dfs.datanode.max.transfer.threads 解释：HBase 一般都会同一时间操作大量的文件，根据集群的数量和规模以及数据动作，设置为4096或者更高。默认值：4096
+
+3. 优化延迟高的数据操作的等待时间 hdfs-site.xml 属性：dfs.image.transfer.timeout 解释：如果对于某一次数据操作来讲，延迟非常高，socket 需要等待更长的时间，建议把该值设置为更大的值（默认60000毫秒），以确保 socket 不会被 timeout 掉。
+
+4. 优化数据的写入效率 mapred-site.xml 属性： mapreduce.map.output.compress mapreduce.map.output.compress.codec 解释：开启这两个数据可以大大提高文件的写入效率，减少写入时间。第一个属性值修改为true，第二个属性值修改为：org.apache.hadoop.io.compress.GzipCodec或者其他压缩方式。
+
+5. 设置 RPC 监听数量 hbase-site.xml 属性：hbase.regionserver.handler.count 解释：默认值为30，用于指定RPC监听的数量，可以根据客户端的请求数进行调整，读写请求较多时，增加此值。
+
+6. 优化HStore文件大小 hbase-site.xml 属性：hbase.hregion.max.filesize 解释：默认值10737418240（10GB），如果需要运行HBase的MR任务，可以减小此值，因为一个region对应一个map任务，如果单个region过大，会导致map任务执行时间过长。该值的意思就是，如果HFile的大小达到这个数值，则这个region会被切分为两个Hfile。
+
+7. 优化 hbase 客户端缓存 hbase-site.xml 属性：hbase.client.write.buffer 解释：用于指定 HBase 客户端缓存，增大该值可以减少RPC调用次数，但是会消耗更多内存，反之则反之。一般我们需要设定一定的缓存大小，以达到减少 RPC 次数的目的。
+
+8. 指定scan.next扫描HBase所获取的行数 hbase-site.xml 属性：hbase.client.scanner.caching 解释：用于指定scan.next方法获取的默认行数，值越大，消耗内存越大。 默认: 2147483647
+
+9. flush、compact、split机制
+
+当 MemStore 达到阈值，将 Memstore 中的数据 Flush 进 Storefile；
+
+compact 机制则是把 flush 出来的小文件合并成大的 Storefile 文件。
+
+split 则是当 Region 达到阈值，会把过大的 Region 一分为二。
+
+涉及属性：
+
+hbase.hregion.memstore.flush.size：134217728 这个参数的作用是当单个 HRegion 内所有的 Memstore 大小总和超过指定值时，flush 该 HRegion 的所有 memstore。RegionServer 的 flush 是通过将请求添加一个队列，模拟生产消费模型来异步处理的。那这里就有一个问题，当队列来不及消费，产生大量积压请求时，可能会导致内存陡增，最坏的情况是触发OOM。
+
+hbase.regionserver.global.memstore.size：0.4 hbase.regionserver.global.memstore.size.lower.limit：0.38 即：当 MemStore 使用内存总量达到总内存的hbase.regionserver.global.memstore.size指定值时，将会有多个MemStores flush 到文件中，MemStore flush 顺序是按照大小降序执行的，直到刷新到 MemStore 使用内存略小于 lowerLimit。
+
+#### FAQ
+##### RIT（Region-In-Transition）
+
+为什么会处于RIT状态才是问题探索的根本，也是解决问题的关键。
+
+四种会触发Region状态变迁的操作以及操作对应的Region状态。其中特定操作行为通常包括assign、unassign、split以及merge等，而很多其他操作都可以拆成unassign和assign，比如move操作实际上是先unassign再assign；
+
+Region状态迁移是如何发生的？
+
+这个过程有点类似于状态机，也是通过事件驱动的。和Region状态一样，HBase还定义了很多事件（具体见EventType类）。
+
 
 
 ### MapReduce
@@ -346,17 +520,4 @@ Hive诞生于FaceBook，它最初就是为方便FaceBook的数据分析人员而
 3. HBase 对应的列簇值变更，也会在 Hive 中对应的表中变更。
 
 Hive 和 HBase 通信主要是依靠 $HIVE_HOME/lib 目录下的hive-hbase-handler-1.2.2.jar 来实现.
-
-
-
-
-
-
-
-
-
-
-
-
-
 

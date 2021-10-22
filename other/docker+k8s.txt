@@ -1,0 +1,637 @@
+
+Docker 有三个组件和三个基本元素
+
+Docker Client : 这是一个泛称，他既可以是命令行工具docker，也可以是任何遵循Docker API的客户端。用来向 Docker Daemon发起请求，执行相应的容器管理操作。
+Docker Daemon : Docker服务的守护进程。Docker Daemon负责响应Docker Client发过来的请求。
+Docker Registry : Docker Images的仓库，就像git的仓库一样，并且提供安全的账号管理可以管理只有自己可见的私人image。官方的 Registry，叫做Dock Hub(http://hub.Docker.com)
+
+
+Docker Container : Docker的容器，负责应用程序的运行，包括操作系统、用户添加的文件以及元数据。 
+Docker Images : Docker的镜像，暂时可以认为这个就像我们要给电脑装系统用的系统CD盘，里面有操作系统的程序，
+并且还有一些CD盘在系统的基础上安装了必要的软件，做成的一张 “只读” 的CD。
+DockerFile : 文件指令集，用来说明如何自动创建Docker镜像。
+
+
+
+Docker 使用的Linux核心组件：
+AUFS(chroot) – 用来建立不同的操作系统和隔离运行时的硬盘空间
+Namespace – 用来隔离Container的执行空间
+Cgroup – 分配不同的硬件资源
+SELinux – 用来保护linux的网络安全
+Netlink – 用来让不同的Container之间的进程保持通信
+Netfilter – 建立Container埠為基礎的網路防火牆封包過濾
+AppArmor – 保護Container的網路及執行安全
+Linux Bridge – 讓不同Container或不同主機上的Container能溝通
+...
+
+AUFS -> Another Union File System，AUFS的技术可以让多个文件目录union成一个新的目录，并且可以对这个新的目录进行读写操作。
+那这有什么用呢？如果你有一张只读的cd数据盘，但是你却想编辑里面的内容，你通常的做法是不是把内容拷贝到本地硬盘，然后再编辑。但如果你可以利用AUFS技术，你就可以将硬盘中的一个空目录和你的cd数据盘进行union形成一个新的目录，接着你对这个目录读取，会得到的cd盘内的数据，当你对这个目录的内容进行编辑，编辑的内容AUFS会自动讲修改内容保存在你union的那个空目录内，当你再次读区的时候，AUFS也会将你硬盘中记录的改动内容优先于CD数据盘中的内容读取出来，这样对你来说这就完全是一个可编辑的目录内容了。
+
+cgroup -> 最初名为 process container, 在2007年更名为 Control Groups 并整合进 Linux 内核。
+
+
+namespace 的6项隔离
+namespace   系统调用参数    隔离内容
+1.UTS       CLONE_NEWUTS    主机名与域名
+2.IPC       CLONE_NEWIPC    信号量、消息列表和共享内存
+3.PID       CLONE_NEWPID    进程编号
+4.Network   CLONE_NEWNET    网络设备、网格栈、端口等
+5.Mount     CLONE_NEWNS     挂载点（文件系统）
+6.User      CLONE_NEWUSER   用户和用户组
+
+Linux 3.8 版本后才支持user namespace。
+
+查看/proc/[pid]/ns文件
+ls -l /proc/$$/ns
+
+
+
+
+
+
+Docker从17.03开始分为企业版与社区版，社区版并非阉割版，而是改了个名称；企业版则提供了一些收费的高级特性。
+EE版本维护期1年；CE的stable版本三个月发布一次，维护期四个月；另外CE还有edge版，一个月发布一次。
+
+版本迭代计划
+Docker从17.03开始，转向基于时间的YY.MM 形式的版本控制方案，类似于Canonical为Ubuntu所使用的版本控制方案。
+
+Docker CE有两种版本：
+edge版本每月发布一次，主要面向那些喜欢尝试新功能的用户。
+stable版本每季度发布一次，适用于希望更加容易维护的用户（稳定版）。
+edge版本只能在当前月份获得安全和错误修复。而stable版本在初始发布后四个月内接收关键错误修复和安全问题的修补程序。
+
+
+
+
+
+
+on macOS:
+install docker.app
+目前只有 edge 版 带 Kubernetes 功能
+
+$ docker --version
+Docker version 18.03, build c97c6d6
+
+$ docker-compose --version
+docker-compose version 1.21.0, build 8dd22a9
+
+$ docker-machine --version
+docker-machine version 0.14.0, build 9ba6da9
+
+
+$ docker run hello-world
+// 让docker daemon从docker hub上拉了一个"hello-world"的image,并且通过这个image创建了一个container
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+ca4f61b1923c: Pull complete
+Digest: sha256:ca0eeb6fb05351dfc8759c20733c91def84cb8007aa89a5bf606bc8b315b9fc7
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+...
+
+$ docker run -d -p 80:80 --name webserver nginx
+open http://localhost/
+$ docker container stop webserver
+$ docker container rm webserver
+
+
+
+
+
+[docker container ]
+$ docker [container] create      Create a new container
+$ docker [container] rm          Remove one or more containers
+$ docker [container] rename      Rename a container
+$ docker container ls (docker ps) -a
+-a 查看所有，包括停止的容器
+-l 查看最近，包括停止的容器
+$ docker [container] start       Start one or more stopped containers
+$ docker [container] pause       Pause all processes within one or more containers
+$ docker [container] unpause     Unpause all processes within one or more containers
+$ docker [container] stop        Stop one or more running containers
+$ docker [container] restart     Restart one or more containers
+$ docker [container] kill        Kill one or more running containers
+
+$ docker [container] attach      Attach local standard input, output, and error streams to a running container
+$ docker [container] commit      Create a new image from a container's changes
+$ docker [container] diff        Inspect changes to files or directories on a container's filesystem
+$ docker [container] export      Export a container's filesystem as a tar archive
+$ docker container inspect     Display detailed information on one or more containers
+$ docker [container] port        List port mappings or a specific mapping for the container
+$ docker container prune       Remove all stopped containers
+$ docker [container] stats       Display a live stream of container(s) resource usage statistics
+$ docker [container] top         Display the running processes of a container
+$ docker [container] update      Update configuration of one or more containers
+$ docker [container] wait        Block until one or more containers stop, then print their exit codes
+
+$ docker container run         Run a command in a new container
+docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+-i 使用交互模式
+-t 分配一个伪终端
+--name 指定容器名称，否则随机分配
+-p 暴露端口
+
+$ docker [container] exec        Run a command in a running container
+$ docker [container] cp          Copy files/folders between a container and the local filesystem
+$ docker [container] logs        Fetch the logs of a container
+
+
+[docker image ]
+$ docker [image] build
+$ docker [image] history
+$ docker [image] import
+$ docker image inspect
+$ docker [image] load
+$ docker image ls (docker images)
+$ docker image prune
+$ docker [image] pull
+$ docker [image] push
+$ docker image rm nginx (docker rmi)
+$ docker [image] save
+$ docker [image] tag
+
+
+$ docker search
+$ docker login  
+$ docker logout
+
+
+
+
+docker 子命令
+
+docker 环境信息   info, version
+容器生命周期管理   create, exec, kill, pause, restart, rm, run, start, stop, unpause
+镜像仓库命令       login, logout, pull, push, search
+镜像管理          build, images, import, load, rmi, save, tag, commit
+容器运维操作      attach, export, inspect, port, ps, rename, stats, top, wait, cp, diff, update
+容器资源管理      volume, network
+系统日志信息      events, history, logs
+
+
+
+
+
+Docker Compose 项目是 Docker 官方的开源项目，负责实现对 Docker 容器集群的快速编排，开源地址：https://github.com/docker/compose
+
+Docker Compose 中的两个重要概念：
+
+服务 (service)：一个应用容器，实际上可以运行多个相同镜像的实例。
+项目 (project)：由一组关联的应用容器组成的一个完整业务单元。
+一个项目可以由多个服务关联（容器）而成，并使用docker-compose.yml进行管理。
+
+YAML 配置命令
+build 指定 Dockerfile 所在的目录地址，用于构建镜像，并使用此镜像创建容器，比如上面配置的build: .
+command 容器的执行命令
+dns 自定义 dns 服务器
+expose  暴露端口配置，但不映射到宿主机，只被连接的服务访问
+extends 对docker-compose.yml的扩展，配置在服务中
+image 使用的镜像名称或镜像 ID
+links 链接到其它服务中的容器（一般桥接网络模式使用）
+net 设置容器的网络模式（四种：bridge, none, container:[name or id]和host）
+ports 暴露端口信息，主机和容器的端口映射
+volumes 数据卷所挂载路径设置
+
+
+
+Docker Compose 常用命令
+docker-compose build  构建项目中的镜像，--force-rm：删除构建过程中的临时容器；--no-cache：不使用缓存构建；--pull：获取最新版本的镜像
+docker-compose up -d  构建镜像、创建服务和启动项目，-d表示后台运行
+docker-compose run ubuntu ls -d 指定服务上运行一个命令，-d表示后台运行
+docker-compose logs 查看服务容器输出日志
+docker-compose ps 列出项目中所有的容器
+docker-compose pause [service_name] 暂停一个服务容器
+docker-compose unpause [service_name] 恢复已暂停的一个服务容器
+docker-compose restart  重启项目中的所有服务容器（也可以指定具体的服务）
+docker-compose stop 停止运行项目中的所有服务容器（也可以指定具体的服务）
+docker-compose start  启动已经停止项目中的所有服务容器（也可以指定具体的服务）
+docker-compose rm 删除项目中的所有服务容器（也可以指定具体的服务），-f：强制删除（包含运行的）
+docker-compose kill 强制停止项目中的所有服务容器（也可以指定具体的服务）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Kubernetes is only available in Docker for Mac 17.12 CE and higher, on the Edge channel.
+preferences Kubernetes select Enable Kubernetes and click the Apply button.
+
+之前使用 brew 安装了 kubectl 请先卸载。
+brew uninstall kubernetes-cli
+之前你可能使用了 minikube ，需要切换到 docker-for-desktop。
+kubectl config use-context docker-for-desktop
+
+
+
+
+
+
+
+
+
+
+on ubuntu:
+
+Install old Docker from Ubuntu’s repositories:
+apt-get update
+apt-get install -y docker.io
+
+Uninstall old versions
+Older versions of Docker were called docker or docker-engine. If these are installed, uninstall them:
+sudo apt-get remove docker docker-engine docker.io
+
+
+Trusty 14.04
+Unless you have a strong reason not to, install the linux-image-extra-* packages, which allow Docker to use the aufs storage drivers.
+$ sudo apt-get update
+$ sudo apt-get install \
+    linux-image-extra-$(uname -r) \
+    linux-image-extra-virtual
+
+
+Xenial 16.04 and newer
+一、 Install Docker CE
+1. Install using the repository
+SET UP THE REPOSITORY
+$ sudo apt-get update
+
+$ sudo apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+$ sudo apt-key fingerprint 0EBFCD88
+
+$ sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+note: arch=amd64/armhf/ppc64el/s390x
+
+INSTALL DOCKER CE
+$ sudo apt-get update
+$ sudo apt-get install docker-ce
+$ apt-cache madison docker-ce
+docker-ce | 18.03.0~ce-0~ubuntu | https://download.docker.com/linux/ubuntu xenial/stable amd64 Packages
+$ sudo apt-get install docker-ce=<VERSION>
+
+UPGRADE DOCKER CE
+To upgrade Docker CE, first run sudo apt-get update, then follow the installation instructions, choosing the new version you want to install.
+
+
+2. Install from a package
+https://download.docker.com/linux/ubuntu/dists/{Ubuntu version}/pool/stable/arm
+
+$ sudo dpkg -i /path/to/package.deb
+
+
+3. Install using the convenience script
+$ curl -fsSL get.docker.com -o get-docker.sh
+$ sudo sh get-docker.sh
+
+
+二、 Uninstall Docker CE
+$ sudo apt-get purge docker-ce
+$ sudo rm -rf /var/lib/docker
+
+配置docker代理
+mkdir -p /etc/systemd/system/docker.service.d
+添加如下内容到/etc/systemd/system/docker.service.d/http-proxy.conf
+[Service]
+Environment="HTTP_PROXY=http://127.0.0.1:8118" "NO_PROXY=localhost,172.16.0.0/16,127.0.0.1,10.244.0.0/16"
+重启docker
+systemctl daemon-reload && systemctl restart docker
+
+systemctl enable docker 
+systemctl start docker
+
+
+
+kubelet 运行在 Cluster 所有节点上，负责启动 Pod 和容器。
+kubeadm 用于初始化 Cluster。
+kubectl 是 Kubernetes 命令行工具。通过 kubectl 可以部署和管理应用，查看各种资源，创建、删除和更新各种组件。
+
+
+apt-get update && apt-get install -y apt-transport-https curl
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+...
+deb http://mirrors.ustc.edu.cn/kubernetes/apt kubernetes-xenial main
+
+apt-get update
+apt-get install -y kubelet kubeadm kubectl
+
+
+
+sudo swapoff -a  关闭所有交换设备
+sudo swapon -a
+重启失效
+sudo kubeadm init
+
+
+初始化kubectl配置
+To start using your cluster, you need to run the following as a regular user:
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+kubectl create -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+kubectl create -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel-rbac.yml
+kubeadm reset
+kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=v1.10.1  --apiserver-advertise-address 
+
+创建检测DNS pod
+kubectl run curl --image=radial/busyboxplus:curl -i --tty
+执行nslookup kubernetes.default确认解析正常
+kubectl delete deploy curl
+
+
+kubeadm join emmme.cn:6443 --token bwn0f3.jjkfbiwmw7gd325i --discovery-token-ca-cert-hash sha256:d07e03a2cb21a587f13d09dd8d73ce572e734f594d2849e6694e18def82f2f2f
+
+kubeadm token list
+
+--discovery-token-ca-cert-hash sha256:
+哈希值由 kubeadm init 结尾输出的 kubeadm join 命令所返回，或者位于 kubeadm token create --print-join-command 的输出中
+也能够通过第三方工具计算
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+
+
+kubectl delete node xxx
+sudo kubeadm reset
+
+
+
+
+
+
+
+
+使用 kubectl 命令来创建简单的 kubernetes-dashboard 服务：
+$ kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+在 Dashboard 启动完毕后，可以使用 kubectl 提供的 Proxy 服务来访问该面板：
+$ kubectl proxy
+# 打开如下地址：
+# http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
+
+如果访问报错，可以尝试编辑 kubernetes-dashboard 服务：
+$ kubectl -n kube-system edit service kubernetes-dashboard
+将倒数第3行的“type: ClusterIP”，改成 type: NodePort
+kubectl get services kubernetes-dashboard -n kube-system
+kubectl get deployment kubernetes-dashboard  -n kube-system
+kubectl get pods  -n kube-system | grep dashboard
+
+curl -k https://10.106.190.212:443
+使用 NodePort 方式
+curl -k https://127.0.0.1:30333
+curl -k https://www.xxx.cn:30333
+
+使用 kubectl proxy 方式
+$ kubectl proxy --address='0.0.0.0' --port=8080 --accept-hosts='^*$'
+
+获取 token
+kubectl -n kube-system get secret | grep kubernetes-dashboard-token
+kubectl -n kube-system describe secret kubernetes-dashboard-token-xxx
+
+如果上面查到的token无效，可以使用下方命令
+kubectl create serviceaccount dashboard -n default
+kubectl create clusterrolebinding dashboard-admin -n default \
+--clusterrole=cluster-admin \
+--serviceaccount=default:dashboard
+kubectl get secret $(kubectl get serviceaccount dashboard -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode
+
+
+删除安装的 Dashboard 配置命令：
+$ kubectl -n kube-system delete $(kubectl -n kube-system get pod -o name | grep dashboard)
+kubectl delete deployment kubernetes-dashboard --namespace=kube-system 
+kubectl delete service kubernetes-dashboard  --namespace=kube-system 
+kubectl delete role kubernetes-dashboard-minimal --namespace=kube-system 
+kubectl delete rolebinding kubernetes-dashboard-minimal --namespace=kube-system
+kubectl delete sa kubernetes-dashboard --namespace=kube-system 
+kubectl delete secret kubernetes-dashboard-certs --namespace=kube-system
+kubectl delete secret kubernetes-dashboard-key-holder --namespace=kube-system
+
+
+kubectl run hello-minikube --image=k8s.gcr.io/echoserver:1.4 --port=8080
+kubectl expose deployment hello-minikube --type=NodePort
+kubectl delete service hello-minikube
+kubectl delete deployment hello-minikube
+
+kubectl get pod --all-namespaces kube-addon-manager-minikube
+kubectl describe --namespace=kube-system pod kube-addon-manager-minikube
+kubectl logs --namespace=kube-system kube-addon-manager-minikube
+kubectl delete --namespace=kube-system pod kube-addon-manager-minikube
+
+查看部署的容器与服务 
+kubectl get deployments -n kube-system -o=wide
+kubectl get services               kubectl get svc
+kubectl get pods                   kubectl get pod
+kubectl get nodes                  kubectl get no
+kubectl get ds                     kubectl get ds 
+kubectl get componentstatuses      kubectl get cs
+
+--all-namespaces 
+--namespace kube-system 
+
+
+
+kubectl cluster-info
+kubectl cluster-info dump
+
+
+
+no IP addresses available in range set: 10.244.0.1-10.244.0.254
+sudo ls /var/lib/cni/flannel/
+sudo ls /var/lib/cni/networks/cbr0/
+
+干掉cni-flannel,停运集群.清理环境.
+sudo kubeadm reset
+rm -rf /var/lib/cni/flannel/* && rm -rf /var/lib/cni/networks/cbr0/* && ip link delete cni0
+rm -rf  /var/lib/cni/networks/cni0/*
+
+
+
+
+
+
+
+master:
+for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler flanneld; do
+    systemctl restart $SERVICES
+    systemctl enable $SERVICES
+    systemctl status $SERVICES
+done
+node:
+for SERVICES in kube-proxy kubelet flanneld docker; do
+    systemctl restart $SERVICES
+    systemctl enable $SERVICES
+    systemctl status $SERVICES
+done
+
+
+kubectl config get-contexts
+kubectl config use-context docker-for-desktop
+
+kubectl config set-cluster default-cluster --server=http://192.168.121.9:8080
+kubectl config set-context default-context --cluster=default-cluster --user=default-admin
+kubectl config use-context default-context
+
+
+
+
+
+
+Kubeadm安装的k8s集群与kube-up.sh安装集群相比，最大的不同应该算是kubernetes核心组件的Pod化，即：kube-apiserver、kube-controller-manager、kube-scheduler、kube-proxy、kube-discovery以及 etcd 等核心组件都运行在集群中的Pod里的，这颇有些 CoreOS 的风格。只有一个组件是例外的，那就是负责在node上与本地容器引擎交互的Kubelet。
+
+
+kube-apiserver pod里面的pause容器采用的网络模式是host网络，而以pause容器网络为基础的kube-apiserver 容器显然就继承了这一network namespace。
+
+
+在kube-apiserver等核心组件还是以本地程序运行在物理机上的时代，修改kube-apiserver的启动参数，可以通过直接修改/etc/default/kube-apiserver(以Ubuntu 14.04为例)文件的内容并重启kube-apiserver service(service restart kube-apiserver)的方式实现。其他核心组件：诸如：kube-controller-manager、kube-proxy和kube-scheduler均是如此。
+
+但在kubeadm时代，这些配置文件不再存在，取而代之的是和用户Pod描述文件类似的manifest文件(都放置在/etc/kubernetes/manifests)
+
+kubelet自身是一个systemd的service，它的启动配置可以通过下面文件修改：
+vi /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+
+kubectl --kubeconfig /etc/kubernetes/kubelet.conf config view
+
+ls /etc/kubernetes/pki
+apiserver-key.pem：kube-apiserver的私钥文件
+apiserver.pem：kube-apiserver的公钥证书
+apiserver-pub.pem kube-apiserver的公钥文件
+ca-key.pem：CA的私钥文件
+ca.pem：CA的公钥证书
+ca-pub.pem ：CA的公钥文件
+sa-key.pem ：serviceaccount私钥文件
+sa-pub.pem ：serviceaccount的公钥文件
+tokens.csv：kube-apiserver用于校验的token文件
+
+
+
+
+
+Kubernetes的核心概念
+Master节点运行着集群管理相关的一组进程：etcd、kube-apiserver、kube-controller-manager、scheduler。这些进程实现了整个集群的资源管理、Pod调度、弹性伸缩、安全控制、系统监控、纠错等管理功能。
+
+Node(节点)
+节点是Kubernates系统中的一台工作机器(之前的版本叫做Minion)，既从属主机。它可以是物理机，也可以是虚拟机。
+每一个节点都包含了Pod运行所需的必要服务，例如Docker、kubelet和网络代理(proxy)，节点受Kubernates系统中的主节点控制。
+
+
+
+
+
+
+Pod(容器组)
+运行于Node节点上，若干相关容器的组合。Pod内包含的容器运行在同一宿主机上，使用相同的网络命名空间、IP地址和端口，能够通过localhost进行通信。
+Pod是Kurbernetes进行创建、调度和管理的最小单位，它提供了比容器更高层次的抽象，使得部署和管理更加灵活。
+一个Pod可以包含一个容器或者多个相关容器。
+每个Pod中有一个特殊的Pause容器，其他的成为业务容器，这些业务容器共享Pause容器的网络栈以及Volume挂载卷，因而他们之间的通信及数据交互更为高效。
+
+
+
+Replication Controller(复制控制器)
+Pod可以单独创建。由于Pods没有可控的生命周期，如果他们进程死掉了，他们将不会重新创建。出于这个原因，建议您使用复制控制器。
+Replication Controller用来管理Pod的副本，保证集群中存在指定数量的Pod副本。集群中副本的数量大于指定数量，则会停止指定数量之外的多余容器数量，反之，则会启动少于指定数量个数的容器，保证数量不变。Replication Controller是实现弹性伸缩、动态扩容和滚动升级的核心。
+
+
+Replica Sets
+Replica Sets能够确保在某个时间点上，一定数量的Pod在运行。
+RelicaSet是Replication Controller的升级版本，两者的区别主要在选择器selector,Replica支持集合级别的选择器，而前期的Replication Controller支持在等号描述的选择器。目前Replica Sets主要用于Deployment中。
+
+
+Deployment
+Deployment是Kubernetes 1.2起一个新引入的概念，Deployment是Replica Sets更高一层的抽象。
+Kubernetes Deployment提供了官方的用于更新Pod和Replica Set的方法，您可以在Deployment对象中只描述您所期望的理想状态(预期的运行状态)，Deployment控制器为您将现在的实际状态转换成您期望的状态。
+
+Deployment集成了上线部署、滚动升级、创建副本、暂停上线任务，恢复上线任务，回滚到以前某一版本(成功/稳定)的Deployment等功能，在某种程度上，Deployment可以帮我们实现无人值守的上线，大大降低我们的上线过程的复杂沟通、操作风险。
+
+Deployment的使用场景
+使用Deployment来启动（上线/部署）一个Pod或者ReplicaSet
+检查一个Deployment是否成功执行
+更新Deployment来重新创建相应的Pods（例如，需要使用一个新的Image）
+如果现有的Deployment不稳定，那么回滚到一个早期的稳定的Deployment版本
+暂停或者恢复一个Deployment
+
+
+
+Service(服务)
+Service定义了Pod的逻辑集合和访问该集合的策略，是真实服务的抽象。
+Service提供了一个统一的服务访问入口以及服务代理和发现机制，用户不需要了解后台Pod是如何运行。
+
+Service具有如下特征：
+拥有一个唯一指定的名字
+拥有一个虚拟IP和端口号
+能够提供某种远程服务能力
+被映射到提供这种服务能力的一组容器上
+Service的服务进程目前都基于socket通信方式对外提供服务
+
+
+Label(标签)
+Kubernetes中的任意API对象都是通过Label进行标识，Label的实质是一系列的K/V键值对，主要解决Service与Pod之间的关联问题。
+Label是Replication Controller和Service运行的基础，二者通过Label来进行关联Node上运行的Pod。
+
+Annotation(注解)
+Annotation与Label类似，也使用key/value键值对的形式进行定义。
+Label具有严格的命名规则，它定义的是Kubernetes对象的元数据（Metadata），并且用于Label Selector。
+Annotation则是用户任意定义的”附加”信息，以便于外部工具进行查找。
+
+用Annotation来记录的信息包括：
+build信息、release信息、Docker镜像信息等，例如时间戳、release id号、PR号、镜像hash值、docker registry地址等；
+日志库、监控库、分析库等资源库的地址信息；
+程序调试工具信息，例如工具名称、版本号等；
+团队的联系信息，例如电话号码、负责人名称、网址等。
+
+
+Namespace(命名空间)
+使用Namespace来组织kubernetes的各种对象，可以实现用户的分组(多租户)，对不同的租户还可以进行单独的资源设置和管理，是的整个集群的资源配置非常灵活。
+
+Schedule
+将Pod调度到合适的Node上启动运行
+
+
+Volume(容器共享存储卷)
+Volume是Pod中能够被多个容器访问的共享目录。Kubernetes的Volume概念与Docker的Volume比较类似，但不完全相同。Kubernetes中的Volume与Pod生命周期相同，但与容器的生命周期不相关。当容器终止或者重启时，Volume中的数据也不会丢失。另外，Kubernetes支持多种类型的Volume，并且一个Pod可以同时使用任意多个Volume。
+
+
+
+Persistent Volume(持久卷)
+Persistent Volume(PV)是集群之中的一块网络存储。跟Node一样，也是集群的资源。PV跟Volume (卷)类似，不过会有独立于Pod的生命周期。这一API对象包含了存储的实现细节，例如NFS、iSCSI或者其他的云提供商的存储系统。
+
+Persistent Volume Claims(持久卷申请)
+用户通过持久卷请求(PVC)申请存储资源。它跟Pod类似，Pod消费Node的资源，PVC消费PV的资源。Pod能够申请特定的资源(CPU和内存)；PVC可以申请大小、访问方式（例如mount rw一次或mount ro多次等多种方式）。
+
+
+Horizontal Pod Autoscaling(Pod自动扩容)
+Pod横向自动扩容。可以实现基于CPU使用率的Pod自动伸缩的功能。
+
+
+Proxy(代理)
+反向代理，Proxy会根据Load Balancer规则将外网请求分发到后端正确的容器处理。
+

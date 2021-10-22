@@ -1,0 +1,112 @@
+﻿一、获取当前时间，显示为 xxxx年xx月xx日 xx时xx分xx秒 的格式。（日期操作使用虚表）
+ 'yyyy"年"mm"月"dd"日" hh24"时"mi"分"ss"秒"'
+	select to_char(sysdate,'yyyy"年"mm"月"dd"日" hh24"时"mi"分"ss"秒"') from dual;
+二、找出入职时间在1981-06-01后入职的所有员工信息。（日期操作）
+  select * from emp where hiredate>'01-6月-81';
+三、统计所有员工的平均奖金，没有奖金的也要计算在内，按0处理。（空值处理）
+ select avg(nvl(comm,0)) from emp;
+
+四、查询所有不是经理的员工信息。（一般子查询，NOT IN）
+select * from emp where job!='MANAGER'
+
+五、找到工资小于本部门的平均工资的员工。（相关子查询）
+	select * from emp e where 
+	sal<(select avg(sal) from emp where e.deptno=deptno);
+六、查询所有员工，要求每于行都显示员工工资和他的经理的工资。（相关子查询）
+select e1.ename||'工资是'||e1.sal||'领导工资是'||e2.sal from emp e1,emp e2 where e1.mgr=e2.empno;
+
+七、找到员工表中工资最高的前三名的员工信息。（ROWNUM）
+select rownum,empno,ename,sal from (select * from emp order by sal desc) where rownum<=3;
+
+八、按员工的工资由高到低排列，只查询出第6至第10条结果，包含第6与第10条结果。（分页）
+     select empno,ename,sal from
+     (
+     select empno,ename,sal, rownum r from
+      (select * from emp order by sal desc) 
+     where rownum<=10
+     ) where r>=6
+     ------------
+     select empno,ename,sal from
+     (
+     select empno,ename,sal, rownum r from
+      (select * from emp order by sal desc) 
+     ) where r<=10 and r>=6
+     
+ 2975
+ 2850
+ 2450
+ 1600
+ 1500  
+ 
+2975
+2850
+2450
+1600
+1500
+
+
+九、统计每年入职的员工个数，效果如下：
+    TOTAL       1980       1981       1982       1987       1990
+    -------- ---------- ---------- ---------- ---------- ----------
+     14          1         10          1          2          0
+	
+
+方式一：
+	SQL>
+	  1  select to_char(hiredate, 'yyyy') AS 年份, count(*)
+	  2  from emp
+	  3  group by to_char(hiredate, 'yyyy')
+	  4* order by 1
+	SQL> /
+
+	年份   COUNT(*)
+	---- ----------
+	1980          1
+	1981         10
+	1982          1
+	1987          2
+
+
+方式二：
+
+	  1  select
+	  2     (select count(*) from emp) total,
+	  3     (select count(*) from emp where to_char(hiredate, 'yyyy')='1980') "1980",
+	  4     (select count(*) from emp where to_char(hiredate, 'yyyy')='1981') "1981",
+	  5     (select count(*) from emp where to_char(hiredate, 'yyyy')='1982') "1982",
+	  6     (select count(*) from emp where to_char(hiredate, 'yyyy')='1987') "1987",
+	  7     (select count(*) from emp where to_char(hiredate, 'yyyy')='1990') "1990"
+	  8  from
+	  9     emp
+	 10  where
+	 11*    rownum=1
+	 
+	 	select
+	  (select count(*) from emp) total,
+	  (select count(*) from emp where to_char(hiredate, 'yyyy')='1980') "1980",
+	  (select count(*) from emp where to_char(hiredate, 'yyyy')='1981') "1981",
+	  (select count(*) from emp where to_char(hiredate, 'yyyy')='1982') "1982",
+	  (select count(*) from emp where to_char(hiredate, 'yyyy')='1987') "1987",
+	  (select count(*) from emp where to_char(hiredate, 'yyyy')='1990') "1990"
+	  from
+	  	emp
+	 	where
+	 rownum=1
+	SQL> /
+
+		 TOTAL       1980       1981       1982       1987       1990
+	---------- ---------- ---------- ---------- ---------- ----------
+			14          1         10          1          2          0
+=================================================================
+
+
+
+
+
+一、获取当前时间，显示为 xxxx年xx月xx日 xx时xx分xx秒 的格式
+	SQL（使用双引号向日期格式中添加字符）：
+		select to_char(sysdate, 'yyyy"年"mm"月"dd"日" hh"时"mi"分"ss"秒"') from dual;
+	结果：
+		TO_CHAR(SYSDATE,'YYYY"年"MM
+		---------------------------
+		2012年03月08日 01时04分01秒

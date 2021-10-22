@@ -1,0 +1,102 @@
+React Native通过一个基于FlexBox的布局引擎，在所有移动平台上实现了一致的跨平台样式和布局方案。
+
+flexbox是2009年W3C提出的一种全新的可伸缩的CSS布局方式。依赖flexbox，我们可以更简单，高效的完成可伸缩式页面的布局。
+flexbox规范的制定可谓是艰辛百变:
+在2009年最早版本的Flexbox规范中，我们编写为“display:box;”（第1次草案）
+中期版本的Flexbox；我们编写为“display:flexbox;”（第2次草案）
+而目前的规范版本，我们定义“display:flex;”（第3次草案）
+但目前使用的最新版本草案已于今年3-1日正式进入W3C的候选推荐标准（Candidate Recommendation）阶段，这也就意味着关于flexbox的最终规范即将落地。
+
+**另附W3C制定标准流程：**
+工作草案（Working Draft）
+最终公示（Last Call）
+候选推荐标准（Candidate Recommendation）
+提名推荐标准（Proposed Recommendation）
+推荐标准（Recommendation）
+
+
+
+
+
+flex布局的基本思想是通过flex容器来伸缩控制子项目的宽度和高度。子项目在主轴上依次排列，在侧轴上填满flex容器的可用空间。
+
+
+RN中的flex布局
+flex属性
+1）用在flex容器上的属性
+① 子项目的排列方向（也就提到很多次的定义主轴）：flexDirection: column(default) | row | column-reverse | row-reverse
+② 子项目的换行方式（就是超出flex容器跨度时换不换行，怎么换）：flexWrap: nowrap(default) | wrap | wrap-reverse
+③ 子项目的对齐方式：
+justifyContent: flex-start | flex-end | center | space-between | space-around（主轴）
+alignItems: flex-start | flex-end | center | stretch(default)（侧轴）| baseline
+上面属性的用法和效果都跟Web flex的基本一致。
+
+2）用在flex子项上的属性
+① 当一个元素定义了flex属性时，表示该元素是可伸缩的（flex的属性值大于0的时候才可伸缩）。将与兄弟节点抢占空间
+② 单个子项在侧轴上的排列方式： alignSelf: auto | flex-start | flex-end | center | stretch
+
+Web flex和RN flex几点区别：
+1）因为RN里的所有组件都是以flex作为其显示属性，所以不需要再有display:flex的设定
+2）主轴默认方向的区别
+在Web Flex中，主轴默认方向是水平的，而在RN是垂直的。
+3）支持的属性和属性写法的区别
+
+对于margin、padding的使用
+同Web上的使用方式，但不存在margin塌陷的情况。嵌套的Text不能设置垂直方向上的margin。
+
+绝对定位
+RN中元素默认的定位方式是relative，并且只有「relative和absolute两种定位方式」。如果为组件加上position:absolute，它将会以inline的方式渲染在页面上。并且脱离正常文档流。也就是视觉上会被后面的组件覆盖，但不能通过zIndex方式调整。嵌套的Text不可用。
+
+<Text>元素在布局上不同于其它组件：在Text内部的元素不再使用flexbox布局，而是采用文本布局。这意味着<Text>内部的元素不再是一个个矩形，而可能会在行末进行折叠。
+布局中一些注意点
+1）文本必须写在Text中而非View
+2）View最好不要嵌套在Text中
+
+RN中的长度单位
+默认单位
+在RN中所有的尺寸属性都是不带单位的。官网给出的默认单位是dp。
+逻辑分辨率pt  pt=dp
+
+取得屏幕大小和设备像素比
+1）屏幕大小
+const {devWidth,devHeight} = Dimensions.get('window');
+
+2）dpr
+PixelRatio.get()
+
+
+
+
+
+WEB中的flex布局
+
+Android UC浏览器只支持display: box语法。而iOS UC浏览器则支持两种方式（同一家公司的浏览器，由于平台不一样，支持程度还不一样，也是醉了
+
+父元素设置display:flex后，子元素宽度/高度即使固定了，也会随父元素宽度/高度的改变而改变，display:box不会。
+解决方法：子元素设置 flex: none
+
+
+display:box; 作用下，如果子元素是 block 的，竖着排，如果子元素是 inline、inline-block 的，横着排。
+display:flex; 作用下，是横着排还是竖着排，只取决于 flex-direction 的值是 row 还是 column。
+
+
+display:box; 作用下，float、clear、text-align、vertical-align 仍起作用。
+display:flex; 作用下，上述四属性失效。
+
+横向排列时，子元素之间空白字符（空格、换行等）处理不同
+display:box; 作用下，不会被忽略。 display:flex; 作用下，忽略。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

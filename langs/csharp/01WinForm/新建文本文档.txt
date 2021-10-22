@@ -1,0 +1,10 @@
+--> 知识点1：MessageBox.Show()。弹出对话框显示内容，只是简单的弹出对话框显示内容，不能用像Console.WriteLine();方法使用占位符，但是有一个string.Format():方法可以使用占位符拼接，然后再输入需要显示的内容。
+----------------通过DialogResult dr = MessageBox.Show();接收用户输入的内容，然后判断下一步操作，比如我们操作文档后，不保存直接关闭文档就会弹出对话框让用户选择。例;DialogResult dr =MessageBox.Show(”提示文字"),MessageBoxButtons.OKCancel,MessageBoxIcon.Warnning,MessageBoxDefaultButton.Button2);。
+
+--> 知识点2：对话框控件：OpenFileDialog、SaveFileDilog、FolderBrowerDialog、FontDialog和ColorDialog的使用，并非拖控件使用，而是通过编写代码使用。
+------------------如：OpenFileDialog ofd=new OpenFileDialog();弹出一个选择对话框；ofd.title="标题文字";对话框标题文字；ofd.Filter="文本文档|*.txt|所有*.*";过滤是选择所有文件还是选择文本文档。注意ofd.FilterIndex是设置默认选择哪种方式，索引默认从1开始，这个比较特殊罕见；ofd.InitialDirectory=......设置默认打开哪个文件夹；.........
+------------------------判断是否选择了文件，用ofd.ShowDialog()是否等于Dialog.Ok，如果选择了，可以知道ofd.FileName代表选中的文件名。其它对话框使用非常类似。
+
+-->知识点3：主窗体与子窗体交互。主窗体与子窗体互相控制。比如点击QQ好友进行聊天会弹出一个新的窗体就是窗体交互。主窗体控制子窗体就是在主窗体中实例一个子窗体的对象，就可以控制子窗体了。如何通过子窗体控制主窗体，就是在主窗体实例子窗体时将主窗体的引用以参数this传给子窗体即可。
+
+

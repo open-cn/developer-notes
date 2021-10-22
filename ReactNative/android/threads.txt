@@ -1,0 +1,53 @@
+
+SharedPreferencesImpl-load
+
+	  at java.lang.Thread.setName(Thread.java:1154)
+	  at java.lang.Thread.init(Thread.java:409)
+	  at java.lang.Thread.<init>(Thread.java:493)
+	  at android.app.SharedPreferencesImpl$1.<init>(SharedPreferencesImpl.java:88)
+	  at android.app.SharedPreferencesImpl.startLoadFromDisk(SharedPreferencesImpl.java:88)
+	  at android.app.SharedPreferencesImpl.<init>(SharedPreferencesImpl.java:81)
+	  at android.app.ContextImpl.getSharedPreferences(ContextImpl.java:369)
+	  - locked <0x7c8> (a java.lang.Class)
+	  at android.app.ContextImpl.getSharedPreferences(ContextImpl.java:358)
+	  at android.content.ContextWrapper.getSharedPreferences(ContextWrapper.java:164)
+	  at android.preference.PreferenceManager.getDefaultSharedPreferences(PreferenceManager.java:487)
+	  at com.facebook.react.devsupport.DevInternalSettings.<init>(DevInternalSettings.java:48)
+	  at com.facebook.react.devsupport.DevSupportManagerImpl.<init>(DevSupportManagerImpl.java:180)
+	  at java.lang.reflect.Constructor.newInstance0(Constructor.java:-1)
+	  at java.lang.reflect.Constructor.newInstance(Constructor.java:430)
+	  at com.facebook.react.devsupport.DevSupportManagerFactory.create(DevSupportManagerFactory.java:70)
+	  at com.facebook.react.XReactInstanceManagerImpl.<init>(XReactInstanceManagerImpl.java:309)
+	  at com.facebook.react.ReactInstanceManager$Builder.build(ReactInstanceManager.java:403)
+	  at com.facebook.react.ReactNativeHost.createReactInstanceManager(ReactNativeHost.java:84)
+	  at com.facebook.react.ReactNativeHost.getReactInstanceManager(ReactNativeHost.java:41)
+	  at com.facebook.react.ReactActivityDelegate.loadApp(ReactActivityDelegate.java:101)
+	  at com.facebook.react.ReactActivityDelegate.onCreate(ReactActivityDelegate.java:91)
+	  at com.facebook.react.ReactActivity.onCreate(ReactActivity.java:54)
+
+AsyncTask #1
+
+OkHttp Dispatcher ¡ª>OkHttp http://10.0.3.2:8081/¡­(okhttp3.internal.NamedRunnable)
+DevServerHelper.openPackagerConnection AsyncTask
+
+AsyncTask #2
+ReactActivityDelegate.onCreate(); loadApp startReactApplication 
+mReactInstanceManager.createReactContextInBackground(); recreateReactContextInBackgroundInner onJSBundleLoadedFromServer
+
+
+
+
+OkHttp ConnectionPool
+
+
+Okio Watchdog
+
+AsyncTask #3
+
+mqt_js
+
+Thread-4
+
+(push service)
+
+mqt_native_modules

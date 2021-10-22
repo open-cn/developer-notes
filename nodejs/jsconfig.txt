@@ -1,0 +1,22 @@
+目录中存在jsconfig.json文件，表示该目录是JavaScript项目的根目录。
+
+jsconfig.json文件指定根文件和JavaScript语言服务提供的功能选项。
+
+jsconfig.json源于tsconfig.json，是TypeScript的配置文件。jsconfig.json相当于tsconfig.json的“allowJs”属性设置为true。
+
+
+{
+    "compilerOptions": {
+        "noLib": "", // 不包含默认库文件。
+        "target": "es5", // 指定要使用的默认库。
+        "checkJs": true, // 启用JavaScript文件的类型检查。
+        "experimentalDecorators": "", // 为拟议的ES装饰器提供实验支持。
+        "allowSyntheticDefaultImports": true, // 允许从没有默认导出的模块进行默认导入。 这不会影响代码发出，只会影响类型检查。
+        "baseUrl": ".", // 用于解析非相对模块名称的基目录。
+        "paths": {} // 指定相对于baseUrl选项计算的路径映射。
+    }
+}
+
+不要被compilerOptions混淆。 此属性的存在是因为jsconfig.json是tsconfig.json的后代
+
+

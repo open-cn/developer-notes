@@ -1,0 +1,32 @@
+React Components:
+
+ARTRenderableViewManager.createARTGroupViewManager(),         ARTGroup
+ARTRenderableViewManager.createARTShapeViewManager(),         ARTShape
+ARTRenderableViewManager.createARTTextViewManager(),          ARTText                              -
+new ARTSurfaceViewManager(),                                  ARTSurfaceView
+new ReactDialogPickerManager(),                               AndroidDialogPicker
+new ReactDrawerLayoutManager(),                               AndroidDrawerLayout
+new ReactDropdownPickerManager(),                             AndroidDropdownPicker
+new ReactHorizontalScrollViewManager(),                       AndroidHorizontalScrollView
+new ReactImageManager(),                                      RCTImageView
+new ReactModalHostManager(reactContext),                      RCTModalHostView
+new ReactProgressBarViewManager(),                            AndroidProgressBar
+new ReactRawTextManager(),                                    RCTRawText
+new ReactScrollViewManager(),                                 RCTScrollView
+new ReactSliderManager(),                                     RCTSlider
+new ReactSwitchManager(),                                     AndroidSwitch
+new FrescoBasedReactTextInlineImageViewManager(),             RCTTextInlineImage
+new ReactTextInputManager(),                                  AndroidTextInput
+new ReactTextViewManager(),                                   RCTText                              -
+new ReactToolbarManager(),                                    ToolbarAndroid
+new ReactViewManager(),                                       RCTView
+new ReactViewPagerManager(),                                  AndroidViewPager
+new ReactVirtualTextViewManager(),                            RCTVirtualText
+new ReactWebViewManager(),                                    RCTWebView
+new RecyclerViewBackedScrollViewManager(),                    AndroidRecyclerViewBackedScrollView
+new SwipeRefreshLayoutManager());                             AndroidSwipeRefreshLayout
+
+
+
+ART***:
+Android***:

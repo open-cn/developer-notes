@@ -1,0 +1,38 @@
+1、统计所有员工的平均奖金，没有奖金的也要计算在内，按0处理。
+  select avg(nvl(comm,0)) from emp;
+2、查询所有不是经理的员工信息。
+select * from emp where job != 'MANAGER';
+3、找到工资小于本部门的平均工资的员工。
+select ename,sal from emp  e where sal < (
+select avg(sal)  from emp ee group by deptno having e.deptno=emp.deptno
+);
+
+select ename,sal,ee.deptno,ee.emp_avg  from 
+   emp e,(select deptno,avg(sal)  emp_avg from emp group 
+   by deptno) ee
+where e.deptno=ee.deptno and e.sal < ee.emp_avg;
+
+select ename,deptno,sal from emp e where sal < (
+select avg(sal) from emp where e.deptno=emp.deptno
+);
+
+4、查询所有员工，要求每行都显示员工工资和他的经理的工资
+
+select e1.ename || '工资是' || e1.sal ||'老板的工资是'|| e2.sal
+from emp e1,emp e2 where 
+e1.mgr = e2.empno;
+
+5、找到员工表中工资最高的前三名的员工信息。
+select * from emp  where rownum <= 3 order by sal desc;
+ select  ee.ename,ee.sal  from
+ (select * from emp order by sal desc) ee
+ where rownum <= 3
+
+6、按员工的工资由高到低排列，只查询出第6至第10条结果，包含第6与第10条结果。（分页）
+   select eee.* from 
+   (
+   	select ee.*,rownum r from
+  		(select * from emp order by sal desc) ee
+  		where rownum <= 10
+  )  eee
+  where eee.r >=6

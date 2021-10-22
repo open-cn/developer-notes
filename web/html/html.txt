@@ -1,0 +1,272 @@
+Html(HyperText Mark-up Language)
+即超文本标记语言或超文本链接标示语言，是网络的通用语言,一种简单、通用的全置标记语言。
+
+HTML文本是由HTML命令组成的描述性文本，HTML命令可以说明文字、图形、动画、声音、表格、链接等。
+
+【历次版本】
+HTML 2.0 是 1996 年由 Internet 工程工作小组的 HTML 工作组开发的。
+
+HTML 3.2 作为 W3C 标准发布于 1997 年 1 月 14 日。HTML 3.2 向 HTML 2.0 标准添加了被广泛运用的特性，诸如字体、表格、applets、围绕图像的文本流，上标和下标。
+
+这些被添加到 1997 年 HTML 3.2 标准的元素之一 - <font> 标签 - 为 HTML 内容和呈现的分离这个重要的任务带来了不必要的麻烦。
+
+HTML 4.0 被发布于 1997 年 12 月 18 日。而仅仅进行了一些编辑修正的第二个版本发布于 1998 年 4 月 24 日。
+HTML 4.0 最重要的特性是引入了样式表（CSS）。
+
+HTML 4.01 发布于 1999 年 12 月 24 日。
+HTML 4.01 是对 HTML 4.0 的一次较小的更新，对后者进行了修正和漏洞修复。
+W3C 不会继续发展 HTML。未来 W3C 的工作会集中在 XHTML 上。
+
+XHTML 1.0 发布于 2000 年 1 月 20 日。
+XHTML 1.0 使用 XML 对 HTML 4.01 进行了重新地表示。
+
+HTML 5
+W3C 于 2008 年 1 月 22 日发布 HTML 5 工作草案。
+2013年5月6日， HTML 5.1正式草案公布。
+
+【历史】
+
+在最初的5年中（1990-1995），HTML经历了若干次修订和扩展。最初由 CERN 主要托管，随后是 IETF。
+
+随着 W3C 的诞生，HTML 的开发再次易主。1995 年第一次扩展 HTML 的尝试（HTML 3.0）以失败告终，随后转变为更加务实的 HTML 3.2，在 1997 年完成。 就在同年很快开始了 HTML4 的开发。
+
+大概在 1998 年 HTML 停止演化的时候，浏览器厂商开发的部分 HTML API 被标准化和发布在 DOM Level 1（1998） 和 DOM Level 2 Core，以及 DOM Level 2 HTML（2000年开始2003年完成）中。 在 2004 年发布了一些 DOM Level 3 标准，但是 Level 3 草案尚未全部完成工作组就关闭了。 这些工作也最终不了了之。
+
+Apple，Mozilla 和 Opera 共同声明他们将继续在 WHATWG（一个新的组织）团体下投入工作。 他们为此创建了一个公开的邮件列表，草案也移交到了 WHATWG 网站。随后版权也修改为这三家共同拥有， 同时允许该标准的重用。
+
+WHATWG 基于若干核心原则，具体地：技术需要向后兼容，标准和实现需要相符（即使这意味着更改标准而不是实现）， 标准需要足够详细来使得一个实现在不需对其他实现进行逆向工程的情况下，就能可达到完全的互操作性。
+
+其中后一个原则，要求 HTML5 标准的范围应包括先前在 HTML4，XHTML1，和 DOM2 HTML 这三篇独立的文档中标准化的内容。 同时意味着相比于此前的考虑，需要显著地引入更多的细节。
+
+2006 年，W3C 暗示了参与 HTML5 开发的兴趣，并于 2007 年组建了工作组来与 WHATWG 共同开发 HTML5 标准。
+
+在 2011 年，这些工作组最终发现他们有着不同的目标： W3C 希望发布一个"完成的" HTML5 版本，而 WHATWG 希望持续地维护一个 HTML Living Standard， 持续地维护该标准而不是锁定在一个带着已知问题的状态， 同时按照需求增加新的特性来发展整个平台。
+
+从此 WHATWG 一直在（与其他组织一同）开发该标准， W3C 则复制 WHATWG 的修复工作到他们所在的文档分支（也有其他的一些改动）。
+
+
+
+[MDN web docs] https://developer.mozilla.org
+[HTML Living Standard] https://html.spec.whatwg.org
+
+注释
+<!-- xxx -->
+xxx 可选的文本，不得以 >、-> 起始，也不能包含 <!--、-->、--!>，也不得以 <!- 结尾
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+【常用的代码】
+
+1,常用的代码：<hr>:____________；<hr width="">:_____长度，<hr width="%">:像素为：
+
+<br>:换行；
+<b>:字体加粗；
+<strong>:加粗语气；
+<em>：加粗并倾斜；
+<i>：倾斜；
+<u>：下划线；
+<s>：删除；
+<sup>：上标；
+<sub>：下标 ；
+<p>：段落；
+<hi>.....<h6>:文章标题
+<table>:表格; <tr>行的内容；<td>：列的内容，
+&nbsp:空格；&copy: 版权号：&reg:注册商标;“：&quot;&amp:&; <:&lt;>:gt;
+<pre>:预格式化
+<align="对齐方式">有left(左)right(右)center(居中)top(垂直靠上)middle(垂直居中）bottom(垂直靠下)
+<font bgcolor="gray"bodygroup=""text=""size="">  :一般都是对文本的设置：背景颜色为""背景图片：""文本颜色""字体大小。
+
+2,html文件名的保存：在本地电脑里可以用中文保存，但在网页文件都是保存在服务器上的，建议都使用英文。
+<blockquote ></blockquote>:块的引用；
+在段落中，第一个字符前的空格都不显示，两个字符间不管几个空格都只显示一个空格，所以就需要我们用空格符&nbsp来标记。
+列表标记：无序列表：<ul type="项目符号类型"><li>....</li></ul>嵌套使用：有disc/circle/square
+有序列表：<ol>......</ol>
+
+定义列表：<dl>......</dl>
+
+在定义列表的情况下：<dt>表示一个项目，<dd>表示这个项目下的子项目
+
+eg:<dt>电脑整机</dt>
+
+<dd>笔记本，上网本，平板机</dd>
+
+图片的插入：
+web上支持的图片格式：GIF(图形交换格式)支持动画效果和透明
+JPEG（联合图像格式）不支持动画和透明
+
+PNG(网络可移植格式)支持透明，不支持动画；
+
+代码格式：<img src="图片路径">最好是图片与网页在同一个文件夹里面。若不在可用：../目录路径上走一级；../../上走两级；/根目录下。
+
+alt属性值="文本"替代无法显示的图片。
+
+title="文本"鼠标经过时显示的文字。
+
+width=宽，heigh="高"，border="图像边框"
+
+hspace:定义图像左侧与右侧空白（水平边距）
+
+rspace:定义顶部与底部空白（垂直边距）
+
+传统的网页布局方式------使用table表格
+布局思路：排版--从大向小徘版-----从左向右，从上到下排版--按视觉排版
+
+
+
+表格标签：结构<table width="">.....</table>定义表格及宽度
+<tr>......</tr>定义表行
+
+<td>......</td>定义表列
+
+<th>......</th>定义标题栏，文字默认加粗，居中。
+
+<table bgcolor="">定义表格背景颜色
+
+<table background="">表格背景图片
+
+<table border=""bordercolor="">表格边框，默认为0,及边框线的颜色
+
+<table cellpadding="">设置单元格边框与其内容空间大小，默认为2.
+
+<table cellspacing="">设置单元格与单元格之间的空间大小，默认为2.
+
+<td rowspan="">行合并的数目
+
+<td colspan="">列合并的数目
+
+<td nowarp="nowarp">单元格中不换行
+
+
+
+凸起效果表格是利用颜色的亮暗对比效果做出来的。涉及到的代码有：<table bordercolorlight="">和<table bordercolordark="">
+
+细线表格效果公式：1，将表格自身的border="0"
+
+2,给表格设置背景颜色---细线的颜色
+
+3，给表格设置单元格之间的距离----细线，粗线
+
+1、<table>标签下的边框设置：
+
+frame=""
+
+void------不显示表格的外边框；
+above-----只显示表格上边线；
+belos-----只显示下边线；
+hsides----只显示上下边线；
+Vsides----只显示左右边线；
+lhs-------只显示左边线;
+rhs-------只显示右边线;
+border/box----显示所有边线。
+rules=""
+
+rows-------只显示横行的格框线；
+cols-------只显示直行的格框线；
+all--------显示全部的格框线；
+groups-----表列列线合水平部分；
+none-------不显示任何格框线。
+<caption>......</caption>定义表格标题，后可跟align=""(top/bottom)
+
+eg:<table  width="600"frame="border"rules="none>显示效果为宽度为600，显示所有外边框但无内框线的一个表格。
+
+<caption align="top">各科成绩汇总：</caption></table>
+
+2、表格结构化：
+
+<table>
+
+<thead>......</thead>表头区
+
+<tbody>......<tbody>表体区
+
+<tfoot>......</tfoot>表尾区
+
+<table>
+
+3、直列化表格：<colgruop>.....</colgruop>=<col>
+
+align=""
+
+align=""left(在)center(中)right(右)
+vaglign=""top(上)middle(中)bottom(下)
+span=""需直列的数字
+bgcolor=""背景颜色
+eg:
+
+<col bgcolor="red"></col>:表示此列全为红色；
+<col bgcolor="red"span="3"></col>：表示前三列均为红；
+ <col span="2">；
+<col bgcolor="red"></col>:  表示前两列为自然色第三列开始为红;
+
+<col span="2"></col>
+<col bgcolor="red" span="2">:表示第三列与第四列为红；
+
+4、超级链接：
+
+<a href="链接目标"title="注释"target="打开链接窗口的形式">显示内容</a>
+
+eg:<a href="http://control.blog.sina.com.cn/admin/article/article_add.php"title="新浪博客"target="blank">新浪博客</a>
+
+其中：target=""
+
+blank:表示在新的窗口中打开；
+self:表示在自身窗口中打开（一般为默认值）
+parent:表示在上一级窗口中打开，框架会经常使用；
+top:表示在浏览器的整个窗口中打开，忽略任何框架；
+链接分类：
+
+内部链接：当前文档与目标文档在同一个站点内
+<a href="目标文档位置及全称">
+
+外部链接：当前文档与目标文档在不同站点内
+<a href=url(网址)>
+
+E-mail链接，并允许访问者向指定的地址发送邮件
+<a hrer=mailto:电子邮件地址>
+
+锚点链接-----可以跳转到某个页面的某个位置
+<a name="锚点名称">显示内容</a>
+
+<a href="#锚点名称">显示内容</a>
+
+eg:<a href="需要跳转的页#需跳到的页面的定点位置">内容</a>
+
+空链接:就是没有目标端点的链接。
+<a href="#">显示内容</a>
+eg:设为首页：
+
+<a href="#"
+
+onclick="this.style.behavior=‘url(#default#homepage)’;this is ethomepage(‘http://www.sohu.com')">设为首页</a>
+
+添加为收藏：
+
+<a href="#"
+
+onclick="javascript:window.extermal.addfavorite(‘http://wwww.sohu.com’)">加入收藏夹</a>
+
+常用到的脚本链接：
+
+<a href="javascript:window.open('http://www.sohu.com')">搜狐</a>
+
+关闭窗口：输入javascript:window.close()
+
+打开窗口：输入javascript:window.open(文件名)
+
+
+
+
+
+
+

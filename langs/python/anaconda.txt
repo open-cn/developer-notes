@@ -1,0 +1,7 @@
+
+
+conda install -n rrrr pyqt4
+PackagesNotFoundError: The following packages are not available from current channels:
+
+conda install -n rrrr pyqt=4
+

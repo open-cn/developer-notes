@@ -1,0 +1,499 @@
+文档对象模型（Document Object Model，简称DOM），是W3C（万维网联盟）推荐的处理可扩展标志语言的标准编程接口。
+
+在网页上，组织页面（或文档）的对象被组织在一个树形结构中，用来表示文档中对象的标准模型就称为DOM。
+
+
+HTML DOM 是：HTML 的标准对象模型、HTML 的标准编程接口、W3C 标准
+HTML DOM 定义了访问和操作 HTML 文档的标准。
+
+
+
+W3C DOM 标准被分为 3 个不同的部分：
+核心 DOM - 针对任何结构化文档的标准模型
+XML DOM - 针对 XML 文档的标准模型
+HTML DOM - 针对 HTML 文档的标准模型
+
+在 HTML DOM 中，HTML 文档中的所有内容都是节点：
+整个文档是一个文档节点
+每个 HTML 元素是元素节点
+HTML 元素内的文本是文本节点
+每个 HTML 属性是属性节点
+注释是注释节点
+
+
+HTML DOM 将 HTML 文档视作树结构。这种结构被称为节点树：HTML DOM Tree
+节点父、子和同胞
+在节点树中，顶端节点被称为根（root）
+每个节点都有父节点、除了根（它没有父节点）
+一个节点可拥有任意数量的子
+同胞是拥有相同父节点的节点
+
+
+
+
+DOM视图：描述跟踪一个文档的各种视图（使用CSS样式设计文档前后）的接口；
+DOM事件：描述事件接口；
+DOM样式：描述处理基于CSS样式的接口；
+DOM遍历与范围：描述遍历和操作文档树的接口；
+
+
+
+
+【HTML DOM Document 对象】
+Document 对象
+使用 document.write() 向输出流写文本
+使用 document.write() 向输出流写 HTML
+返回当前文档的标题
+返回当前文档的 URL
+返回当前文档的 referrer
+返回下载当前文档的服务器域名
+使用 getElementById()
+使用 getElementsByName()
+打开一个新的文档，添加一些文本，然后关闭它。
+返回文档中锚的数目
+返回文档中第一个锚的 innerHTML
+计算文档中表单的数目
+访问集合中的项目
+计算文档中的图像数目
+
+
+【HTML DOM 节点对象】
+Node 继承 EventTarget
+
+
+node.nodeName
+node.nodeType
+node.nodeValue
+node.parentElement
+node.parentNode
+node.appendChild()
+node.replaceChild()
+node.removeChild()
+node.getRootNode()
+
+
+
+【HTML DOM 元素对象】
+Element 继承 Node
+
+Element: touchmove event 冒泡事件，可取消
+
+Anchor 对象
+更改一个链接的文本、URL 以及 target
+使用 focus() 和 blur()
+向超链接添加快捷键
+
+Image 对象
+更改图像的高度和宽度
+更改图像的 src
+
+Option 和 Select 对象
+禁用并启用下拉列表
+取得包含该下拉列表的表单的 id
+取得下拉列表中选项的数目
+更改下拉列表中的可见行数
+选择下拉列表中的多个选项
+输出下拉列表中所有选项的文本
+取得下拉列表中所选的选项的索引位置
+更改被选选项
+从下拉列表中删除选项
+
+Form 和 Input 对象
+更改表单的 action 属性
+返回向服务器发送数据的 HTTP 方法
+提示按钮的 id 和 类型 + 禁用按钮
+选定以及不选定 checkbox
+一个表单中的若干个 checkbox
+Checkbox - 把文本转换为大写
+使用单选按钮中的 value 属性
+重置表单
+提交表单
+验证表单
+设置和移开文本域上的焦点
+选取文本域中的内容
+表单中的下拉列表
+另一个下拉列表
+当达到文本域的最大字符数时跳至下一个域
+为若干表单域添加快捷键
+
+Frame、Frameset 以及 IFrame 对象
+可调整大小和不可调整大小的框架
+带有滚动条和不带有滚动条的框架
+更改两个框架的源
+跳出框架
+更改两个框架的源
+
+Table、TableHeader、TableRow、TableData 对象
+更改表格边线的宽度
+更改表格的 cellPadding 和 cellSpacing
+规定表格的外部边框
+规定表格的内部边线
+某一行的 InnerHTML
+表格单元的 InnerHTML
+为表格创建了一个标题
+从表格删除行
+向表格添加新行 - 然后向其添加内容
+向一个已有的行中插入单元格
+对齐行中的单元格内容
+垂直对齐行中的单元格内容
+对齐单元格中的内容
+垂直对齐单元格中的内容
+更改表格单元格中的内容
+更改表元横跨的列数
+
+
+【HTML DOM 属性对象】
+Attributes 对象
+
+
+【HTML DOM 事件】
+
+Event 对象
+哪个鼠标按钮被点击？
+光标的坐标是？
+被按的按键的 unicode 是？
+相对于屏幕，光标的坐标是？
+shift 键被按了吗？
+哪个元素被点击了？
+哪个事件类型发生了？
+
+
+EventTarget.addEventListener(type, listener, options?: { capture, once, passive ]);
+EventTarget.addEventListener(type, listener [, useCapture, wantsUntrusted  ]);
+useCapture 用来设置事件是在事件捕获时执行，还是事件冒泡时执行。
+低版本IE没有 addEventListener， 提供了 attachEvent()方法，此方法没有相关设置，不过IE的事件模型默认是在事件冒泡时执行的，即useCapture等于false。
+
+冒泡
+从事件 目标 的事件处理函数开始，依次向外，直到 window 的事件处理函数触发
+也就是从下向上的执行事件处理函数
+
+捕获
+从 window 的事件处理函数开始，依次向内，只要事件 目标 的事件处理函数执行
+也就是从上向下的执行事件处理函数
+
+阻止默认事件
+e.preventDefault() : 非 IE 使用
+e.returnValue = false ：IE 使用
+
+阻止冒泡传递
+e.stopPropagation(): 非 IE 使用
+e.cancelBubble = true : IE 使用
+
+
+setTimeout 访问 evt时，需要evt.persist();
+
+
+
+Resource events
+error   A resource failed to load.
+abort   The loading of a resource has been aborted.
+load    A resource and its dependent resources have finished loading.
+beforeunload    The window, the document and its resources are about to be unloaded.
+unload  The document or a dependent resource is being unloaded.
+
+Network events
+online  The browser has gained access to the network.
+offline The browser has lost access to the network.
+
+Focus events
+focus   An element has received focus (does not bubble).
+blur    An element has lost focus (does not bubble).
+focusin An element is about to receive focus (does bubble).
+focusout    An element is about to lose focus (does bubble).
+
+WebSocket events
+open    A WebSocket connection has been established.
+message A message is received through a WebSocket.
+error   A WebSocket connection has been closed with prejudice (some data couldn't be sent for example).
+close   A WebSocket connection has been closed.
+
+Session History events
+pagehide    A session history entry is being traversed from.
+pageshow    A session history entry is being traversed to.
+popstate    A session history entry is being navigated to (in certain cases).
+
+CSS Animation events
+animationstart  A CSS animation has started.
+animationcancel A CSS animation has aborted.
+animationend    A CSS animation has completed.
+animationiteration  A CSS animation is repeated.
+
+CSS Transition events
+transitionstart A CSS transition has actually started (fired after any delay).
+transitioncancel    A CSS transition has been cancelled.
+transitionend   A CSS transition has completed.
+transitionrun   A CSS transition has begun running (fired before any delay starts).
+
+Form events
+reset   The reset button is pressed
+submit  The submit button is pressed
+
+Printing events
+beforeprint The print dialog is opened
+afterprint  The print dialog is closed
+
+Text Composition events
+compositionstart    The composition of a passage of text is prepared (similar to keydown for a keyboard input, but works with other inputs such as speech recognition).
+compositionupdate   A character is added to a passage of text being composed.
+compositionend  The composition of a passage of text has been completed or canceled.
+
+View events
+fullscreenchange    An element was toggled to or from fullscreen mode.
+fullscreenerror It was impossible to switch to fullscreen mode for technical reasons or because the permission was denied.
+resize  The document view has been resized.
+scroll  The document view or an element has been scrolled.
+
+Clipboard events
+cut The selection has been cut and copied to the clipboard
+copy    The selection has been copied to the clipboard
+paste   The item from the clipboard has been pasted
+
+Keyboard events
+keydown ANY key is pressed
+keypress    ANY key (except Shift, Fn, or CapsLock) is in pressed position. (Fired continously.)
+keyup   ANY key is released
+
+Mouse events
+auxclick    A pointing device button (ANY non-primary button) has been pressed and released on an element.
+click   A pointing device button (ANY button; soon to be primary button only) has been pressed and released on an element.
+contextmenu The right button of the mouse is clicked (before the context menu is displayed).
+dblclick    A pointing device button is clicked twice on an element.
+mousedown   A pointing device button is pressed on an element.
+mouseenter  A pointing device is moved onto the element that has the listener attached.
+mouseleave  A pointing device is moved off the element that has the listener attached.
+mousemove   A pointing device is moved over an element. (Fired continously as the mouse moves.)
+mouseover   A pointing device is moved onto the element that has the listener attached or onto one of its children.
+mouseout    A pointing device is moved off the element that has the listener attached or off one of its children.
+mouseup A pointing device button is released over an element.
+pointerlockchange   The pointer was locked or released.
+pointerlockerror    It was impossible to lock the pointer for technical reasons or because the permission was denied.
+select  Some text is being selected.
+wheel   A wheel button of a pointing device is rotated in any direction.
+
+Drag & Drop events
+drag    An element or text selection is being dragged. (Fired continuously every 350ms)
+dragend A drag operation is being ended (by releasing a mouse button or hitting the escape key).
+dragenter   A dragged element or text selection enters a valid drop target.
+dragstart   The user starts dragging an element or text selection.
+dragleave   A dragged element or text selection leaves a valid drop target.
+dragover    An element or text selection is being dragged over a valid drop target. (Fired continuously every 350ms)
+drop    An element is dropped on a valid drop target.
+
+Media events
+audioprocess    The input buffer of a ScriptProcessorNode is ready to be processed.
+canplay The browser can play the media, but estimates that not enough data has been loaded to play the media up to its end without having to stop for further buffering of content.
+canplaythrough  The browser estimates it can play the media up to its end without stopping for content buffering.
+complete    The rendering of an OfflineAudioContext is terminated.
+durationchange  The duration attribute has been updated.
+emptied The media has become empty; for example, this event is sent if the media has already been loaded (or partially loaded), and the load() method is called to reload it.
+ended   Playback has stopped because the end of the media was reached.
+loadeddata  The first frame of the media has finished loading.
+loadedmetadata  The metadata has been loaded.
+pause   Playback has been paused.
+play    Playback has begun.
+playing Playback is ready to start after having been paused or delayed due to lack of data.
+ratechange  The playback rate has changed.
+seeked  A seek operation completed.
+seeking A seek operation began.
+stalled The user agent is trying to fetch media data, but data is unexpectedly not forthcoming.
+suspend Media data loading has been suspended.
+timeupdate  The time indicated by the currentTime attribute has been updated.
+volumechange    The volume has changed.
+waiting Playback has stopped because of a temporary lack of data.
+
+Progress events
+abort   Progression has been terminated (not due to an error).
+error   Progression has failed.
+load    Progression has been successful.
+loadend Progress has stopped (after "error", "abort", or "load" have been dispatched).
+loadstart   Progress has begun.
+progress    In progress.
+timeout Progression is terminated due to preset time expiring.
+
+Storage events
+change
+storage
+
+Update events
+checking
+downloading
+error
+noupdate
+obsolete
+updateready
+
+Value change events
+broadcast
+CheckboxStateChange
+hashchange
+input
+RadioStateChange
+readystatechange
+ValueChange
+
+Uncategorized events
+invalid
+message
+message
+open
+show
+
+Less common and non-standard events
+
+Abortable Fetch events
+abort   A DOM request is aborted, i.e. using AbortController.abort().
+
+WebVR events
+vrdisplayactivate   When a VR display is able to be presented to, for example if an HMD has been moved to bring it out of standby, or woken up by being put on.
+vrdisplayblur   when presentation to a VRDisplay has been paused for some reason by the browser, OS, or VR hardware — for example, while the user is interacting with a system menu or browser, to prevent tracking or loss of experience.
+vrdisplayconnect    when a compatible VRDisplay is connected to the computer.
+vrdisplaydeactivate When a VRDisplay can no longer be presented to, for example if an HMD has gone into standby or sleep mode due to a period of inactivity.
+vrdisplaydisconnect When a compatible VRDisplay is disconnected from the computer.
+vrdisplayfocus  When presentation to a VRDisplay has resumed after being blurred.
+vrdisplaypresentchange  The presenting state of a VRDisplay changes — i.e. goes from presenting to not presenting, or vice versa.
+
+SVG events
+SVGAbort
+SVGError
+SVGLoad
+SVGResize
+SVGScroll
+SVGUnload
+SVGZoom
+
+Database events
+abort
+blocked
+complete
+error
+success
+upgradeneeded
+versionchange
+
+Script events
+afterscriptexecute
+beforescriptexecute
+
+Menu events
+DOMMenuItemActive
+DOMMenuItemInactive
+
+Window events
+close
+
+Popup events
+popuphidden
+popuphiding
+popupshowing
+popupshown
+
+Tab events
+visibilitychange
+
+Battery events
+chargingchange
+chargingtimechange
+dischargingtimechange
+levelchange
+
+Call events
+alerting
+busy
+callschanged
+cfstatechange
+connected
+connecting
+dialing
+disconnected
+disconnecting
+error
+held, holding
+incoming
+resuming
+statechange
+voicechange
+
+Sensor events
+compassneedscalibration
+devicemotion
+deviceorientation
+orientationchange
+
+Smartcard events
+icccardlockerror
+iccinfochange
+smartcard-insert
+smartcard-remove
+stkcommand
+stksessionend
+cardstatechange
+
+SMS and USSD events
+delivered
+received
+sent
+ussdreceived
+
+Frame events
+mozbrowserclose
+mozbrowsercontextmenu
+mozbrowsererror
+mozbrowsericonchange
+mozbrowserlocationchange
+mozbrowserloadend
+mozbrowserloadstart
+mozbrowseropenwindow
+mozbrowsersecuritychange
+mozbrowsershowmodalprompt
+mozbrowsertitlechange
+
+DOM mutation events
+DOMAttributeNameChanged
+DOMAttrModified
+DOMCharacterDataModified
+DOMContentLoaded
+DOMElementNameChanged
+DOMNodeInserted
+DOMNodeInsertedIntoDocument
+DOMNodeRemoved
+DOMNodeRemovedFromDocument
+DOMSubtreeModified
+
+Touch events
+touchcancel
+touchend
+touchmove 在这个事件发生期间，调用preventDefault()事件可以阻止滚动。
+touchstart
+
+上面的这些事件都会冒泡，也都可以取消。
+
+
+
+Pointer events
+pointerover
+pointerenter
+pointerdown
+pointermove
+pointerup
+pointercancel
+pointerout
+pointerleave
+gotpointercapture
+lostpointercapture
+
+
+
+
+【HTML DOM Console 对象】
+
+
+【HTML DOM CSS 样式声明对象(CSSStyleDeclaration)】
+
+
+
+
+
+
+
+
+

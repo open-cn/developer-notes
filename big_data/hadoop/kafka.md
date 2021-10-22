@@ -12,6 +12,7 @@ Kafka 是一个作家的名字，由于 Jay Kreps 比较喜欢这个作家，并
 
 官方下载地址: http://kafka.apache.org/downloads
 
+0.7.x, 0.8.0, 0.8.1.X, 0.8.2.X, 0.9.0.X, 0.10.0.X, 0.10.1.X, 0.10.2.X, 0.11.0.X, 1.0.X, 1.1.X, 2.0.X, 2.1.X, 2.2.X, 2.3.X, 2.4.X, 2.5.X, 2.6.X, 2.7.X, 2.8.X 3.0.x.
 
 ### 消息队列
 
@@ -83,4 +84,42 @@ kafka 的存储文件都是按照 offset.kafka 来命名
 Kafka 使用 Zookeeper 保存集群的元数据信息和消费者信息，来保证集群的可用性。
 
 Kafka 集群中只能有一个 leader，其他都是 follower，这都需要 Zookeeper 来保证。
+
+### 使用
+
+```bash
+# Download the latest Kafka release and extract it:
+$ tar -xzf kafka_2.13-3.0.0.tgz
+$ cd kafka_2.13-3.0.0
+
+# NOTE: Your local environment must have Java 8+ installed.
+
+# Start the ZooKeeper service
+# Note: Soon, ZooKeeper will no longer be required by Apache Kafka.
+$ bin/zookeeper-server-start.sh config/zookeeper.properties
+
+# Start the Kafka broker service
+$ bin/kafka-server-start.sh config/server.properties
+
+$ bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+
+$ bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092
+Topic:quickstart-events  PartitionCount:1    ReplicationFactor:1 Configs:
+    Topic: quickstart-events Partition: 0    Leader: 0   Replicas: 0 Isr: 0
+
+$ bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server localhost:9092
+This is my first event
+This is my second event
+
+$ bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server localhost:9092
+This is my first event
+This is my second event
+
+```
+
+
+
+
+
+
 

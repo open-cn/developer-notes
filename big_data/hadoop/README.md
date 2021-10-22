@@ -349,8 +349,285 @@ HDFS的小文件问题被大家诟病，Ozone对象存储也是千呼万唤始�
 最关键的一点：CDP的组件代码在github上找不到，是不再开源了，CDP7以后就没有社区版了。
 
 
-### Hadoop 的原理
-#### Hadoop 的架构
+### Hadoop 运行
+
+#### Hadoop 运行模式
+Hadoop 运行模式包括：本地模式、伪分布式模式以及完全分布式模式。
+
+本地运行模式不需要额外的设置，只需要执行相应的jar包就可以了。不需要任何的集群配置，本地运行模式其实也是一种单节点模式。
+
+伪分布模式可以把MapReduce程序直接运行在HDFS上，
+也可以选择运行在Yarn上。
+
+#### 配置文件说明
+Hadoop 配置文件分两类：默认配置文件和自定义配置文件，只有用户想修改某一默认
+配置值时，才需要修改自定义配置文件，更改相应属性值。
+
+（1）默认配置文件：<br>
+[core-default.xml] hadoop-common-2.7.2.jar/core-default.xml<br>
+[hdfs-default.xml] hadoop-hdfs-2.7.2.jar/hdfs-default.xml<br>
+[yarn-default.xml] hadoop-yarn-common-2.7.2.jar/yarn-default.xml<br>
+[mapred-default.xml] hadoop-mapreduce-client-core-2.7.2.jar/mapred-default.xml<br>
+
+（2）自定义配置文件：<br>
+core-site.xml、hdfs-site.xml、yarn-site.xml、mapred-site.xml四个配置文件存放在$HADOOP_HOME/etc/hadoop这个路径上，可以根据项目需求重新进行修改配置。<br>
+
+#### 本地运行模式-官方 Grep 案例
+```bash
+# 在hadoop-2.7.2文件下面创建一个input文件夹
+cd $HADOOP_HOME
+mkdir input
+# 将Hadoop的xml配置文件复制到input
+cp etc/hadoop/*.xml input
+# 执行share目录下的MapReduce程序
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar \
+grep input output 'dfs[a-z.]+'
+# 查看输出结果
+cat output/*
+```
+
+#### 本地运行模式-官方 WordCount 案例
+```
+在hadoop-2.7.2文件下面创建一个wcinput文件夹
+cd $HADOOP_HOME
+mkdir wcinput
+在wcinput文件下创建一个wc.input文件
+cd wcinput
+touch wc.input
+编辑wc.input文件
+vi wc.input
+在文件中输入如下内容
+hadoop yarn
+hadoop mapreduce
+atguigu
+atguigu
+保存退出：：wq
+回到Hadoop目录，执行share目录下的MapReduce程序
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar
+wordcount wcinput wcoutput
+查看输出结果
+cat wcoutput/part-r-00000
+```
+
+#### 伪分布式运行模式-启动 HDFS 并运行 MapReduce 程序
+```
+（1）配置集群
+（a）配置：hadoop-env.sh
+配置JAVA_HOME
+（b）配置：core-site.xml
+<!--指定HDFS中NameNode的地址-->
+<property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://hadoop101:9000</value>
+</property>
+<!--指定Hadoop运行时产生文件的存储目录-->
+<property>
+    <name>hadoop.tmp.dir</name>
+    <value>/opt/hadoop/tmp</value>
+</property>
+（c）配置：hdfs-site.xml
+<!--指定HDFS副本的数量-->
+<property>
+<name>dfs.replication</name>
+<value>1</value>
+</property>
+（2）启动集群
+（a）格式化NameNode（第一次启动时格式化，以后就不要总格式化）
+bin/hdfs namenode -format
+（b）启动NameNode
+sbin/hadoop-daemon.sh start namenode
+（c）启动DataNode
+sbin/hadoop-daemon.sh start datanode
+（3）查看集群
+（a）查看是否启动成功
+jps #注意：jps是JDK中的命令，不是Linux命令。
+（b）web端查看HDFS文件系统
+http://hadoop101:50070/dfshealth.html#tab-overview
+（c）查看产生的Log日志
+（d）思考：为什么不能一直格式化NameNode，格式化NameNode，要注意什么？
+注意：格式化NameNode，会产生新的集群id,导致NameNode和DataNode的集群id不一致，集群找不到已往数据。所以，格式NameNode时，一定要先删除data数据和log日志，然后再格式化NameNode。
+（4）操作集群
+（a）在HDFS文件系统上创建一个input文件夹
+bin/hdfs dfs -mkdir -p /user/input
+（b）将测试文件内容上传到文件系统上
+bin/hdfs dfs -put wcinput/wc.input /user/input/
+（c）查看上传的文件是否正确
+bin/hdfs dfs -ls /user/input/
+bin/hdfs dfs -cat /user/input/wc.input
+（d）运行MapReduce程序
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/input/ /user/output
+（e）查看输出结果
+bin/hdfs dfs -cat /user/output/*
+（f）将测试文件内容下载到本地
+hdfs dfs -get /user/output/part-r-00000./wcoutput/
+（g）删除输出结果
+hdfs dfs -rm -r /user/output
+```
+
+#### 伪分布式运行模式-启动 YARN 并运行 MapReduce 程序
+```
+（1）配置集群
+（a）配置yarn-env.sh
+配置JAVA_HOME
+（b）配置yarn-site.xml
+<!--Reducer获取数据的方式-->
+<property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+</property>
+<!--指定YARN的ResourceManager的地址-->
+<!--wsl2 中需要设置未0.0.0.0，不然无法访问-->
+<property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>hadoop101</value>
+</property>
+（c）配置：mapred-env.sh
+配置JAVA_HOME
+（d）配置：(对mapred-site.xml.template重新命名为)mapred-site.xml
+<!--指定MR运行在YARN上-->
+<property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+</property>
+（2）启动集群
+（a）启动前必须保证NameNode和DataNode已经启动
+（b）启动ResourceManager
+sbin/yarn-daemon.sh start resourcemanager
+（c）启动NodeManager
+sbin/yarn-daemon.sh start nodemanager
+（3）集群操作
+（a）YARN的浏览器页面查看http://hadoop101:8088/cluster
+（b）删除文件系统上的output文件
+bin/hdfs dfs -rm -R /user/output
+（c）执行MapReduce程序
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/input /user/output
+（d）查看运行结果
+bin/hdfs dfs -cat /user/output/*
+```
+
+#### 伪分布式运行模式-配置历史服务器
+```
+（1）配置mapred-site.xml
+vi mapred-site.xml
+在该文件里面增加如下配置。
+<!--历史服务器端地址-->
+<property>
+    <name>mapreduce.jobhistory.address</name>
+    <value>hadoop101:10020</value>
+</property>
+<!--历史服务器web端地址-->
+<property>
+    <name>mapreduce.jobhistory.webapp.address</name>
+    <value>hadoop101:19888</value>
+</property>
+（2）启动历史服务器
+sbin/mr-jobhistory-daemon.sh start historyserver
+（3）查看历史服务器是否启动
+jps
+（4）查看JobHistory http://hadoop101:19888/jobhistory
+```
+
+#### 伪分布式运行模式-配置日志的聚集
+日志聚集概念：应用运行完成以后，将程序运行日志信息上传到HDFS系统上。
+注意：开启日志聚集功能，需要重新启动NodeManager、ResourceManager和HistoryManager。
+```
+（1）配置yarn-site.xml
+vi yarn-site.xml
+在该文件里面增加如下配置。
+<!--日志聚集功能使能-->
+<property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+</property>
+<!--日志保留时间设置7天-->
+<property>
+    <name>yarn.log-aggregation.retain-seconds</name>
+    <value>604800</value>
+</property>
+（2）关闭NodeManager、ResourceManager和HistoryManager
+sbin/yarn-daemon.sh stop resourcemanager
+sbin/yarn-daemon.sh stop nodemanager
+sbin/mr-jobhistory-daemon.sh stop historyserver
+（3）启动NodeManager、ResourceManager和HistoryManager
+sbin/yarn-daemon.sh start resourcemanager
+sbin/yarn-daemon.sh start nodemanager
+sbin/mr-jobhistory-daemon.sh start historyserver
+（4）删除HDFS上已经存在的输出文件
+bin/hdfs dfs -rm -R /user/atguigu/output
+（5）执行WordCount程序
+hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/atguigu/input 
+/user/atguigu/output
+（6）查看日志http://hadoop101:19888/jobhistory
+```
+
+#### 完全分布式运行模式
+1. 准备客户机（关闭防火墙、静态ip、主机名称）
+2. 安装JDK
+3. 配置环境变量
+4. 安装Hadoop
+5. 配置环境变量
+6. 配置集群
+7. 单点启动
+8. 配置ssh
+9. 群起并测试集群
+
+#### Hadoop编译源码
+```
+1.准备工作：CentOS联网、jar包准备(hadoop源码、JDK8、maven、ant、protobuf)
+（1）hadoop-2.7.2-src.tar.gz
+（2）jdk-8u144-linux-x64.tar.gz
+（3）apache-ant-1.9.9-bin.tar.gz（build工具，打包用的）
+（4）apache-maven-3.0.5-bin.tar.gz
+（5）protobuf-2.5.0.tar.gz（序列化的框架）
+注意：采用root角色编译，减少文件夹权限出现问题
+2.jar包安装：
+（1）JDK解压、配置环境变量JAVA_HOME和PATH
+（2）Maven解压、配置MAVEN_HOME和PATH
+（3）ant解压、配置ANT_HOME和PATH
+（4）安装glibc-headers和g++命令如下
+yum install glibc-headers
+yum install gcc-c++
+（5）安装make和cmake
+yum install make
+yum install cmake
+（6）解压protobuf，进入到解压后protobuf主目录，/opt/module/protobuf-2.5.0，
+然后相继执行命令
+tar -zxvf protobuf-2.5.0.tar.gz -C /opt/module/
+cd /opt/module/protobuf-2.5.0/
+./configure
+make
+make check
+make install
+ldconfig
+
+vi /etc/profile
+#LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/module/protobuf-2.5.0
+export PATH=$PATH:$LD_LIBRARY_PATH
+source/etc/profile
+（7）安装openssl库、安装ncurses-devel库
+yum install openssl-devel
+yum install ncurses-devel
+3.编译源码
+（1）解压源码到/opt/目录
+tar -zxvf hadoop-2.7.2-src.tar.gz -C /opt/
+（2）进入到hadoop源码主目录
+cd /opt/hadoop-2.7.2-src
+（3）通过maven执行编译命令
+mvn package -Pdist,native -DskipTests -Dtar
+等待时间30分钟左右，最终成功是全部SUCCESS，
+（4）成功的64位hadoop包在/opt/hadoop-2.7.2-src/hadoop-dist/target下
+4.编译源码过程中常见的问题及解决方案
+（1）MAVEN install时候JVM内存溢出
+处理方式：在环境配置文件和maven的执行文件均可调整MAVEN_OPT的heap大小。
+（2）编译期间maven报错。可能网络阻塞问题导致依赖库下载不完整导致，多次执行命令
+（一次通过比较难）。
+（3）报ant、protobuf等错误，插件下载未完整或者插件版本问题，最开始链接有较多特殊
+情况，同时推荐2.7.0版本的问题汇总帖子http://www.tuicool.com/articles/IBn63qf
+```
+
+### Hadoop 原理
+#### Hadoop 架构
 Hadoop 主要有两个层次，即：
 
 - 加工/计算层(MapReduce)
@@ -383,7 +660,7 @@ Hadoop 运行整个计算机集群代码。这个过程包括以下核心任务�
 - 发送排序的数据到某一计算机。
 - 为每个作业编写的调试日志。
 
-#### Hadoop 的特点
+#### Hadoop 特点
 Hadoop框架允许用户快速地编写和测试的分布式系统。有效并在整个机器和反过来自动分配数据和工作，利用CPU内核的基本平行度。 <br>
 Hadoop不依赖于硬件，以提供容错和高可用性（FTHA），而Hadoop库本身已被设计在应用层可以检测和处理故障。 <br>
 服务器可以添加或从集群动态删除，Hadoop可继续不中断地运行。 <br>
@@ -1168,6 +1445,11 @@ hive.server2.authentication.ldap.baseDN ou=people,o=emr
 
 - HiveMetaStore端口（9083）状态检查：检查近5分钟HiveMetaStore端口（9083）状态是否正常
 
+##### Zookeeper
+- Zookeeper Client端口（2181）状态检查：检查近5分钟Zookeeper Client端口（2181）状态是否正常
+- Zookeeper Leader端口（3888）状态检查：检查近5分钟Zookeeper Leader端口（3888）状态是否正常
+- Zookeeper Peer端口（2888）状态检查：检查近5分钟Zookeeper Peer端口（2888）状态是否正常
+
 ##### HUE
 - Hue端口（8888）状态检查：检查近5分钟Hue端口（8888）状态是否正常
 
@@ -1196,279 +1478,6 @@ hive.server2.authentication.ldap.baseDN ou=people,o=emr
 ##### Zeppelin
 - Zeppelin端口（8080）状态检查：检查近5分钟Zeppelin端口（8080）状态是否正常
 
-##### Zookeeper
-- Zookeeper Client端口（2181）状态检查：检查近5分钟Zookeeper Client端口（2181）状态是否正常
-- Zookeeper Leader端口（3888）状态检查：检查近5分钟Zookeeper Leader端口（3888）状态是否正常
-- Zookeeper Peer端口（2888）状态检查：检查近5分钟Zookeeper Peer端口（2888）状态是否正常
-
-### Hadoop 运行模式
-Hadoop 运行模式包括：本地模式、伪分布式模式以及完全分布式模式。
-
-#### 配置文件说明
-Hadoop 配置文件分两类：默认配置文件和自定义配置文件，只有用户想修改某一默认
-配置值时，才需要修改自定义配置文件，更改相应属性值。
-
-（1）默认配置文件：<br>
-[core-default.xml] hadoop-common-2.7.2.jar/core-default.xml<br>
-[hdfs-default.xml] hadoop-hdfs-2.7.2.jar/hdfs-default.xml<br>
-[yarn-default.xml] hadoop-yarn-common-2.7.2.jar/yarn-default.xml<br>
-[mapred-default.xml] hadoop-mapreduce-client-core-2.7.2.jar/mapred-default.xml<br>
-
-（2）自定义配置文件：<br>
-core-site.xml、hdfs-site.xml、yarn-site.xml、mapred-site.xml四个配置文件存放在$HADOOP_HOME/etc/hadoop这个路径上，可以根据项目需求重新进行修改配置。<br>
-
-#### 本地运行模式-官方 Grep 案例
-```
-在hadoop-2.7.2文件下面创建一个input文件夹
-cd $HADOOP_HOME
-mkdir input
-将Hadoop的xml配置文件复制到input
-cp etc/hadoop/*.xml input
-执行share目录下的MapReduce程序
-bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar
-grep input output 'dfs[a-z.]+'
-查看输出结果
-cat output/*
-```
-
-#### 本地运行模式-官方 WordCount 案例
-```
-在hadoop-2.7.2文件下面创建一个wcinput文件夹
-cd $HADOOP_HOME
-mkdir wcinput
-在wcinput文件下创建一个wc.input文件
-cd wcinput
-touch wc.input
-编辑wc.input文件
-vi wc.input
-在文件中输入如下内容
-hadoop yarn
-hadoop mapreduce
-atguigu
-atguigu
-保存退出：：wq
-回到Hadoop目录，执行share目录下的MapReduce程序
-bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar
-wordcount wcinput wcoutput
-查看输出结果
-cat wcoutput/part-r-00000
-```
-
-#### 伪分布式运行模式-启动 HDFS 并运行 MapReduce 程序
-```
-（1）配置集群
-（a）配置：hadoop-env.sh
-配置JAVA_HOME
-（b）配置：core-site.xml
-<!--指定HDFS中NameNode的地址-->
-<property>
-    <name>fs.defaultFS</name>
-    <value>hdfs://hadoop101:9000</value>
-</property>
-<!--指定Hadoop运行时产生文件的存储目录-->
-<property>
-    <name>hadoop.tmp.dir</name>
-    <value>/opt/module/hadoop-2.7.2/data/tmp</value>
-</property>
-（c）配置：hdfs-site.xml
-<!--指定HDFS副本的数量-->
-<property>
-<name>dfs.replication</name>
-<value>1</value>
-</property>
-（2）启动集群
-（a）格式化NameNode（第一次启动时格式化，以后就不要总格式化）
-bin/hdfs namenode -format
-（b）启动NameNode
-sbin/hadoop-daemon.sh start namenode
-（c）启动DataNode
-sbin/hadoop-daemon.sh start datanode
-（3）查看集群
-（a）查看是否启动成功
-jps #注意：jps是JDK中的命令，不是Linux命令。
-（b）web端查看HDFS文件系统
-http://hadoop101:50070/dfshealth.html#tab-overview
-（c）查看产生的Log日志
-（d）思考：为什么不能一直格式化NameNode，格式化NameNode，要注意什么？
-注意：格式化NameNode，会产生新的集群id,导致NameNode和DataNode的集群id不一致，集群找不到已往数据。所以，格式NameNode时，一定要先删除data数据和log日志，然后再格式化NameNode。
-（4）操作集群
-（a）在HDFS文件系统上创建一个input文件夹
-bin/hdfs dfs -mkdir -p /user/atguigu/input
-（b）将测试文件内容上传到文件系统上
-bin/hdfs dfs -put wcinput/wc.input /user/atguigu/input/
-（c）查看上传的文件是否正确
-bin/hdfs dfs -ls /user/atguigu/input/
-bin/hdfs dfs -cat /user/atguigu/input/wc.input
-（d）运行MapReduce程序
-bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/atguigu/input/ /user/atguigu/output
-（e）查看输出结果
-bin/hdfs dfs -cat /user/atguigu/output/*
-（f）将测试文件内容下载到本地
-hdfs dfs -get /user/atguigu/output/part-r-00000./wcoutput/
-（g）删除输出结果
-hdfs dfs -rm -r /user/atguigu/output
-```
-
-#### 伪分布式运行模式-启动 YARN 并运行 MapReduce 程序
-```
-（1）配置集群
-（a）配置yarn-env.sh
-配置JAVA_HOME
-（b）配置yarn-site.xml
-<!--Reducer获取数据的方式-->
-<property>
-    <name>yarn.nodemanager.aux-services</name>
-    <value>mapreduce_shuffle</value>
-</property>
-<!--指定YARN的ResourceManager的地址-->
-<property>
-    <name>yarn.resourcemanager.hostname</name>
-    <value>hadoop101</value>
-</property>
-（c）配置：mapred-env.sh
-配置JAVA_HOME
-（d）配置：(对mapred-site.xml.template重新命名为)mapred-site.xml
-<!--指定MR运行在YARN上-->
-<property>
-    <name>mapreduce.framework.name</name>
-    <value>yarn</value>
-</property>
-（2）启动集群
-（a）启动前必须保证NameNode和DataNode已经启动
-（b）启动ResourceManager
-sbin/yarn-daemon.sh start resourcemanager
-（c）启动NodeManager
-sbin/yarn-daemon.sh start nodemanager
-（3）集群操作
-（a）YARN的浏览器页面查看http://hadoop101:8088/cluster
-（b）删除文件系统上的output文件
-bin/hdfs dfs -rm -R /user/atguigu/output
-（c）执行MapReduce程序
-bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/atguigu/input /user/atguigu/output
-（d）查看运行结果
-bin/hdfs dfs -cat /user/atguigu/output/*
-```
-
-#### 伪分布式运行模式-配置历史服务器
-```
-（1）配置mapred-site.xml
-vi mapred-site.xml
-在该文件里面增加如下配置。
-<!--历史服务器端地址-->
-<property>
-    <name>mapreduce.jobhistory.address</name>
-    <value>hadoop101:10020</value>
-</property>
-<!--历史服务器web端地址-->
-<property>
-    <name>mapreduce.jobhistory.webapp.address</name>
-    <value>hadoop101:19888</value>
-</property>
-（2）启动历史服务器
-sbin/mr-jobhistory-daemon.sh start historyserver
-（3）查看历史服务器是否启动
-jps
-（4）查看JobHistory http://hadoop101:19888/jobhistory
-```
-
-#### 伪分布式运行模式-配置日志的聚集
-日志聚集概念：应用运行完成以后，将程序运行日志信息上传到HDFS系统上。
-注意：开启日志聚集功能，需要重新启动NodeManager、ResourceManager和HistoryManager。
-```
-（1）配置yarn-site.xml
-vi yarn-site.xml
-在该文件里面增加如下配置。
-<!--日志聚集功能使能-->
-<property>
-    <name>yarn.log-aggregation-enable</name>
-    <value>true</value>
-</property>
-<!--日志保留时间设置7天-->
-<property>
-    <name>yarn.log-aggregation.retain-seconds</name>
-    <value>604800</value>
-</property>
-（2）关闭NodeManager、ResourceManager和HistoryManager
-sbin/yarn-daemon.sh stop resourcemanager
-sbin/yarn-daemon.sh stop nodemanager
-sbin/mr-jobhistory-daemon.sh stop historyserver
-（3）启动NodeManager、ResourceManager和HistoryManager
-sbin/yarn-daemon.sh start resourcemanager
-sbin/yarn-daemon.sh start nodemanager
-sbin/mr-jobhistory-daemon.sh start historyserver
-（4）删除HDFS上已经存在的输出文件
-bin/hdfs dfs -rm -R /user/atguigu/output
-（5）执行WordCount程序
-hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/atguigu/input 
-/user/atguigu/output
-（6）查看日志http://hadoop101:19888/jobhistory
-```
-
-#### 完全分布式运行模式
-1. 准备客户机（关闭防火墙、静态ip、主机名称）
-2. 安装JDK
-3. 配置环境变量
-4. 安装Hadoop
-5. 配置环境变量
-6. 配置集群
-7. 单点启动
-8. 配置ssh
-9. 群起并测试集群
-
-#### Hadoop编译源码
-```
-1.准备工作：CentOS联网、jar包准备(hadoop源码、JDK8、maven、ant、protobuf)
-（1）hadoop-2.7.2-src.tar.gz
-（2）jdk-8u144-linux-x64.tar.gz
-（3）apache-ant-1.9.9-bin.tar.gz（build工具，打包用的）
-（4）apache-maven-3.0.5-bin.tar.gz
-（5）protobuf-2.5.0.tar.gz（序列化的框架）
-注意：采用root角色编译，减少文件夹权限出现问题
-2.jar包安装：
-（1）JDK解压、配置环境变量JAVA_HOME和PATH
-（2）Maven解压、配置MAVEN_HOME和PATH
-（3）ant解压、配置ANT_HOME和PATH
-（4）安装glibc-headers和g++命令如下
-yum install glibc-headers
-yum install gcc-c++
-（5）安装make和cmake
-yum install make
-yum install cmake
-（6）解压protobuf，进入到解压后protobuf主目录，/opt/module/protobuf-2.5.0，
-然后相继执行命令
-tar -zxvf protobuf-2.5.0.tar.gz -C /opt/module/
-cd /opt/module/protobuf-2.5.0/
-./configure
-make
-make check
-make install
-ldconfig
-
-vi /etc/profile
-#LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/opt/module/protobuf-2.5.0
-export PATH=$PATH:$LD_LIBRARY_PATH
-source/etc/profile
-（7）安装openssl库、安装ncurses-devel库
-yum install openssl-devel
-yum install ncurses-devel
-3.编译源码
-（1）解压源码到/opt/目录
-tar -zxvf hadoop-2.7.2-src.tar.gz -C /opt/
-（2）进入到hadoop源码主目录
-cd /opt/hadoop-2.7.2-src
-（3）通过maven执行编译命令
-mvn package -Pdist,native -DskipTests -Dtar
-等待时间30分钟左右，最终成功是全部SUCCESS，
-（4）成功的64位hadoop包在/opt/hadoop-2.7.2-src/hadoop-dist/target下
-4.编译源码过程中常见的问题及解决方案
-（1）MAVEN install时候JVM内存溢出
-处理方式：在环境配置文件和maven的执行文件均可调整MAVEN_OPT的heap大小。
-（2）编译期间maven报错。可能网络阻塞问题导致依赖库下载不完整导致，多次执行命令
-（一次通过比较难）。
-（3）报ant、protobuf等错误，插件下载未完整或者插件版本问题，最开始链接有较多特殊
-情况，同时推荐2.7.0版本的问题汇总帖子http://www.tuicool.com/articles/IBn63qf
-```
 
 ### Hadoop 生态圈
 ![](images/README0.jpg)
@@ -1495,7 +1504,7 @@ Hadoop生态圈由以下内容组成：
 **集群管理与监控**
 
 - Clodera Manager（简称CM）是Cloudera开发的一个基于Web的用于部署和管理CDH集群的软件。它具有集群自动化安装、中心化管理、集群监控、报警等功能，大大节省集群部署时间，降低了运维成本，极大的提高集群管理的效率。(非开源)
-- Hue是由Cloudera贡献给开源社区的Hadoop UI系统（Hadoop User Experience），最早是由Cloudera Desktop演化而来，它是基于Python Web框架Django实现的。Hue是一个可快速开发和调试Hadoop生态系统各种应用的一个基于浏览器的图形化用户接口。使用Hue可以在浏览器端的Web控制台上与Hadoop集群进行交互来分析处理数据，例如操作HDFS上的数据、运行MapReduce Job、执行Hive的SQL语句、浏览HBase数据库、运行Sqoop，编写Oozie工作流等等大量工作。Hue是Hadoop平台大数据分析开发的可视化分析利器。
+- Hue 是由Cloudera贡献给开源社区的Hadoop UI系统（Hadoop User Experience），最早是由 Cloudera Desktop 演化而来，它是基于 Python Web 框架 Django 实现的。Hue 是一个可快速开发和调试 Hadoop 生态系统各种应用的一个基于浏览器的图形化用户接口。使用 Hue 可以在浏览器端的 Web 控制台上与 Hadoop 集群进行交互来分析处理数据，例如操作 HDFS 上的数据、运行 MapReduce Job、执行 Hive 的 SQL 语句、浏览 HBase 数据库、运行 Sqoop，编写 Oozie 工作流等等大量工作。Hue 是 Hadoop 平台大数据分析开发的可视化分析利器。
 - Apache Ambari是Hortonworks贡献给Apache基金会的Hadoop平台管理软件，2013年11月20日成为Apache顶级项目。它具备Hadoop组件的安装、管理、运维等基本功能，提供Web UI进行可视化的集群管理，简化了大数据平台的安装、使用难度。
 - Dr.elephant是一款对Hadoop和Spark任务进行性能监控和调优的工具，它由LinkedIn的团队于2016年开源，开源之前已经在公司运行使用2年。它能自动采集作业的度量指标并分析，然后以简单明了的方式展现出来。Dr.elephant的设计思想是通过作业分析结果来指导开发者进行作业调优，从而提升开发者效率和集群资源的利用率。
 - Ganglia是UC Berkeley发起的一个开源集群监视项目，设计用于测量数以千计的节点。Ganglia的核心包含gmond、gmetad以及一个Web前端。主要是用来监控系统性能，如：cpu 、mem、硬盘利用率， I/O负载、网络流量情况等，通过曲线很容易见到每个节点的工作状态，对合理调整、分配系统资源，提高系统整体性能起到重要作用。
@@ -1507,7 +1516,7 @@ Hadoop生态圈由以下内容组成：
 
 - HDFS（Hadoop Distributed File System）分布式文件系统，是分布式计算中数据存储管理的基础。是Hadoop Core项目的核心子项目。HDFS是基于流数据模式访问和处理超大文件的需求而开发的，效仿谷歌文件系统(GFS)，数据在相同节点上以复制的方式进行存储以实现将数据合并计算的目的。HDFS是一个高度容错性的系统，适合部署在廉价的机器上。HDFS能提供高吞吐量的数据访问，非常适合大规模数据集上的应用。HDFS放宽了一部分POSIX约束，来实现流式读取文件系统数据的目的。它有很多的优点，但也存在有一些缺点，包括：不适合低延迟数据访问、无法高效存储大量小文件、不支持多用户写入及任意修改文件。
 - GPFS（General Parallel File System）是IBM推出的基于Hadoop的并行分布式集群文件系统。IBM认为GPFS不共享集群版本比HDFS快得多，因为它在内核级别中运行，而不是像HDFS在操作系统中运行。GPFS是一个共享磁盘的文件系统，集群内的所有节点可以并行地访问所有共享磁盘，并通过分布式的Token管理机制和条带化技术来管理和优化节点的访问。GPFS支持完整的Posix文件系统语义。GPFS的应用范围非常广泛，从多节点文件共享服务、实时多媒体处理、到大型的高性能计算集群，我们都可以看到GPFS的优秀表现。GPFS在这些应用里面都表现出了非常出色的性能和高可用性。
-- Ceph是一个开源的统一的分布式存储系统，是高性能的并行文件系统。Ceph是加州大学Santa Cruz分校的Sage Weil（DreamHost的联合创始人）专为博士论文设计的新一代自由软件分布式文件系统。自2007年毕业之后，Sage开始全职投入到Ceph开发之中，使其能适用于生产环境。Ceph的主要目标是设计成基于POSIX的没有单点故障的分布式文件系统，使数据能容错和无缝的复制。2010年3月，Linus Torvalds将Ceph client合并到内核2.6.34中。它基于CRUSH算法，没有中心节点，可以无限扩展。Ceph提供三种存储方式分别是对象存储，块存储和文件系统。在虚拟化领域里，比较常用到的是Ceph的块设备存储。Ceph以其稳定、高可用、可扩展的特性，乘着开源云计算管理系统OpenStack的东风，迅速成为最热门的开源分布式存储系统。Ceph是目前最火的分布式存储软件，Ceph开源存储项目已经成为全球众多海量存储项目的主要选择。Ceph现在是云计算、虚拟机部署的最火开源存储解决方案，是私有云事实上的标准。
+- Ceph 是一个开源的统一的分布式存储系统，是高性能的并行文件系统。Ceph是加州大学Santa Cruz分校的Sage Weil（DreamHost的联合创始人）专为博士论文设计的新一代自由软件分布式文件系统。自2007年毕业之后，Sage开始全职投入到Ceph开发之中，使其能适用于生产环境。Ceph的主要目标是设计成基于POSIX的没有单点故障的分布式文件系统，使数据能容错和无缝的复制。2010年3月，Linus Torvalds将Ceph client合并到内核2.6.34中。它基于CRUSH算法，没有中心节点，可以无限扩展。Ceph提供三种存储方式分别是对象存储，块存储和文件系统。在虚拟化领域里，比较常用到的是Ceph的块设备存储。Ceph以其稳定、高可用、可扩展的特性，乘着开源云计算管理系统OpenStack的东风，迅速成为最热门的开源分布式存储系统。Ceph是目前最火的分布式存储软件，Ceph开源存储项目已经成为全球众多海量存储项目的主要选择。Ceph现在是云计算、虚拟机部署的最火开源存储解决方案，是私有云事实上的标准。
 - GlusterFS(GNU ClusterFile System)是一种全对称的开源分布式文件系统，所谓全对称是指GlusterFS采用弹性哈希算法，没有中心节点，所有节点全部平等。GlusterFS配置方便，稳定性好，可轻松达到PB级容量，数千个节点。2011年被红帽收购，之后推出了基于GlusterFS的Red Hat Storage Server，增加了针对KVM的许多特性，可用作为KVM存储image存储集群，也可以为LB或HA提供存储。
 - Swift 最初是由 Rackspace 公司开发的高可用分布式对象存储服务。于 2010 年贡献给OpenStack开源社区作为其最初的核心子项目之一，为其 Nova 子项目提供虚机镜像存储服务。Swift构筑在比较便宜的标准硬件存储基础设施之上，无需采用 RAID（磁盘冗余阵列），通过在软件层面引入一致性散列技术和数据冗余性，牺牲一定程度的数据一致性来达到高可用性和可伸缩性，支持多租户模式、容器和对象读写操作，适合解决互联网的应用场景下非结构化数据存储问题。Swift是一种比较通用的存储解决方案，能够可靠地存储数量非常多的大小不一的文件。
 - BeeGFS（原FhGFS）既是一个网络文件系统也是一个并行文件系统。是由Fraunhofer Institute为工业数学计算而设计开发，由于在欧洲和美国的中小型HPC系统性能表现良好，在2014年改名注册为BeeGFS并受到科研和商业的广泛应用。客户端通过网络与存储服务器进行通信(具有TCP/IP或任何具有RDMA功能 的互连，如InfiniBand，RoCE或Omni-Path，支持native verbs 接口)。通过BeeGFS添加更多的服务器， 其容量和性能被聚合在单个命名空间中。BeeGFS是遵循GPL的“免费开源”产品，文件系统没有许可证费用。 由ThinkParQ提供专业支持，系统集成商可以为客户构建使用BeeGFS的解决方案。
@@ -1517,32 +1526,32 @@ Hadoop生态圈由以下内容组成：
 **资源调度**
 
 - YARN（Yet Another Resource Negotiator）是Hadoop的资源管理和作业调度系统。作为Apache Hadoop的核心组件之一，YARN负责将系统资源分配给在Hadoop集群中运行的各种应用程序，并调度在不同集群节点上执行的任务。YARN是Hadoop2.x 版本中的一个新特性。它的出现其实是为了解决第一代 MapReduce 编程框架的不足，提高集群环境下的资源利用率，这些资源包括内存，磁盘，网络，IO等。YARN的基本思想是将资源管理和作业调度/监视的功能分解为单独的 daemon（守护进程），其拥有一个全局ResourceManager、每个应用程序的ApplicationMaster及每台机器框架代理NodeManager。ResourceManager负责所有应用程序之间资源分配。NodeManager负责Containers，监视其资源使用情况（CPU，内存，磁盘，网络）并将其报告给 ResourceManager。ApplicationMaster负责是协调来自ResourceManager的资源，并与NodeManager一起执行和监视任务。
-- Apache Mesos是一个集群管理器，可跨分布式应用程序或框架提供有效的资源隔离和共享。Mesos最初是由加州大学伯克利分校的AMPLab开发的，Mesos项目发布于是2009年，2010年12月进入Apache孵化器，2013年6月19日成为Apache顶级项目。Twitter公司则是 Mesos 项目的早期支持者和使用者之一。它位于应用程序层和操作系统之间，可以更加轻松地在大规模集群环境中更有效地部署和管理应用程序。它可以在动态共享节点池上运行许多应用程序。对数据中心而言它就像一个单一的资源池，从物理或虚拟机器中抽离了CPU、内存、存储以及其它计算资源，很容易建立和有效运行具备容错性和弹性的分布式系统。2019年5月，Twitter宣布放弃Mesos，基础设施从Mesos全面转向Kubernetes。
+- Apache Mesos 是一个集群管理器，可跨分布式应用程序或框架提供有效的资源隔离和共享。Mesos最初是由加州大学伯克利分校的AMPLab开发的，Mesos项目发布于是2009年，2010年12月进入Apache孵化器，2013年6月19日成为Apache顶级项目。Twitter公司则是 Mesos 项目的早期支持者和使用者之一。它位于应用程序层和操作系统之间，可以更加轻松地在大规模集群环境中更有效地部署和管理应用程序。它可以在动态共享节点池上运行许多应用程序。对数据中心而言它就像一个单一的资源池，从物理或虚拟机器中抽离了CPU、内存、存储以及其它计算资源，很容易建立和有效运行具备容错性和弹性的分布式系统。2019年5月，Twitter宣布放弃Mesos，基础设施从Mesos全面转向Kubernetes。
 
 
 **协调框架**
 
 - Apache ZooKeeper 是一个开源的分布式协调服务，是Google的Chubby一个开源的实现，是Hadoop，HBase和其他分布式框架使用的有组织服务的标准。由雅虎开源并于2010年11月成为Apache顶级项目。ZooKeeper是一个典型的分布式数据一致性解决方案，分布式应用程序可以基于ZooKeeper实现诸如数据发布/订阅、负载均衡、命名服务、分布式协调/通知、集群管理、Master 选举、分布式锁和分布式队列等功能。ZooKeeper是以Fast Paxos算法为基础的，Paxos 算法存在活锁的问题，即当有多个proposer交错提交时，有可能互相排斥导致没有一个proposer能提交成功，而Fast Paxos作了一些优化，通过选举产生一个leader (领导者)，只有leader才能提交proposer。ZooKeeper使用 ZAB 协议作为其保证数据一致性的核心算法。ZAB（ZooKeeper Atomic Broadcast 原子广播）协议是为分布式协调服务 ZooKeeper 专门设计的一种支持崩溃恢复的原子广播协议。
-- Etcd是一个高可用的键值存储系统，主要用于共享配置和服务发现。Etcd是一种分布式kv存储设施，由CoreOS于2013年6月发起的开源并维护的项目，它感来自于ZooKeeper和Doozer，基于Go语言实现。它类似的Zookeeper，但没有Zookeeper那么重型，功能也没有覆盖那么多，通过Raft一致性算法处理日志复制以保证强一致性。Raft是一个新的一致性算法，适用于分布式系统的日志复制，Raft通过选举的方式来实现一致性。Google的容器集群管理系统Kubernetes、开源PaaS平台Cloud Foundry和CoreOS的Fleet都广泛使用了Etcd。在分布式系统中，如何管理节点间的状态一直是一个难题，etcd像是专门为集群环境的服务发现和注册而设计，它提供了数据TTL失效、数据改变监视、多值、目录监听、分布式锁原子操作等功能，可以方便的跟踪并管理集群节点的状态。
-- Consul是HashiCorp公司推出的开源工具，用于实现分布式系统的服务发现与配置共享。Consul用Go语言实现，因此具有天然可移植性(支持Linux、windows和Mac OS X)。与其他分布式服务注册与发现的方案不同，Consul的方案更"一站式"，内置了服务注册与发现框架、分布一致性协议实现、健康检查、Key/Value存储、多数据中心方案，不再需要依赖其他工具（比如ZooKeeper等）。采用Raft算法一致性协议，支持多数据中心分布式高可用，服务发现和配置共享，使用gossip协议管理成员和消息广播，支持ACL访问控制。最新的Consul提供了一个新特性“Mesh 网关”，实现透明、跨网络的连接。这些特性可以跨平台工作，对Kubernetes提供一流的支持，并且在任何云或专用网络上都可以轻松地部署到更传统的环境中，实现了Consul多云服务网络的目标。
+- Etcd 是一个高可用的键值存储系统，主要用于共享配置和服务发现。Etcd是一种分布式kv存储设施，由CoreOS于2013年6月发起的开源并维护的项目，它感来自于ZooKeeper和Doozer，基于Go语言实现。它类似的Zookeeper，但没有Zookeeper那么重型，功能也没有覆盖那么多，通过Raft一致性算法处理日志复制以保证强一致性。Raft是一个新的一致性算法，适用于分布式系统的日志复制，Raft通过选举的方式来实现一致性。Google的容器集群管理系统Kubernetes、开源PaaS平台Cloud Foundry和CoreOS的Fleet都广泛使用了Etcd。在分布式系统中，如何管理节点间的状态一直是一个难题，etcd像是专门为集群环境的服务发现和注册而设计，它提供了数据TTL失效、数据改变监视、多值、目录监听、分布式锁原子操作等功能，可以方便的跟踪并管理集群节点的状态。
+- Consul 是HashiCorp公司推出的开源工具，用于实现分布式系统的服务发现与配置共享。Consul用Go语言实现，因此具有天然可移植性(支持Linux、windows和Mac OS X)。与其他分布式服务注册与发现的方案不同，Consul的方案更"一站式"，内置了服务注册与发现框架、分布一致性协议实现、健康检查、Key/Value存储、多数据中心方案，不再需要依赖其他工具（比如ZooKeeper等）。采用Raft算法一致性协议，支持多数据中心分布式高可用，服务发现和配置共享，使用gossip协议管理成员和消息广播，支持ACL访问控制。最新的Consul提供了一个新特性“Mesh 网关”，实现透明、跨网络的连接。这些特性可以跨平台工作，对Kubernetes提供一流的支持，并且在任何云或专用网络上都可以轻松地部署到更传统的环境中，实现了Consul多云服务网络的目标。
 
 
 **数据存储**
 
 - Apache HBase（Hadoop Database）是一个分布式的、面向列的NoSQL开源数据库。是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBase技术可在廉价PC Server上搭建起大规模结构化存储集群。初期的目标是弥补MapReduce在实时操作上的缺失，方便用户可随时操作大规模的数据集。HBase原来是Apache的Hadoop项目的子项目，随着大数据与NoSQL的流行和迅速发展，2010年5月Apache HBase脱离了Hadoop成为Apache基金的顶级项目。HBase是Google Bigtable的开源实现，类似Google Bigtable利用GFS作为其文件存储系统，HBase利用Hadoop HDFS作为其文件存储系统；Google运行MapReduce来处理Bigtable中的海量数据，HBase同样利用Hadoop MapReduce来处理HBase中的海量数据；Google Bigtable利用 Chubby作为协同服务，HBase利用Zookeeper作为协调服务。HBase不同于一般的关系数据库，它是一个适合于非结构化数据存储的数据库，另外HBase是基于列的而不是基于行的模式。
-- Apache Cassandra是一个开源的、分布式的混合型NoSQL数据库。它最初由Facebook开发，于2008年开源，2010年2月17日成为Apache顶级项目。主要用于储存海量数据。以Amazon专有的完全分布式Dynamo为基础，结合了Google BigTable基于列族的数据模型。P2P去中心化的存储。很多方面都可以称之为Dynamo 2.0。Cassandra的主要特点就是它不是一个数据库，而是由一堆数据库节点共同构成的一个分布式网络服务，对Cassandra 的一个写操作，会被复制到其它节点上去，对Cassandra的读操作，也会被路由到某个节点上面去读取。对于一个Cassandra群集来说，扩展性能是比较简单的事情，只管在群集里面添加节点就可以了。它提供了高可用性，没有单点故障。它是一个网络社交云计算方面理想的数据库。
-- Clickhouse是俄罗斯yandex公司于2016年开源的一个列式数据库管理系统，在OLAP领域像一匹黑马一样，以其超高的性能受到业界的青睐。它的特性：基于shard+replica实现的线性扩展和高可靠、采用列式存储，数据类型一致，压缩性能更高、硬件利用率高，连续IO，提高了磁盘驱动器的效率、向量化引擎与SIMD提高了CPU利用率，多核多节点并行化大查询，它的不足点:不支持事务,异步删除与更新、不适用高并发场景
+- Apache Cassandra 是一个开源的、分布式的混合型NoSQL数据库。它最初由Facebook开发，于2008年开源，2010年2月17日成为Apache顶级项目。主要用于储存海量数据。以Amazon专有的完全分布式Dynamo为基础，结合了Google BigTable基于列族的数据模型。P2P去中心化的存储。很多方面都可以称之为Dynamo 2.0。Cassandra的主要特点就是它不是一个数据库，而是由一堆数据库节点共同构成的一个分布式网络服务，对Cassandra 的一个写操作，会被复制到其它节点上去，对Cassandra的读操作，也会被路由到某个节点上面去读取。对于一个Cassandra群集来说，扩展性能是比较简单的事情，只管在群集里面添加节点就可以了。它提供了高可用性，没有单点故障。它是一个网络社交云计算方面理想的数据库。
+- Clickhouse 是俄罗斯yandex公司于2016年开源的一个列式数据库管理系统，在OLAP领域像一匹黑马一样，以其超高的性能受到业界的青睐。它的特性：基于shard+replica实现的线性扩展和高可靠、采用列式存储，数据类型一致，压缩性能更高、硬件利用率高，连续IO，提高了磁盘驱动器的效率、向量化引擎与SIMD提高了CPU利用率，多核多节点并行化大查询，它的不足点:不支持事务,异步删除与更新、不适用高并发场景
 - ScyllaDB 是用 C++ 重写的 Cassandra，官网号称每节点每秒处理 100 万 TPS。ScyllaDB 完全兼容 Apache Cassandra，拥有比 Cassandra 多 10x 倍的吞吐量，降低了延迟。ScyllaDB 号称是世界上最快的 NoSQL 列存储数据库。ScyllaDB 在垃圾收集或者 Compaction 的时候不需要暂停，在常规生产负载的时候可以添加和删除节点，数据结构测量不会跨 CPU 缓存线，poll 模式驱动替代了中断。目前国内资料极少，中文网2016年7月停止了更新。
-- MongoDB是为处理大数据而生的一个面向文档的分布式开源数据库，由10gen公司开发和维护。它使用C++编写。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。他支持的数据结构非常松散，是类似json的bjson格式，因此可以存储比较复杂的数据类型。Mongo最大的特点是他支持的查询语言非常强大，其语法有点类似于面向对象的查询语言，几乎可以实现类似关系数据库单表查询的绝大部分功能，而且还支持对数据建立索引。MongoDB是专为可扩展性，高性能和高可用性而设计的数据库。它可以从单服务器部署扩展到大型、复杂的多数据中心架构。利用内存计算的优势，MongoDB能够提供高性能的数据读写操作。MongoDB的本地复制和自动故障转移功能使应用程序具有企业级的可靠性和操作灵活性。2018年10月MongoDB宣布将开源协议从GNU AGPLv3切换到Server Side Public License (SSPL)，SSPL 明确要求托管 MongoDB 实例的云厂商要么获取商业许可证要么向社区开放其服务源码。随即，红帽宣布从Red Hat Enterprise Linux（RHEL）8中删除 MongoDB，Debian Linux也已经从它的发行版中删除了MongoDB。
+- MongoDB 是为处理大数据而生的一个面向文档的分布式开源数据库，由10gen公司开发和维护。它使用C++编写。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。他支持的数据结构非常松散，是类似json的bjson格式，因此可以存储比较复杂的数据类型。Mongo最大的特点是他支持的查询语言非常强大，其语法有点类似于面向对象的查询语言，几乎可以实现类似关系数据库单表查询的绝大部分功能，而且还支持对数据建立索引。MongoDB是专为可扩展性，高性能和高可用性而设计的数据库。它可以从单服务器部署扩展到大型、复杂的多数据中心架构。利用内存计算的优势，MongoDB能够提供高性能的数据读写操作。MongoDB的本地复制和自动故障转移功能使应用程序具有企业级的可靠性和操作灵活性。2018年10月MongoDB宣布将开源协议从GNU AGPLv3切换到Server Side Public License (SSPL)，SSPL 明确要求托管 MongoDB 实例的云厂商要么获取商业许可证要么向社区开放其服务源码。随即，红帽宣布从Red Hat Enterprise Linux（RHEL）8中删除 MongoDB，Debian Linux也已经从它的发行版中删除了MongoDB。
 - Apache Accumulo 是一个高性能可扩展的分布式Key-Value数据存储和检索系统。由美国国家安全局（NSA）于2011年捐赠给Apache基金会，2012年3月21日成为Apache顶级项目。Accumulo使用Google BigTable设计思路，基于Apache Hadoop、Zookeeper 和 Thrift 构建。Accumulo支持高效存储和检索的结构化数据，包括查询范围，并提供支持使用Accumulo表作为输入和输出的 MapReduce作业。Accumulo比简单的key-values数据库提供更丰富的数据模型，但不是完全的关系数据库。
 - Redis 是一个开源的支持网络、可基于内存也可持久化的日志型、Key-Value数据库，和Memcached类似。它可以用作数据库、缓存和消息中间件。是Salvatore Sanfilippo于2009年开发，2010年3月15日起Redis的开发工作由VMware主持，2013年5月开始由Pivotal赞助。Redis支持存储的value类型相对更多，包括字符串、链表、集合（set）和有序集合（zset）。与memcached一样，为了保证效率，数据都是缓存在内存中，区别的是Redis会周期性的把更新的数据写入磁盘或者把修改操作写入追加的记录文件，并且在此基础上实现了主从同步。Redis的出现，很大程度补偿了memcached这类key/value存储的不足，在部分场合可以对关系数据库起到很好的补充作用。它提供了Python、Ruby、Erlang、PHP客户端，使用很方便。 简单说，Redis是一个数据缓存的NoSQL数据库。
-- Apache Ignite是一个以内存为中心的分布式数据库、缓存和处理平台，可以在PB级数据中，以内存级的速度进行事务性、分析性以及流式负载的处理。Ignite和Apache Arrow很类似，属于大数据范畴中的内存分布式管理系统。Ignite来源于GridGain系统公司开发的GridGain软件，2014 年3月GridGain公司将该软件90%以上的功能和代码开源，2014年10月GridGain通过Apache 2.0许可进入Apache的孵化器进行孵化，2015年9月18日成为Apache的顶级项目，9月28日即发布了1.4.0版。Ignite提供了完整的SQL、DDL和DML的支持，可以使用纯SQL而不用写代码与Ignite进行交互，这意味着只使用SQL就可以创建表和索引，以及插入、更新和查询数据。有这个完整的SQL支持，Ignite就可以作为一种分布式SQL数据库。Ignite还提供了基于数据关联对数据进行分区的能力，并使用大规模并行处理来提高性能和可伸缩性。Ignite还提供内置的流处理、分析和机器学习功能。它类似于一个关系型的内存数据库，可以像操作数据库一样操作内存缓存。
+- Apache Ignite 是一个以内存为中心的分布式数据库、缓存和处理平台，可以在PB级数据中，以内存级的速度进行事务性、分析性以及流式负载的处理。Ignite和Apache Arrow很类似，属于大数据范畴中的内存分布式管理系统。Ignite来源于GridGain系统公司开发的GridGain软件，2014 年3月GridGain公司将该软件90%以上的功能和代码开源，2014年10月GridGain通过Apache 2.0许可进入Apache的孵化器进行孵化，2015年9月18日成为Apache的顶级项目，9月28日即发布了1.4.0版。Ignite提供了完整的SQL、DDL和DML的支持，可以使用纯SQL而不用写代码与Ignite进行交互，这意味着只使用SQL就可以创建表和索引，以及插入、更新和查询数据。有这个完整的SQL支持，Ignite就可以作为一种分布式SQL数据库。Ignite还提供了基于数据关联对数据进行分区的能力，并使用大规模并行处理来提高性能和可伸缩性。Ignite还提供内置的流处理、分析和机器学习功能。它类似于一个关系型的内存数据库，可以像操作数据库一样操作内存缓存。
 - Apache Arrow 大数据列式内存数据平台。最初是基于Apache Drill项目的代码进行开发的，于2016年2月17日成为Apache顶级项目。它是列式内存分析的事实标准，由来自Drill、Hadoop、HBase、Impala、Storm等13个顶级开源项目的工程师们开发和完善。它设计的目的在于作为一个跨平台的数据层，来加快大数据分析项目的运行速度。它为平面和分层数据指定了独立于语言的标准化列式内存格式，可在现代硬件上进行高效的分析操作。它还提供了计算库和零拷贝流式消息传递和进程间通信。在分布式系统内部，每个系统都有自己的内存格式，大量的 CPU 资源被消耗在序列化和反序列化过程中，并且由于每个项目都有自己的实现，没有一个明确的标准，造成各个系统都在重复着复制、转换工作，这种问题在微服务系统架构出现之后更加明显，Arrow 的出现就是为了解决这一问题。它提供了一种跨平台应用的内存数据交换格式，是列式内存分析的事实标准。目前支持的语言包括C、C++、C#、Go、Java、JavaScript、MATLAB、Python、R语言、Ruby和Rust等11种语言。
-- Apache Geode是一个高性能的分布式内存对象缓存系统，Key/Value存储系统。是GemFire的开源版，2015年4月GemGire把代码提交给Apache孵化，2016年11月16日毕业成为Apache基金会的顶级项目。Geode是一个相当成熟、强健的的数据管理平台，提供实时的、一致的、贯穿整个云架构地访问数据关键型应用。Geode跨多个进程汇集内存，CPU，网络资源和可选的本地磁盘，以管理应用程序对象和行为。Geode自身功能比较多，首先它是一个基于JVM的NoSQL分布式数据处理平台，同时集中间件、缓存、消息队列、事件处理引擎、NoSQL数据库于一身的分布式内存数据处理平台。可用来进行完成分布式缓存、数据持久化、分布式事物、动态扩展等功能。简单说，Geode是Redis的增强版。
-- Neo4j是一个开源的高性能NOSQL图形数据库，它将结构化数据存储在网络上而不是表中。它是由Neo技术使用Java语言完全开发的。图形数据库也就意味着它的数据并非保存在表或集合中，而是保存为节点以及节点之间的关系。Neo4j 除了顶点和边，还有一种重要的部分属性。无论是顶点还是边，都可以有任意多的属性。属性的存放类似于一个HashMap，Key 为一个字符串，而 Value 必须是基本类型或者是基本类型数组。Neo4j也可以被看作是一个高性能的图引擎，该引擎具有成熟数据库的所有特性。Neo4j创建的图是用顶点和边构建一个有向图，其查询语言cypher已经成为事实上的标准。
-- Apache CouchDB是一个分布式的NoSQL面向文档的数据库，2008年11月19日成为Apache顶级开源项目。CouchDB是一个完全包含web的数据库。使用JSON格式存储文档数据。使用web浏览器通过HTTP访问文档。使用JavaScript查询、组合和转换文档。CouchDB可以很好地与现代web和移动应用程序配合使用。可以使用CouchDB 增量复制高效地分发数据。CouchDB支持带有自动冲突检测的主控设置。CouchDB附带了一套特性，比如即时文档转换和实时更改通知，这使得web开发变得非常简单。它甚至提供了一个易于使用的web管理控制台。
-- Apache Kudu是一个为了Hadoop系统环境而打造的列式存储系统，是一个为块数据的快速分析而生的存储架构，可以同时提供低延迟的随机读写和高效的数据分析能力。Kudu是由Cloudera开源，2015年12月3日进入Apache孵化器，2016年7月20日成为Apache顶级项目。Kudu专为了对快速变化的数据进行快速的分析，拥有Hadoop生态系统应用的常见技术特性，运行在一般的商用硬件上，支持水平扩展,高可用，使用Raft协议进行一致性保证。并且与Cloudera Impala和Apache Spark等当前流行的大数据查询和分析工具结合紧密。在Kudu出现之前，Hadoop生态环境中的储存主要依赖HDFS和HBase，追求高吞吐批处理的用例中使用HDFS，追求低延时随机读取用例下用HBase，而Kudu正好能兼顾这两者。
-- Apache CarbonData是一个基于索引的列式数据格式解决方案。华为于2016年6月开源并贡献给Apache，于2017年4月19日成为Apache顶级项目。CarbonData是一种新的融合存储解决方案，利用先进的列式存储，索引，压缩和编码技术提高计算效率，从而加快查询速度，其查询速度比 PetaBytes 数据快一个数量级。CarbonData提供了一种新的融合数据存储方案，以一份数据同时支持“交互式分析、详单查询、任意维度组合的过滤查询等”多种大数据应用场景，并通过丰富的索引技术、字典编码、列存等特性提升了IO扫描和计算性能，实现百亿数据级秒级响应，与大数据生态Apache Hadoop、Apache Spark等无缝集成。
+- Apache Geode 是一个高性能的分布式内存对象缓存系统，Key/Value存储系统。是GemFire的开源版，2015年4月GemGire把代码提交给Apache孵化，2016年11月16日毕业成为Apache基金会的顶级项目。Geode是一个相当成熟、强健的的数据管理平台，提供实时的、一致的、贯穿整个云架构地访问数据关键型应用。Geode跨多个进程汇集内存，CPU，网络资源和可选的本地磁盘，以管理应用程序对象和行为。Geode自身功能比较多，首先它是一个基于JVM的NoSQL分布式数据处理平台，同时集中间件、缓存、消息队列、事件处理引擎、NoSQL数据库于一身的分布式内存数据处理平台。可用来进行完成分布式缓存、数据持久化、分布式事物、动态扩展等功能。简单说，Geode是Redis的增强版。
+- Neo4j 是一个开源的高性能NOSQL图形数据库，它将结构化数据存储在网络上而不是表中。它是由Neo技术使用Java语言完全开发的。图形数据库也就意味着它的数据并非保存在表或集合中，而是保存为节点以及节点之间的关系。Neo4j 除了顶点和边，还有一种重要的部分属性。无论是顶点还是边，都可以有任意多的属性。属性的存放类似于一个HashMap，Key 为一个字符串，而 Value 必须是基本类型或者是基本类型数组。Neo4j也可以被看作是一个高性能的图引擎，该引擎具有成熟数据库的所有特性。Neo4j创建的图是用顶点和边构建一个有向图，其查询语言cypher已经成为事实上的标准。
+- Apache CouchDB 是一个分布式的NoSQL面向文档的数据库，2008年11月19日成为Apache顶级开源项目。CouchDB是一个完全包含web的数据库。使用JSON格式存储文档数据。使用web浏览器通过HTTP访问文档。使用JavaScript查询、组合和转换文档。CouchDB可以很好地与现代web和移动应用程序配合使用。可以使用CouchDB 增量复制高效地分发数据。CouchDB支持带有自动冲突检测的主控设置。CouchDB附带了一套特性，比如即时文档转换和实时更改通知，这使得web开发变得非常简单。它甚至提供了一个易于使用的web管理控制台。
+- Apache Kudu 是一个为了Hadoop系统环境而打造的列式存储系统，是一个为块数据的快速分析而生的存储架构，可以同时提供低延迟的随机读写和高效的数据分析能力。Kudu是由Cloudera开源，2015年12月3日进入Apache孵化器，2016年7月20日成为Apache顶级项目。Kudu专为了对快速变化的数据进行快速的分析，拥有Hadoop生态系统应用的常见技术特性，运行在一般的商用硬件上，支持水平扩展,高可用，使用Raft协议进行一致性保证。并且与Cloudera Impala和Apache Spark等当前流行的大数据查询和分析工具结合紧密。在Kudu出现之前，Hadoop生态环境中的储存主要依赖HDFS和HBase，追求高吞吐批处理的用例中使用HDFS，追求低延时随机读取用例下用HBase，而Kudu正好能兼顾这两者。
+- Apache CarbonData 是一个基于索引的列式数据格式解决方案。华为于2016年6月开源并贡献给Apache，于2017年4月19日成为Apache顶级项目。CarbonData是一种新的融合存储解决方案，利用先进的列式存储，索引，压缩和编码技术提高计算效率，从而加快查询速度，其查询速度比 PetaBytes 数据快一个数量级。CarbonData提供了一种新的融合数据存储方案，以一份数据同时支持“交互式分析、详单查询、任意维度组合的过滤查询等”多种大数据应用场景，并通过丰富的索引技术、字典编码、列存等特性提升了IO扫描和计算性能，实现百亿数据级秒级响应，与大数据生态Apache Hadoop、Apache Spark等无缝集成。
 
 
 **数据处理**

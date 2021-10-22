@@ -1,0 +1,14 @@
+测试相关概念
+
+根据测试 是否知道源代码：
+    黑盒测试：只关心程序执行的过程 和结果。
+    白盒测试：根据源代码写测试方法 或者 测试用例。
+
+根据测试的粒度：
+    方法测试： function test
+    单元测试： unit test
+    集成测试： intergration test
+
+根据测试的次数：
+    冒烟测试： smoke test （android 猴子monkey）
+    压力测试： pressure test

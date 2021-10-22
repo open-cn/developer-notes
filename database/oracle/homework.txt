@@ -1,0 +1,162 @@
+salgrade:工资等级表
+	GRADE   工资等级
+	LOSAL   最低工资标准
+	HISAL    最高工资标准
+
+dept:部门表
+	 DEPTNO：部门编号
+ 	DNAME：部门名称
+ 	LOC：部门所在地
+ 	
+em:员工表
+ EMPNO  员工编号
+ ENAME   姓名
+ JOB        职位
+ MGR       领导
+ HIREDATE  入职时间
+ SAL       薪资
+ COMM   奖金
+ DEPTNO  部门编号
+ 
+ bonus:红利表
+ ENAME 员工姓名
+JOB      职位
+SAL      薪资
+COMM  奖金
+
+查询oracle服务器的日期和时间
+select sysdate from dual;
+
+dual表只是为了满足查询语法要求
+ nvl(comm,0):如果comm为null，则取值为0，否则取本身值
+ 
+ 列起别名最好使用双引号，可以按照双引号原来字符串显示：
+sal * 12 + nvl(comm,0) as "totalsal"
+双引号用来起别名，单引号表示oracle的字符串数据类型    varchar2(10)    'abc';
+
+字符串使用单引号，如果后面有计算则用括号括起来
+select ename||'的年收入是:'||(sal*12 + nvl(comm,0)) from emp;
+
+distinct去掉重复的行:
+ select distinct job from emp;
+ 
+ v$nls_parameters设置一些显示格式:
+ select * from v$nls_parameters;
+ 
+ 修改日期显示格式：
+ alter session set NLS_DATE_FORMAT='yyyy-mm-dd';
+ select * from emp where hiredate <= '1982-12-31';
+  select * from emp where hiredate <= '31-12月-81';
+  
+  select * from emp where empno in (7369,7839);
+                 等价
+ select * from emp where empno = 7369 or empno=7839;
+ 
+ like:  %,表示0个或多个
+          _,表示一个
+          
+定义转义字符：          
+ select * from emp where job like 'IT\_%' escape '\';
+ to_date(' 2014-05-16','yyyy-mm-dd') from dual;
+
+ 2014-07-14
+ 
+ select 列名 from 表名 [where 过滤行]
+                                   group by 列名
+ 								having 过滤组
+ 								order by 列名
+ 
+ where:过滤行
+ having：过滤组和group by结合起来使用
+                                  
+显示自己的工资和他经理的工资
+
+jack的工资是：，他的经理工资是：     
+emp               
+  ename  sal    ,mgr  ,empno  
+  
+  select e1.ename||‘的工资是：’||e1.sal||'  他的经理工资是：'||e2.sal from emp e1,emp e2 where e1.mgr(+) = e2.empno;
+  
+  FORD的工资是：3000  他的经理工资是：2975
+SCOTT的工资是：3000  他的经理工资是：2975
+
+查看每个员工的工资等级
+salgrade
+e1                   e2
+a   b   c           c   d
+1   2   3           3   33
+4   9   8           6   66
+8   2   5           9  77
+7   4   3
+select a,b,d  where e1.c = e2.c
+
+
+ENAME             MGR
+---------- ----------
+jack                7839
+helen            7902
+SMITH            7902
+ALLEN            7698
+WARD             7698
+JONES            7839
+MARTIN           7698
+BLAKE            7839
+CLARK            7839
+SCOTT            7566
+KING
+TURNER           7698
+ADAMS            7788
+JAMES            7698
+FORD             7566
+MILLER           7782
+
+ENAME           EMPNO
+---------- ----------
+jack                7999
+helen            1234
+SMITH            7369
+ALLEN            7499
+WARD             7521
+JONES            7566
+MARTIN           7654
+BLAKE            7698
+CLARK            7782
+SCOTT            7788
+KING             7839
+TURNER           7844
+ADAMS            7876
+JAMES            7900
+FORD             7902
+MILLER           7934
+
+已选择16行。
+
+SQL>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

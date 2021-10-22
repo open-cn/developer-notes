@@ -1,0 +1,40 @@
+CSS3 是 CSS 规范的最新版本。
+在 CSS2.1 的基础上增加了很多强大的新功能，不再需要非语义标签、复杂的 JavaScript 脚本以及图片。
+例如，CSS3 支持圆角、多背景、透明度、阴影、动画、图表等功能。
+
+
+CSS1 和 CSS2.1 都是单一的规范，其中 CSS1 主要定义了网页对象的基本样式，如字体、颜色、背景、边框等，CSS2 添加了高级概念，如浮动、定位、高级选择器（如子选择器、相邻选择器和通用选择器等）。
+
+2001 年 5 月 23 日，W3C完成了 CSS3 的工作草案，在该草案中制定了 CSS3 发展路线图，路线图详细列出了所有模块，并计划在未来将逐步进行规范。
+https://www.w3.org/Style/CSS/current-work.html
+
+2002 年 5 月 15 日发布了 CSS3 Line 模块，该模块规范了文本行模型。
+2002 年 11 月 7 日发布了 CSS3 Lists 模块，该模块规范了列表样式。
+2002 年 11 月 7 日还发布了 CSS3 Border 模块，新添加了背景边框功能。该模块后来被合并到了背景模块中。
+2003 年 5 月 14 日发布了 CSS3 Generated and Replaced Content 模块，定义了 CSS3 的生成及更换内容功能。
+2003 年 8 月 13 日发布了 CSS3 Presentation Levels 模块，定义了演示效果功能。
+2003 年 8 月 13 日还发布了 CSS3 Syntax 模块，该模块重新的定义了 CSS 语法基础。
+2004 年 2 月 24 日发布了 CSS3 Hyperlink Presentation 模块，重新定义了超链接表示规则。
+2004 年 12 月 16 日发布了 CSS3 Speech 模块，该模块重新定义了语音“样式”规则。
+2005 年 12 月 15 日发布了 CSS3 Cascading and Inheritance 模块，定义了 CSS 层叠和继承规则。
+2007 年 8 月 9 日发布了 CSS3 Basic Box 模块，该模块重新定义了 CSS 基本盒模型规则。
+2007 年 9 月 5 日发布了 CSS3 Grid Positioning 模块，定义了 CSS 网格定位规则。
+2009 年 3 月 20 日发布了 CSS3 Animations 模块，定义了 CSS 动画模型。
+2009 年 3 月 20 日还发布了 CSS3 3D Transforms 模块，定义了 CSS 3D 转换模型。
+2009 年 6 月 18 日发布了 CSS3 Fonts 模块，定义了 CSS 字体模式。
+2009 年 7 月 23 日发布了 CSS3 Image Values 模块，定义了图像内容显示模型。
+2009 年 7 月 23 日还发布了 CSS3 Flexible Box Layout 模块，定义了灵活的框布局模型。
+2009 年 12 月 1 日发布了 CSS3 2D Transforms 模块，定义了 2D 转换模型。
+2010 年 4 月 29 日发布了 CSS3 Generated Conten for Paged Media 模块，定义了分页媒体内容模型。
+2010 年 10 月 5 日发布了 CSS3 Text 模块，定义了文本模型。
+2010 年 10 月 5 日还发布了 CSS3 Background and Borders 模块，该模块重新补丁了边框和背景模型。
+
+
+CSS3 属性支持情况：完全支持 CSS3 属性的浏览器有 Chrome 和 Safari，而且不管是 Mac 平台还是 Windows 平台全支持。
+
+CSS3 选择器支持情：除了 IE 家族和 Firefox3，其他几乎全部支持，Chrome、Safari、Firefox 3.6、Opera 10.5 最好。
+
+
+
+
+

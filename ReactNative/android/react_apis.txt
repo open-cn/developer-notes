@@ -1,0 +1,30 @@
+React APIs:
+
+new AppStateModule(reactContext),                               AppState
+new AsyncStorageModule(reactContext),                           AsyncSQLiteDBStorage
+new CameraRollManager(reactContext),                            RKCameraRollManager
+new ClipboardModule(reactContext),                              Clipboard
+new DatePickerDialogModule(reactContext),                       DatePickerAndroid
+new DialogModule(reactContext),                                 DialogManagerAndroid
+new FrescoModule(reactContext),                                 FrescoModule
+new I18nManagerModule(reactContext),                            I18nManager
+new ImageEditingManager(reactContext),                          RKImageEditingManager
+new ImageLoaderModule(reactContext),                            ImageLoader
+new ImageStoreManager(reactContext),                            ImageStoreManager
+new IntentModule(reactContext),                                 IntentAndroid
+new LocationModule(reactContext),                               LocationObserver
+new NativeAnimatedModule(reactContext),                         NativeAnimatedModule
+new NetworkingModule(reactContext),                             RCTNetworking
+new NetInfoModule(reactContext),                                NetInfo
+new PermissionsModule(reactContext),                            PermissionsAndroid
+new ShareModule(reactContext),                                  ShareModule
+new StatusBarModule(reactContext),                              StatusBarManager
+new TimePickerDialogModule(reactContext),                       TimePickerAndroid
+new ToastModule(reactContext),                                  ToastAndroid
+new VibrationModule(reactContext),                              Vibration
+new WebSocketModule(reactContext)                               WebSocketModule
+
+
+***Android
+RCT***
+***Module

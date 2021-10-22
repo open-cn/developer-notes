@@ -1,0 +1,37 @@
+
+
+HTML的结构包括头部（Head）、主体（Body）两大部分，其中头部描述浏览器所需的信息，而主体则包含所要说明的具体内容。
+HTML文档不是必须包括“头”和“主体”两部分
+
+
+bmp颜色格式支持上百万种颜色，但是不支持无损压缩
+&tl不是可以在HTML文档中使用的特殊字符。
+
+
+斜体字的HTML标签：<i> 粗体字的HTML标签: <b> 
+
+制作电子邮件链接<a href="mailto:xxx@163.com">
+
+<ol>产生带有数字列表符号的列表
+<ul>产生带有圆点列表符号的列表 
+
+<input type="text">复选框
+
+<select>下拉列表
+
+<textarea></textarea>产生文本区
+
+background="background.gif"插入背景图像
+
+a {text-decoration:none} 显示没有下划线的超链接
+
+
+
+
+
+HTML 4.01 针对下列元素定义 name 属性：a, applet, frame, iframe, img, 和map。
+在 XHTML 中不鼓励使用 name 属性，应该使用 id 取而代之。
+
+你应该在 "/" 符号前添加一个额外的空格，以使你的 XHTML 与当今的浏览器相兼容。
+
+

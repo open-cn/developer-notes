@@ -1,0 +1,10 @@
+查看端口占用的程序uid
+cmd命令：netstat -aon|findstr "8700"
+结果：  TCP    127.0.0.1:8700         0.0.0.0:0              LISTENING       4820（uid）
+
+查看端口占用的程序名
+cmd命令：tasklist|findstr "4820"
+结果：  eclipse.exe                   4820 Console                    1    881,788 K
+
+关闭该程序
+cmd命令：taskkill /f /t /im eclipse.exe 

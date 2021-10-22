@@ -1,0 +1,76 @@
+
+RubyGems（简称 gems）是一个用于对 Ruby组件进行打包的 Ruby 打包系统。 它提供一个分发 Ruby 程序和库的标准格式，还提供一个管理程序包安装的工具。
+RubyGems的功能类似于Linux下的apt-get。
+使用它可以方便的从远程服务器下载并安装Rails。
+打开命令行窗口(cmd)，输入执行命令 gem install rails --remote 或　gem install rails--include-dependencies。
+
+
+
+
+api.rubygems.org 是被墙的
+
+gem sources -l
+https://rubygems.org/
+
+gem sources --add  https://gems.ruby-china.com/
+
+gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/
+其实就修改了下 ~/.gemrc 文件
+
+
+在 OS X 下, 若继续 gem install, 那么很容易遇到如下错误
+ERROR:  While executing gem ... (Gem::FilePermissionError)
+    You don't have write permissions for the /Library/Ruby/Gems/2.0.0 directory.
+
+
+有两个差劲的方法可以解决这个问题.
+一个是前面加 sudo. 这时候记得先用 sudo 重走第一步换个源.
+另一种是修改 /Library/Ruby/Gems/2.0.0 这个目录的用户, 即 sudo chown -R your_name:your_name /Library/Ruby/Gems/2.0.0
+建议的是用 homebrew 再装一个 ruby, 这样 local 归 local, system 归 system. 反正也不大.
+brew install ruby
+brew 安装有问题 /usr/bin/ruby被内置版本占用
+
+使用 rvm(ruby version manager) 管理版本
+curl -L https://get.rvm.io | bash -s stable --ruby
+
+RVM 是一个命令行工具，可以提供一个便捷的多版本 Ruby 环境的管理和切换。
+
+rvm get
+rvm list known
+rvm install 2.4
+
+gem list --local
+gem install bundler jekyll
+
+1、jekyll new jekyll-website
+
+2、
+mkdir jekyll-website
+cd jekyll-website
+
+# Create a Gemfile
+bundle init
+
+# Add Jekyll
+bundle add jekyll
+
+# Install gems
+bundle install
+
+
+
+1、bundle update jekyll
+2、gem update jekyll
+
+
+
+
+
+
+
+
+
+
+
+
+

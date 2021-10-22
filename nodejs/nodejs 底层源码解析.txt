@@ -1,0 +1,84 @@
+Node.js JavaScript runtime
+https://nodejs.org/
+
+
+【源码组成 https://github.com/nodejs/node】
+Node.js主要分为四大部分，Node Standard Library，Node Bindings，V8，Libuv
+
+
+node/benchmark/ Node.js Core Benchmarks 核心库基准测试
+
+node/deps/uv/ libuv is a multi-platform support library with a focus on asynchronous I/O. 
+node/deps/v8/ V8 JavaScript Engine
+
+node/deps/npm/ npm(1) -- a JavaScript package manager
+node/deps/openssl/
+
+node/src/ Node.js C++ codebase
+
+
+
+【启动流程】
+大体流程是这样的：
+1、初始化 V8 、LibUV , OpenSSL
+2、创建 Environment 环境
+3、设置 Process 进程对象
+4、执行 node.js 文件
+
+
+1、node/src/node_main.cc
+int wmain(int argc, wchar_t* wargv[]) 
+int main(int argc, char* argv[]) 
+
+node::Start(argc, argv);
+
+2、node/src/node.cc
+2.1 InitializationResult result = InitializeOncePerProcess(argc, argv); // 初始化node process等资源
+PlatformInit();
+per_process::v8_platform.Initialize(per_process::cli_options->v8_thread_pool_size);
+V8::Initialize();
+per_process::v8_initialized = true;
+
+2.2 NodeMainInstance main_instance(...) // 初始化node 实例资源
+
+2.3 result.exit_code = main_instance.Run();
+CreateMainEnvironment();
+LoadEnvironment(env.get()); //加载nodejs文件后调用ExecuteString()
+uv_run(env->event_loop(), UV_RUN_DEFAULT); //事件循环池
+v8_platform.DrainVMTasks();
+more = uv_loop_alive(env.event_loop());
+
+2.4 TearDownOncePerProcess(); // 释放node process等资源
+per_process::v8_initialized = false;
+V8::Dispose();
+per_process::v8_platform.Dispose();
+
+2.5 return result.exit_code;
+
+3. node/src/api/environment.cc
+CreateEnvironment(...)
+Environment* env = new Environment(...)
+env->RunBootstrapping().IsEmpty()
+FreeEnvironment(env);
+
+LoadEnvironment
+StartExecution(env, cb);
+StartExecution(env, "internal/bootstrap/environment").IsEmpty()
+return StartExecution(env, "internal/main/run_third_party_main");
+return StartExecution(env, "internal/main/worker_thread");
+return StartExecution(env, "internal/main/inspect");
+return StartExecution(env, "internal/main/run_main_module");
+ExecuteBootstrapper(env, main_script_id, &parameters, &arguments)
+NativeModuleEnv::LookupAndCompile(env->context(), id, parameters, env);
+env->async_hooks()->clear_async_id_stack();
+
+4、JS 入口文件 ./lib/internal/bootstrap/node.js
+
+
+
+
+
+
+
+
+

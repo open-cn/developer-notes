@@ -1,0 +1,435 @@
+搭建环境：
+1、下载jdk:选择正确的平台，编译器、工具集和一个运行环境
+      windows
+      linux
+      mac
+      java.lang.String
+      
+      安装目录：
+        bin   工具集  javac   java   jar   javadoc
+        include   本地开发的头文件   jni.h    native
+        jre            一个java运行环境
+        lib           库文件   *.jar
+2、配置环境变量
+       java_home:和其他软件约定的一个变量名
+           tomcat   jboss  weblogic
+           java-home   javahome
+           java_home=jdk安装目录
+           java_home=C:\jdk1.7.0_45
+       path:window搜索可行程序的目录，这个环境已经存在；system32
+           path=%path%;%java_home%\bin 
+           
+           goagent
+           fqrouter
+           lefei
+           改错：认真看错误提示信息，如果有多个错误先修改第一个错误
+           javac:编译
+           java:把类加载到jvm上运行 
+                  java 类名
+                  java HelloWorld
+                  mono  u3d  C#
+       classpath
+       java学习顺序：javase->sql->jdbc->
+       						 html,javascript,jquery,ajax,css->servlet->
+       						 jsp->struts2[简化web开发],类似有jsf->hibernate->
+       						 spring-->ejb3.0-->web service
+       理解，写代码
+       跨平台：jvm屏蔽了操作系统之间的差异，而java源程序文件编译
+       				后产生的是字节码文件(x.class)	，字节码可以直接在
+       				jvm上运行
+     在一个源程序文件中可以定义多个类，也可以定义多个主函数，
+     如果要执行那个类中的主函数，直接在java命令后面跟类名  						
+      原则：最好在一个源程序文件中定义一个类
+      
+      javadoc 生成帮助文档 
+      /**
+      *
+      */
+      javadoc  源程序文件名
+      api:java内置工具类
+      String
+      
+      java documentation:training
+      
+      workspace:不要用中文，也不要有空格
+      project【java project】-->写类-->写代码
+      
+      javac -d e:\ HelloWorld.java
+      
+      包命名原则：把公司的域名倒过来
+                             http://www.gemptc.com
+                             com.gemptc
+        类全名：包名+类名
+        jvm启动时把java.lang包中的所有类加载到内存
+        
+	classpath:jvm搜索字节码文件的路径
+	
+	classpath=f:\
+	java com.gemptc.HelloWorld
+	
+	标识符：字符、数字、下划线_，美元符$
+	String package;
+	int public;
+	int age;
+	int i;
+	String name;
+	String a;
+	//为什么需要变量：让程序运行，必须要把软件加载到内存，申请和释放内存
+	变量的分类：局部变量和成员变量
+	变量的3要素：
+	 变量划分存储空间的大小（数据类型）、变量名、变量的作用域
+	 变量的作用域(生命周期)：
+	   属性的作用域从定义位置开始，一直到这个类结束;
+	   局部变量作用域从定义位置开始，到这个方法结束
+	   public void m(){
+	   		//错误
+	   	    int i = 20;
+			{
+				int i = 10;
+			}
+	   }
+	  public void m(){
+	   		//正确
+			{
+				int i = 10;
+			}
+			 int i = 20;
+	   }
+    3.14  double 8b
+    123   int         4b
+    true  false
+    'a'    'b'
+    "abcdef"
+    012=10
+    int a = 10;
+    switch(a){
+    }
+    boolean  flag = true;
+    1...100
+    while(flag){
+    		//循环体
+    }
+    看别人程序，一步一步执行
+    do...while
+    for
+    第一步
+    第二步
+    ....
+    while(...){
+		    if(..){
+		       ....
+		       continue;//没有必要
+		   }else if(...){
+		   	....
+		   	continue;
+		   }else{
+		   	....
+		   	continue;
+		   }
+	}
+	break:可以用在循环中，可以用在switch
+	continue:只能用在循环中
+	
+	数组：一次定义一批变量，并且能有规律的使用这些变量
+	int age1;
+	int age2;
+	......
+	类：
+	属性：每个对象，属性的取值是不一样的
+		height
+		weight
+		age
+		name
+	方法：每个对象，方法是只有一份
+		speak
+		run
+		...
+	小李：对象
+		178cm
+		80kg
+		20
+		"xiaoli"
+
+	小王：对象
+		175cm
+		70kg
+		21
+		"xiao王"
+		
+		speak
+		run
+		...
+	交通工具：
+		speed
+		volumn
+		vendor
+		......
+		
+		
+		increaseSpeed
+		run
+     对象1：
+         speed    200码
+         volumn 7
+         vendor  奥迪
+      对象2：
+         speed    100码
+         volumn 5
+         vendor  一汽
+     对象2：
+         speed    150码
+         volumn 5
+         vendor  上海大众
+   面向对象：封装、继承、多态
+   封装：把数据封装在类中，不允许在类的外部直接使用
+   
+   方法重载：
+     方法名相同
+   	 参数类型不同、参数个数不同、参数次序不同
+   不是方法重载：
+    m(int a);
+    m(int b);
+    是方法重载：
+    m(int a,float f);
+    m(float f,int a);
+    
+    m(int a,float f,double d);
+    m(float f,int a);
+    
+    m(String s);
+    m(int a);
+方法重载(overload)：
+	在同一个类中，要求：方法名相同，参数不同
+
+方法覆盖(override)：
+	必须要有继承，要求：4点要求
+		//1、方法名相同
+		//2、参数和返回值类型也相同
+		//3、方法的权限不能比父类的方法权限更严格
+		//4、子类方法抛出的异常不能比父类方法抛出的异常范围大
+super:指向父类的对象引用
+1、当子类重写了父类的方法，在重写的方法中调用父类方法
+2、调用父类的构造方法：必须写在子类的构造方法第一行
+    super(...)
+3、当子类的属性和父类中的属性相同时，引用父类的属性
+	super.name
+this:指向本类对象的引用
+  this(...)
+  this.name
+  
+ 多态：
+ 把子类对象当作父类对象来看；如果子类重写了父类中的某个方法，
+ 通过父类对象的引用调用这个方法时，实际上调用的是子类中的
+ 方法
+ 	Person p = new Student(.....);
+ 	String s  = p.getInfo();
+
+1、要有继承
+2、有方法重写：4点要求
+3、要把子类对象赋值给父类的引用
+
+最大程度解决了软件可扩展问题
+
+初始化顺序：
+	Person:private int initAge() 
+	public Person()
+	Student:private String initName()
+	public Student()
+	
+静态的方法可以重写，但是不产生多态
+面向接口编程
+public interface Movable{
+	public void run();
+}
+
+接口与接口之间继承关系:可以多继承
+   public interface IA extends IB
+类与类之间的关系继承：单继承
+类和接口之间是实现关系
+  public class CA extends CB implements IA,IB{
+  }
+  
+  String:对象池；不可变对象；最终类
+  字符串编码转换
+  
+  iso8859-1 --->utf-8
+  String s = "个会尽快yiol";//   iso8859-1
+  //获得s表示的字节数组
+  byte [] data = s.getBytes("iso8859-1")
+  //重现编码
+  String str = new String(data,"utf-8");//utf-8编码
+  
+  String:
+   char charAt(int index) 
+          返回指定索引处的 char 值。 
+ int compareTo(String anotherString) 
+          按字典顺序比较两个字符串。 
+ int compareToIgnoreCase(String str) 
+          按字典顺序比较两个字符串，不考虑大小写。 
+ String concat(String str) 
+          将指定字符串连接到此字符串的结尾。 
+ boolean contains(CharSequence s) 
+          当且仅当此字符串包含指定的 char 值序列时，返回 true。 
+ boolean endsWith(String suffix) 
+          测试此字符串是否以指定的后缀结束。 
+ boolean equals(Object anObject) 
+          将此字符串与指定的对象比较。 
+ boolean equalsIgnoreCase(String anotherString) 
+          将此 String 与另一个 String 比较，不考虑大小写。 
+ byte[] getBytes(Charset charset) 
+          使用给定的 charset 将此 String 编码到 byte 序列，并将结果存储到新的 byte 数组。 
+ byte[] getBytes(String charsetName) 
+          使用指定的字符集将此 String 编码为 byte 序列，并将结果存储到一个新的 byte 数组中。 
+ int hashCode() 
+          返回此字符串的哈希码。 
+ int indexOf(int ch) 
+          返回指定字符在此字符串中第一次出现处的索引。 
+ int indexOf(int ch, int fromIndex) 
+          返回在此字符串中第一次出现指定字符处的索引，从指定的索引开始搜索。 
+ int indexOf(String str) 
+          返回指定子字符串在此字符串中第一次出现处的索引。 
+ int indexOf(String str, int fromIndex) 
+          返回指定子字符串在此字符串中第一次出现处的索引，从指定的索引开始。 
+ int lastIndexOf(int ch) 
+          返回指定字符在此字符串中最后一次出现处的索引。 
+ int lastIndexOf(int ch, int fromIndex) 
+          返回指定字符在此字符串中最后一次出现处的索引，从指定的索引处开始进行反向搜索。 
+ int lastIndexOf(String str) 
+          返回指定子字符串在此字符串中最右边出现处的索引。 
+ int lastIndexOf(String str, int fromIndex) 
+          返回指定子字符串在此字符串中最后一次出现处的索引，从指定的索引开始反向搜索。 
+ int length() 
+          返回此字符串的长度。 
+ boolean matches(String regex) 
+          告知此字符串是否匹配给定的正则表达式。 
+ String replace(char oldChar, char newChar) 
+          返回一个新的字符串，它是通过用 newChar 替换此字符串中出现的所有 oldChar 得到的。 
+ String replace(CharSequence target, CharSequence replacement) 
+          使用指定的字面值替换序列替换此字符串所有匹配字面值目标序列的子字符串。 
+ String replaceAll(String regex, String replacement) 
+          使用给定的 replacement 替换此字符串所有匹配给定的正则表达式的子字符串。 
+ String[] split(String regex) 
+          根据给定正则表达式的匹配拆分此字符串。 
+ String[] split(String regex, int limit) 
+          根据匹配给定的正则表达式来拆分此字符串。 
+ boolean startsWith(String prefix) 
+          测试此字符串是否以指定的前缀开始。 
+ boolean startsWith(String prefix, int toffset) 
+          测试此字符串从指定索引开始的子字符串是否以指定前缀开始。 
+ String substring(int beginIndex) 
+          返回一个新的字符串，它是此字符串的一个子字符串。 
+ String substring(int beginIndex, int endIndex) 
+          返回一个新字符串，它是此字符串的一个子字符串。 
+ char[] toCharArray() 
+          将此字符串转换为一个新的字符数组。 
+ String toLowerCase() 
+          使用默认语言环境的规则将此 String 中的所有字符都转换为小写。 
+ String toLowerCase(Locale locale) 
+          使用给定 Locale 的规则将此 String 中的所有字符都转换为小写。 
+ String toString() 
+          返回此对象本身（它已经是一个字符串！）。 
+ String toUpperCase() 
+          使用默认语言环境的规则将此 String 中的所有字符都转换为大写。 
+ String toUpperCase(Locale locale) 
+          使用给定 Locale 的规则将此 String 中的所有字符都转换为大写。 
+ String trim() 
+          返回字符串的副本，忽略前导空白和尾部空白。 
+static String valueOf(boolean b) 
+          返回 boolean 参数的字符串表示形式。 
+static String valueOf(char c) 
+          返回 char 参数的字符串表示形式。 
+static String valueOf(char[] data) 
+          返回 char 数组参数的字符串表示形式。 
+static String valueOf(char[] data, int offset, int count) 
+          返回 char 数组参数的特定子数组的字符串表示形式。 
+static String valueOf(double d) 
+          返回 double 参数的字符串表示形式。 
+static String valueOf(float f) 
+          返回 float 参数的字符串表示形式。 
+static String valueOf(int i) 
+          返回 int 参数的字符串表示形式。 
+static String valueOf(long l) 
+          返回 long 参数的字符串表示形式。 
+static String valueOf(Object obj) 
+          返回 Object 参数的字符串表示形式。 
+          
+          String s = "    abc  d   ";
+          String str = s.trim();//"abc d"
+
+写程序：写一部分，测试一部分
+
+//一种写法
+try{
+	//可能发生异常的代码
+}catch(IOException e){
+	//异常处理
+}catch(SQLException e){
+	//异常处理
+}
+
+//另外一种写法
+try{
+	//可能发生异常的代码
+}catch(IOException e){
+	//异常处理
+}catch(SQLException e){
+	//异常处理
+}finally{
+	//最后执行的代码，通常释放资源
+}
+//第三种写法
+try{
+	//可能发生异常的代码
+}
+finally{
+	//最后执行的代码，通常释放资源
+}
+事务：一组不可分割的执行单元
+    SQLiteDatabase db = helper.getWritableData();
+    Transaction tran = db.beginTransaction();
+    try{
+	    a1 = a1 - 500;
+	    //int a = 1 / 0;
+	    a2 = a2 + 500;
+	    tran.setSuccessfully(true);//设置事务成功
+    }finally{
+    	 tran.endTransaction();//false:回滚-->a1 = a1 + 500  true:commit
+    }
+    
+    Throwable
+    			Error
+    			Exception
+    				RuntimeException:未检验异常
+    				其他异常:已检验异常
+    未检验异常:可以不做异常处理
+    已检验异常：必须要做异常处理，否则编译通不过
+	throws
+	throw
+	
+	Person p = new Person();
+	//集合中存储的是对象的引用：p
+	
+	List:存储的元素可以是重复，有下标(a[0])
+			   list.get(0);
+	Set:不能存储相同的元素，没有小标
+	Queue:队列，先进先出:LinkedList  
+	
+	List:ArrayList,LinkedList(Queue,DeQue)
+	Set:HashSet
+	SortedSet: TreeSet
+	
+	Map:HashMap
+	SortMap:TreeMap
+	
+	zhangsan
+
+
+
+
+
+
+加入支持jar包源码：
+1、右击工程-->properties-->builder path-->libraries-->add external jar-->android sdk/extra/v4/support-v4.jar
+2、libraries-->edit source-->右边编辑-->浏览到-->android sdk/extra/v4/src
+3、右击工程-->properties-->builder path-->order and export-->support-v4移动顶部
+

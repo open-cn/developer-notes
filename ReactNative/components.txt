@@ -1,0 +1,69 @@
+
+
+
+
+
+[Basic Components]
+View, 
+Text, 
+Image, 
+TextInput, 
+ScrollView, 
+StyleSheet, 
+
+[User Interface]
+Button, A basic button 
+Picker, Renders the native picker component on iOS and Android.
+Slider, select a single value from a range of values.
+Switch,  Renders a boolean input.
+
+[List Views]
+Unlike the more generic ScrollView, the following list view components only render elements that are currently showing on the screen. 
+FlatList, 
+scrollToIndex({
+animated?: boolean, // 可选，默认 true
+index: number, // 必需
+viewOffset?: number, // 跳转项目再向下偏移一定距离
+viewPosition?: number, // 0～1 向下偏移的百分比，比例尺对应整个列表容器
+})
+
+
+
+
+
+
+
+
+SectionList
+
+[iOS Components and APIs]
+ActionSheetIOS, API to display an iOS action sheet or share sheet.
+AlertIOS, Create an iOS alert dialog with a message or create a prompt for user input.
+DatePickerIOS, Renders a date/time picker (selector) on iOS.
+ImagePickerIOS, Renders a image picker on iOS.
+NavigatorIOS, A wrapper around UINavigationController, enabling you to implement a navigation stack.
+ProgressViewIOS, Renders a UIProgressView on iOS.
+PushNotificationIOS, Handle push notifications for your app, including permission handling and icon badge number.
+SegmentedControlIOS, Renders a UISegmentedControl on iOS.
+TabBarIOS, Renders a UITabViewController on iOS. Use with TabBarIOS.Item.
+
+
+[Android Components and APIs]
+BackHandler, Detect hardware button presses for back navigation.
+DatePickerAndroid, Opens the standard Android date picker dialog.
+DrawerLayoutAndroid, Renders a DrawerLayout on Android.
+PermissionsAndroid, Provides access to the permissions model introduced in Android M.
+ProgressBarAndroid, Renders a ProgressBar on Android.
+TimePickerAndroid, Opens the standard Android time picker dialog.
+ToastAndroid, Create an Android Toast alert.
+ToolbarAndroid, Renders a Toolbar on Android.
+ViewPagerAndroid, Container that allows to flip left and right between child views.
+
+[js Components and APIs]]
+
+
+
+
+
+
+

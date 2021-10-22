@@ -1,0 +1,121 @@
+【安装】：node-v0.10.33-x64.msi
+win8权限问题 使用管理员运行控制台，msiexec指令安装msi程序			msiexec /package xxx.msi
+
+【运行】demo 1.js 脚本文件后缀.js只是一个约定而已。
+1.控制台node命令
+1.1-->node desktop/1.js
+1.2-->node -e "console.log('aw');"
+
+2. Node.js程序内直接使用代码
+REPL模式（Read-eval-print loop），即“输入--求值--输出”循环。
+
+Ctrl+C结束等待（^C）
+
+【基础知识】
+一、IO流异步+事件循环+回调
+一些API也提供相应的同步方法，但是不建议使用
+
+EventEmitter对象
+创建		var event = new EventEmitter();
+注册监听	event.on('some_event',function(){...});
+发送事件	event.emit('some_event');
+
+二、模块和包
+创建模块	reauire('xxx')获取模块xxx
+		模块首次加载时初始化，并且被缓存起来，后面每次reauire('xxx')都会确切地返回同一模块，也不会再进行初始化
+
+单次加载	同一个模块加载多次 起作用的实例只是最后一次的
+
+覆盖exports
+
+
+
+
+
+
+
+
+
+【实例--微博网站】
+1、nodejs官方唯一推荐的Web开发框架
+安装Express框架		npm install -g express@2.5.8(不指定版本则安装最新版)	卸载npm uninstall -g express
+	高版本cmd命令需安装 npm install -g express-generator
+建立工程		express -t ejs microblog	 cd microblog	npm install
+	高版本需要改成：express  -e ejs microblog
+启动工程		node microblog\app.js
+        高版本需要改成：cd microblog    npm start
+
+另一种启动方式  supervisor	解决开发中的调试问题
+安装：npm install -g supervisor
+启动：cd microblog supervisor bin\www		（supervisor app.js）
+
+2、功能分析
+3、路由规划
+到目前为止我们所有的路由规则还都写在了 app.js 中，随着规模扩大其维护难度不断提高，因此我们需要把所有的路由规则分离出去。修改 app.js 的 app.configure 部分，用 
+app.use(express.router(routes))代替 app.use(app.router)：
+并且修改routes/index.js
+
+4、在 Node.js 中使用 MongoDB
+打开工程目录中的 package.json，在 dependencies 属性中添加一行代码：  , "mongodb": ">= 0.9.9" 
+然后npm install安装依赖项 npm update是更新
+
+MongoDB
+安装  msiexec /package xxx.msi	
+运行  cd %MongoDB%\bin    mongod -dbpath E:\MongoDB\db
+-dbpath 默认路径：/data/db/
+--port  默认端口：27017
+后台运行（需要管理员权限）
+  创建本地服务 mongod -install -dbpath E:\MongoDB\db -logpath E:\MongoDB\log\mongodb.log -logappend
+  启动本地服务 net start MongoDB
+记得设置日志路径，无默认，-logappend表示日志追加模式
+
+进入数据库
+cd C:\Program Files\MongoDB 2.6 Standard\bin
+mongo
+use microblog
+
+Express2.5.8 也提供了会话中间件，默认情况下是把用户信息存储在内存中，但我们既然已经有了 MongoDB，不妨把会话信息存储在数据库中，便于持久维护。为了使用这一功
+能，我们首先要获得一个叫做 connect-mongo 的模块，在 package.json里的dependencies 属性中添加一行代码： , "connect-mongo": ">= 0.1.7"
+然后npm install重新安装依赖项
+在app.js中添加：
+var MongoStore = require('connect-mongo')(express); 
+var settings = require('./settings');	./本级目录 ../上级目录
+
+app.use(express.cookieParser());	是 Cookie 解析的中间件
+app.use(express.session({		提供会话支持
+  secret: settings.cookieSecret, 
+  store: new MongoStore({		设置它的 store 参数为 MongoStore 实例，把会话信息存储到数据库中，以避免丢失。 
+    db: settings.db 
+  }) 
+})); 
+Express4.x分离了除静态中间件的所有中间件，需自行导入工程后再使用
+
+
+
+ejs模块，partical引入的ejs文件里，locals为未定义 用新版本的include无此问题
+
+
+
+
+
+
+
+
+Bootstrap前端框架
+Bootstrap 是基于 HTML、CSS、JAVASCRIPT 的，它简洁灵活，使得 Web 开发更加快捷。
+资源：
+百度云，
+http://apps.bdimg.com/libs/bootstrap/3.2.0/css/bootstrap.min.css
+http://apps.bdimg.com/libs/bootstrap/3.2.0/css/bootstrap-theme.min.css
+http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js
+http://apps.bdimg.com/libs/bootstrap/3.2.0/js/bootstrap.min.js
+
+CDN,
+http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css
+http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css
+http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js
+http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js
+
+<link href="http://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script src="http://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>

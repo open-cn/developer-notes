@@ -1,0 +1,91 @@
+
+
+
+文字的排版，颜色的设置，边框设置，元素宽度调整，布局与网格制作等等。
+
+
+
+
+SASS的老语法，也称为缩进语法。受HAML语法的影响，这个语法主要用来给那些追求CSS简洁的人使用。他不是使用大括号和分号，而是使用缩进来指定块。文件使用扩展名.sass。
+新的语法称为“SCSS”，增强了对CSS3语法的支持。这意味着每个CSS3的语法也适用于SCSS。SCSS文件有自己的扩展名.scss。
+
+SCSS语法规则和CSS的语法规则可以说是完全一样，由选择器、属性和属性三部分组成，并且和大括号{}与分号;配合在一起使用。
+
+在SASS语法中，有多个选择器时，每个选择器必须在一个行，而且用逗号,分隔。
+
+CSS代码：
+```
+.container {
+    width: 960px;
+    margin: 0 auto;
+}
+```
+SASS代码
+```
+.container
+    width: 960px
+    margin: 0 auto
+```
+
+
+
+SASS有几个基本特征，那是CSS没有的。
+
+
+变量(Variables)：用来定义变量
+
+SASS声明变量必须用$开头，后面紧变量名和变量值，而且变量名和变量值之间需要使用分号:隔开。
+
+
+
+
+嵌套(Nesting)：样式和属性的嵌套
+SASS中的嵌套有两种，一种是选择器的嵌套，另外一种是样式的嵌套。
+
+
+
+
+
+
+
+Mixins：抽取样式定义为模块
+声明Mixins需要使用@mixin，在后面紧跟Mixins的名。
+同时在Mixins中，还可以定义参数，同时可以给这个参数设置一个默认值，但参数名需要使用$符号开始，而且和参数值之间需要使用:分开。
+```
+@mixin Mixins名（$参数名：参数值）{
+    /*样式规则*/
+}
+```
+
+调用定义好的Mixins，需要使用@include关键词，然后在其后紧跟需要调用的Mixins。
+```
+选择器{
+    @include Mixins()；
+    // +Mixins()；
+}
+```
+
+
+选择器继承（Selector Inheritance）：继承选择样式
+```
+/*定义一个类*/
+.block {
+  margin: 10px 5px;
+  padding: 2px;
+}
+
+p {
+  @extend .block; /*继承.block选择器下所有样式*/
+  border: 1px solid #eee;
+}
+
+ul, ol {
+  @extend .block; /*继承.block选择器下所有样式*/
+  color: #333;
+  text-transform: uppercase;
+}
+```
+使用%代替.定义公用样式
+
+
+

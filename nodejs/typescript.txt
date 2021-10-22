@@ -1,0 +1,24 @@
+
+npm install -g typescript
+
+
+
+
+
+
+代码检查
+
+目前 TypeScript 的代码检查主要有两个方案：使用 TSLint 或使用 ESLint + typescript-eslint-parser。
+
+
+TypeScript 已经能够在编译阶段检查出很多问题了，为什么还需要代码检查呢？
+因为 TypeScript 关注的重心是类型的匹配，而不是代码风格。
+
+
+
+
+
+
+
+
+

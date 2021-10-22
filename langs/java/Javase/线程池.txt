@@ -1,0 +1,40 @@
+线程池简述：开启一条线程是非常浪费资源的，因为它涉及到要与操作系统进行交互；因此JDK5之后Java提供了线程池让我们提高性能，线程池里的线程执行完后，并不会死亡，而是再次回到线程池中成为空闲状态，等待下一个对象来使用。
+
+
+Executors：创建线程池的工厂类。
+创建方法：
+    // 创建一个可根据需要创建新线程的线程池，但是在以前构造的线程可用时将重用它们
+    static ExecutorService newCachedThreadPool()
+    // 创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程
+    static ExecutorService newFixedThreadPool(int nThreads)
+    // 创建一个可根据需要创建新线程的线程池，但是在以前构造的线程可用时将重用它们，并在需要时使用提供的ThreadFactory创建新线程
+    static ExecutorService newCachedThreadPool(ThreadFactory threadFactory)
+    // 创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程，在需要时使用提供的ThreadFactory创建新线程
+    static ExecutorService newFixedThreadPool(int nThreads, ThreadFactory threadFactory)
+    // 创建一个线程池，它可安排在给定延迟后运行命令或者定期地执行
+    static ScheduledExecutorService newScheduledThreadPool(int corePoolSize)
+    // 创建一个线程池，它可安排在给定延迟后运行命令或者定期地执行
+    static ScheduledExecutorService newScheduledThreadPool(int corePoolSize, ThreadFactory threadFactory)
+    //创建一个使用单个worker线程的Executor，以无界队列方式来运行该线程
+    public static ExecutorService newSingleThreadExecutor()
+
+
+
+ExecutorService:线程池管理接口，提供了线程的操作方法。
+    // 启动一次顺序关闭，执行以前提交的任务，但不接受新任务
+    void shutdown()
+    // 试图停止所有正在执行的活动任务，暂停处理正在等待的任务，并返回等待执行的任务列表
+    List<Runnable> shutdownNow()
+    // 提交一个返回值的任务用于执行，返回一个表示任务的未决结果的 Future
+    <T> Future<T> submit(Callable<T> task)
+    // 提交一个 Runnable任务用于执行，并返回一个表示该任务的 Future
+    Future<?> submit(Runnable task)
+    // 提交一个 Runnable任务用于执行，并返回一个表示该任务的 Future
+    <T> Future<T> submit(Runnable task, T result)
+
+
+
+
+
+
+

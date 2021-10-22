@@ -1,0 +1,231 @@
+一、HTML5 简介
+HTML5 将成为 HTML、XHTML 以及 HTML DOM 的新标准。
+
+HTML5草案的前身名为 Web Applications 1.0，于2004年被WHATWG（Web Hypertext Application Technology Working Group）提出，于2007年被W3C接纳，并成立了新的 HTML 工作团队。
+
+HTML5 仍处于完善之中。然而，大部分现代浏览器已经具备了某些 HTML5 支持。
+
+WHATWG 致力于 web 表单和应用程序，而 W3C 专注于 XHTML 2.0。在 2006 年，双方决定进行合作，来创建一个新版本的 HTML。
+为 HTML5 建立的一些规则：
+新特性应该基于 HTML、CSS、DOM 以及 JavaScript。
+减少对外部插件的需求（比如 Flash）
+更优秀的错误处理
+更多取代脚本的标记
+HTML5 应该独立于设备
+开发进程应对公众透明
+
+新特性
+HTML5 中的一些有趣的新特性：
+用于绘画的 canvas 元素
+用于媒介回放的 video 和 audio 元素
+对本地离线存储的更好的支持
+新的特殊内容元素，比如 article、footer、header、nav、section
+新的表单控件，比如 calendar、date、time、email、url、search
+
+浏览器支持
+最新版本的 Safari、Chrome、Firefox 以及 Opera 支持某些 HTML5 特性。Internet Explorer 9 将支持某些 HTML5 特性。
+
+
+二、HTML5 视频
+大多数视频是通过插件（比如 Flash）来显示的。
+HTML5 规定了一种通过 video 元素来包含视频的标准方法。
+
+video 元素支持三种视频格式：Ogg、MPEG 4、WebM
+Ogg = 带有 Theora 视频编码和 Vorbis 音频编码的 Ogg 文件
+MPEG4 = 带有 H.264 视频编码和 AAC 音频编码的 MPEG 4 文件
+WebM = 带有 VP8 视频编码和 Vorbis 音频编码的 WebM 文件
+
+三、HTML5 视频/DOM
+通过video 元素的方法、属性和事件进行控制播放
+
+
+四、HTML5 音频
+类似于视频，使用audio元素
+audio 元素支持三种音频格式：Ogg Vorbis、MP3、Wav
+
+
+
+五、HTML5 拖放
+在 HTML5 中，拖放是标准的一部分，任何元素都能够拖放。
+为了使元素可拖动，把 draggable 属性设置为 true ：<img draggable="true" />
+
+拖动什么 - ondragstart 和 setData()
+被拖动元素 +ondragstart="drag(event)"
+function drag(ev){ev.dataTransfer.setData("Text",ev.target.id);}（格式、被拖动元素id）
+
+放到何处 - ondragover
+默认地，无法将数据/元素放置到其他元素中。如果需要设置允许放置，我们必须阻止对元素的默认处理方式。（浏览器对drop 事件的默认行为是以链接形式打开）
+目标元素 +ondragover="allowDrop(event)"
+function allowDrop(ev){ev.preventDefault();}
+
+进行放置 - ondrop
+当放置被拖数据时，会发生目标元素 drop 事件。
+目标元素 +ondrop="drop(event)"
+function drop(ev){ev.preventDefault();var data=ev.dataTransfer.getData("Text");ev.target.appendChild(document.getElementById(data));}
+
+
+六、HTML5 画布
+HTML5 的 canvas 元素使用 JavaScript 在网页上绘制图像。
+画布是一个矩形区域，您可以控制其每一像素。
+canvas 拥有多种绘制路径、矩形、圆形、字符以及添加图像的方法。
+
+canvas 元素本身是没有绘图能力的。所有的绘制工作必须在 JavaScript 内部完成：
+var c=document.getElementById("myCanvas");
+var cxt=c.getContext("2d");
+cxt.fillStyle="#FF0000";
+cxt.fillRect(0,0,150,75);
+
+
+七、HTML5 SVG
+HTML5 支持内联 SVG。
+
+什么是SVG？
+SVG 指可伸缩矢量图形 (Scalable Vector Graphics)
+SVG 用于定义用于网络的基于矢量的图形
+SVG 使用 XML 格式定义图形
+SVG 图像在放大或改变尺寸的情况下其图形质量不会有损失
+SVG 是万维网联盟的标准
+
+SVG 的优势
+与其他图像格式相比（比如 JPEG 和 GIF），使用 SVG 的优势在于：
+SVG 图像可通过文本编辑器来创建和修改
+SVG 图像可被搜索、索引、脚本化或压缩
+SVG 是可伸缩的
+SVG 图像可在任何的分辨率下被高质量地打印
+SVG 可在图像质量不下降的情况下被放大
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="190">
+  <polygon points="100,10 40,180 190,60 10,60 160,180"
+  style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd;" />
+</svg>
+
+
+八、HTML5 画布 vs SVG
+
+SVG 是一种使用 XML 描述 2D 图形的语言。
+SVG 基于 XML，这意味着 SVG DOM 中的每个元素都是可用的。您可以为某个元素附加 JavaScript 事件处理器。
+在 SVG 中，每个被绘制的图形均被视为对象。如果 SVG 对象的属性发生变化，那么浏览器能够自动重现图形。
+
+
+Canvas 通过 JavaScript 来绘制 2D 图形。
+Canvas 是逐像素进行渲染的。
+在 canvas 中，一旦图形被绘制完成，它就不会继续得到浏览器的关注。如果其位置发生变化，那么整个场景也需要重新绘制，包括任何或许已被图形覆盖的对象。
+
+
+Canvas 与 SVG 的比较
+Canvas
+依赖分辨率
+不支持事件处理器
+弱的文本渲染能力
+能够以 .png 或 .jpg 格式保存结果图像
+最适合图像密集型的游戏，其中的许多对象会被频繁重绘
+SVG
+不依赖分辨率
+支持事件处理器
+最适合带有大型渲染区域的应用程序（比如谷歌地图）
+复杂度高会减慢渲染速度（任何过度使用 DOM 的应用都不快）
+不适合游戏应用
+
+
+
+九、HTML5 地理定位
+
+
+十、HTML5 Web存储
+
+在客户端存储数据
+HTML5 提供了两种在客户端存储数据的新方法：
+localStorage - 没有时间限制的数据存储
+sessionStorage - 针对一个 session 的数据存储
+之前，这些都是由 cookie 完成的。但是 cookie 不适合大量数据的存储，因为它们由每个对服务器的请求来传递，这使得 cookie 速度很慢而且效率也不高。
+在 HTML5 中，数据不是由每个服务器请求传递的，而是只有在请求时使用数据。它使在不影响网站性能的情况下存储大量数据成为可能。
+对于不同的网站，数据存储于不同的区域，并且一个网站只能访问其自身的数据。
+HTML5 使用 JavaScript 来存储和访问数据。
+
+localStorage 方法
+localStorage.lastname="Smith";
+document.write(localStorage.lastname);
+
+sessionStorage 方法
+sessionStorage.lastname="Smith";
+document.write(sessionStorage.lastname);
+
+
+
+
+
+十一、HTML5 应用缓存
+使用 HTML5，通过创建 cache manifest 文件，可以轻松地创建 web 应用的离线版本。
+
+HTML5 引入了应用程序缓存，这意味着 web 应用可进行缓存，并可在没有因特网连接时进行访问。
+应用程序缓存为应用带来三个优势：
+离线浏览 - 用户可在应用离线时使用它们
+速度 - 已缓存资源加载得更快
+减少服务器负载 - 浏览器将只从服务器下载更新过或更改过的资源。
+
+<html manifest="demo.appcache">
+
+manifest 文件的建议的文件扩展名是：".appcache"。
+
+
+
+
+十二、HTML 5 Web Workers
+web worker 是运行在后台的 JavaScript，不会影响页面的性能。
+
+
+
+十三、HTML 5 服务器发送事件
+允许网页获得来自服务器的更新
+EventSource 对象用于接收服务器发送事件通知：
+
+var source=new EventSource("demo_sse.php");
+source.onmessage=function(event)
+  {
+  document.getElementById("result").innerHTML+=event.data + "<br />";
+  };
+
+
+
+十四、HTML5 表单
+HTML5 Input 类型
+
+新的 Input 类型
+email 在提交表单时，会自动验证 email 域的值。
+url 在提交表单时，会自动验证 url 域的值。
+number 能够设置数值域限制<input type="number" name="points" min="1" max="10" />
+range 同number,显示为滑动条。
+Date pickers (date, month, week, time, datetime, datetime-local)
+search 用于搜索域，比如站点搜索或 Google 搜索。
+color
+
+
+HTML5 的新的表单元素
+datalist 选项列表
+keygen 提供一种验证用户的可靠方法。
+密钥对生成器（key-pair generator）。当提交表单时，会生成两个键，一个是私钥，一个公钥。
+output 用于不同类型的输出，比如计算或脚本输出
+
+HTML5 的新的表单属性
+新的 form 属性：
+autocomplete 拥有自动完成功能。
+novalidate 规定在提交表单时不应该验证 form 或 input 域。
+新的 input 属性：
+autocomplete 拥有自动完成功能。
+autofocus 在页面加载时，域自动地获得焦点。
+form 规定输入域所属的某个或多个表单
+form overrides (formaction, formenctype, formmethod, formnovalidate, formtarget) 重写相应属性
+height 和 width 只适用于 image 类型的 <input> 标签。
+list
+min, max 和 step
+multiple 用于以下类型的 <input> 标签：email 和 file。
+pattern (regexp)验证
+placeholder 提供一种提示（hint）
+required 必须在提交之前填写输入域（不能为空）。
+
+
+
+HTML5 中不再支持下面哪个元素
+<font><acronym>
+不再支持 <script> 元素的type属性
+显示已知范围内的标量测量<meter>

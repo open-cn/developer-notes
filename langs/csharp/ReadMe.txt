@@ -1,0 +1,1 @@
+ASP.NET学习路线，C#语言基础，（OO技术）--了解.NET Framework 类库--学习HTML+CSS---学习JS---学习计算机网络原理---学习ASP.NET表示层技术---学习ASP.NET表示层技术---理解多层架构---学习XML与Web---学习AJAX---学习RIA技术

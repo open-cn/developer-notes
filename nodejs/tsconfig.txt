@@ -1,0 +1,80 @@
+如果一个目录下存在一个tsconfig.json文件，那么它意味着这个目录是TypeScript项目的根目录。
+
+tsconfig.json文件中指定了用来编译这个项目的根文件和编译选项。
+
+{
+    "files": [
+        "core.ts",
+        "sys.ts",
+        "types.ts",
+        "parser.ts",
+        "diagnosticInformationMap.generated.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ],
+    "include": [
+        "src/**/*"
+    ],
+    "compileOnSave": true,
+    "extends": "",
+    "compilerOptions": {
+        "target": "es5", // 指定ECMAScript目标版本。
+        "lib": [ // 编译过程中需要引入的库文件的列表。
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
+        "allowJs": true, // 允许编译javascript文件。
+        "skipLibCheck": true, // 不检查默认库文件（lib.d.ts）的正确性。
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true, // 允许从没有设置默认导出的模块中默认导入。
+        "strict": true,
+        "forceConsistentCasingInFileNames": true, // 不允许不一致包装引用相同的文件。
+        "module": "esnext", // 指定生成哪个模块系统代码。
+        "moduleResolution": "node", // 决定如何处理模块。
+        "resolveJsonModule": true,
+        "isolatedModules": true, // 无条件地给没有解析的文件生成imports。
+        "noEmit": true, // 不生成输出文件。
+        "jsx": "preserve" // 在'.tsx'文件里支持JSX：'React' 或 'Preserve'。
+    },
+    "typeAcquisition": {
+        "enable": false,
+        "include": [],
+        "exclude": []
+    },
+    "references": [
+        { "path": "" }
+    ]
+}
+
+glob匹配模式通配符：
+    * 匹配0或多个字符（不包括目录分隔符）
+    ? 匹配一个任意字符（不包括目录分隔符）
+    **/ 递归匹配任意子目录
+
+
+"files"指定一个包含相对或绝对文件路径的列表。
+"exclude"默认情况下会排除node_modules，bower_components，和jspm_packages目录。
+"include"和"exclude"属性指定一个文件glob匹配模式列表。
+
+如果没有"files"或"include"属性，则默认包含所有ts文件，但“exclude”指定的除外。否则仅包含指定文件。
+"files"优先级高于“exclude”
+
+
+"compilerOptions" 可以被忽略，这时编译器会使用默认值
+
+"lib" 编译时需要包含的库文件，比如dom
+"allowJs" 是否允许js文件被编译
+"checkJs" 是否报告js文件里的错误
+"resolveJsonModule" 是否解析json文件
+"baseUrl": "src"
+"paths": {} 文件路径映射
+"outDir"指定输出目录
+
+
+"typeAcquisition" 项目的 .d.ts 采集选项，比如 lodash，jquery
+"references" 引用其他tsconfig
+    “path” 引用的tsconfig或包含tsconfig的文件夹的路径
+

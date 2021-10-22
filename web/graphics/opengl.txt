@@ -1,0 +1,73 @@
+开放式图形库（Open Graphics Library）
+
+用于渲染2D、3D矢量图形的跨语言、跨平台的应用程序编程接口（API）。
+这个接口由近350个不同的函数调用组成，用来绘制从简单的图形比特到复杂的三维景象。
+而另一种程序接口系统是仅用于Microsoft Windows上的Direct3D。
+OpenGL常用于CAD、虚拟现实、科学可视化程序和电子游戏开发。
+
+
+OpenGL规范由1992年成立的OpenGL架构评审委员会（ARB）维护。
+
+ARB由一些对创建一个统一的、普遍可用的API特别感兴趣的公司组成。
+
+根据OpenGL官方网站，2002年6月的ARB投票成员包括3Dlabs、Apple Computer、ATI Technologies、Dell Computer、Evans & Sutherland、Hewlett-Packard、IBM、Intel、Matrox、NVIDIA、SGI和Sun Microsystems。
+Microsoft曾是创立成员之一，但已于2003年3月退出。
+
+Khronos Group团队成立于 2000 年 1 月，由包括 3Dlabs, ATI, Discreet, Evans & Sutherland, Intel, Nvidia, SGI 和 Sun Microsystems 在内的多家国际知名多媒体行业领导者创立，致力于发展开放标准的应用程序接口 API ，以实现在多种平台和终端设备上的富媒体创作、加速和回放。
+
+Khronos Group 是由其成员所提供之基金支持的行业协会，专注于创立开放标准，免授权费的移动设备接口程序API, 用以实现多样化平台及设备上的高质量动态多媒体创作和加速。
+
+
+【历史】
+
+1980年代，开发可以用在各种各样图形硬件上的软件是个真正的挑战。通常，软件开发人员为每种硬件编写自定义的接口和驱动程序。但这非常昂贵并会导致大量工作的重复。
+
+20世纪90年代初，SGI成为工作站3D图形领域的领导者。其IRISGL的API被认为是最先进的科技并成为事实上的行业标准，而基于开放标准的PHIGS则相形见绌。IRIS GL更容易使用，而且还支持即时模式的渲染。相比之下，PHIGS难于使用并且功能老旧。
+
+SGI的竞争对手（包括Sun、惠普和IBM）通过扩展PHIGS标准也能将3D硬件投入市场。这反过来导致SGI市场份额的削弱，因为有越来越多的3D图形硬件供应商进入市场。为攻占市场，SGI决定把IRIS GL API转变为一项开放标准，即OpenGL。
+
+1992年，SGI公司领导了OpenGL架构审查委员会（OpenGL ARB）的创建。该委员会由若干公司组成，负责未来OpenGL规范的维护和扩展。
+
+微软在1995年发布Direct3D，Direct 3D最终成为OpenGL的主要竞争对手。1997年12月17日，微软和SGI发起华氏温标项目，旨在统一OpenGL和Direct3D的接口。1998年，惠普加入。后来，由于SGI的财政限制、微软的战略以及缺乏行业普遍支持，项目1999年遭弃。
+
+2002年微软的DirectX 9提出了全新的Shader绘图功能以及高端着色语言（HLSL），OpenGL霸主地位开始被瓦解。这使得3DLabs了解到必须开发全新的OpenGL 2.0版本，但仅加入支持GLSL的功能。
+
+
+
+2006年7月，OpenGL架构评审委员会投票决定将OpenGL API标准的控制权交给 Khronos Group。
+Khronos Group 立刻着手发展Longs Peak与Mount Evans。
+
+2008年推出OpenGL 3，但评价普遍不高。
+
+2010年3月10日, OpenGL同时推出了3.3和4.0版本，同年7月26日又发布了4.1版本。
+2011年8月8日发布4.2版本。
+2013年发布4.3版。
+
+
+
+
+
+
+
+
+
+OpenGL的高效实现（利用了图形加速硬件）存在于Windows，部分UNIX平台和Mac OS。
+
+OpenGL规范描述了绘制2D和3D图形的抽象API。尽管这些API可以完全通过软件实现，但它是为大部分或者全部使用硬件加速而设计的。
+
+OpenGL的API是语言独立的。因此，OpenGL有许多语言绑定，值得一提的包括：
+JavaScript绑定的WebGL（基于OpenGL ES 2.0在Web浏览器中的进行3D渲染的API）；
+C绑定的WGL、GLX和CGL；
+iOS提供的C绑定；
+Android提供的Java和C绑定。
+
+
+
+OpenGL被设计为只有输出的，所以它只提供渲染功能。核心API没有窗口系统、音频、打印、键盘/鼠标或其他输入设备的概念。
+虽然这一开始看起来像是一种限制，但它允许进行渲染的代码完全独立于他运行的操作系统，允许跨平台开发。
+
+然而，有些集成于原生窗口系统的东西需要允许和宿主系统交互。这通过下列附加API实现：
+
+
+
+

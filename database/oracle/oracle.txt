@@ -1,0 +1,70 @@
+Oracle数据库
+
+SQL语句说明
+-->>>SQL 语言大小写不敏感。 
+-->>>SQL 可以写在一行或者多行（使用时最后要以分号结尾，表示一条SQL语句）。
+-->>>关键字不能被缩写也不能分行
+-->>>格式：
+	-->>>各子句一般要分行写。
+	-->>>使用缩进提高语句的可读性。
+
+命令不区分大小写
+
+内部学习表:emp员工表  dual语法表
+nvl(i,0)变量i为null即i=0;
+
+查询oracle服务器的日期和时间select sysdate from dual;
+
+dual表只是为了满足查询语法要求
+nvl(comm,0):如果comm为null，则取值为0，否则取本身值  含有null值得表达式的值都为空的
+ 
+列起别名最好使用双引号，可以按照双引号原来字符串显示：sal * 12 + nvl(comm,0) as "totalsal"
+双引号用来起别名，单引号表示oracle的字符串数据类型    varchar2(10)    'abc';
+
+字符串使用单引号，如果后面有计算则用括号括起来
+select ename||'的年收入是:'||(sal*12 + nvl(comm,0)) from emp;
+
+distinct去掉重复的行:select distinct job from emp;
+ 
+ v$nls_parameters设置一些显示格式:select * from v$nls_parameters;
+ 
+修改日期显示格式：
+alter session set NLS_DATE_FORMAT='yyyy-mm-dd';
+select * from emp where hiredate <= '1982-12-31';
+select * from emp where hiredate <= '31-12月-81';
+  
+select * from emp where empno in (7369,7839);
+                 等价
+select * from emp where empno = 7369 or empno=7839;
+ 
+like:  %,表示0个或多个
+       _,表示一个
+       定义转义字符：          
+	select * from emp where job like 'IT\_%' escape '\';
+
+to_date(' 2014-05-16','yyyy-mm-dd') from dual; 2014-07-14
+
+where:过滤行
+having：过滤组和group by结合起来使用
+
+hr三个表做连接 where:
+select first_name||' '||last_name, DEPARTMENT_NAME,CITY
+from employees,departments,locations
+where employees.department_id=departments.department_id
+and departments.location_id=locations.location_id
+/
+
+hr三个表做连接：on
+select first_name||' '||last_name, DEPARTMENT_NAME,CITY
+from employees join departments on(employees.department_id=departments.department_id)  join locations
+on(departments.location_id=locations.location_id)
+
+sqlplus:设置反馈信息
+set feedback off/on
+
+设置显示执行时间：
+ set timing on/off
+
+数据量很大的情况下，truncate删除的执行效率比delete效率高:
+
+

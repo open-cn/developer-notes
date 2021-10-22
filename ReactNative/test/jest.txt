@@ -1,0 +1,350 @@
+Jest 是Facebook的一套测试框架。
+
+实际上，编写一个测试用例，我们需要以下准备：
+
+一个测试类库
+一个断言库（assertion）
+一个测试执行环境（environment）
+其他（function or module mock, snapshot etc…）
+
+Jest内置一套断言库，和Jasmine相同语法。
+Jest内置了jsDOM和Node的执行环境。默认开启面向浏览器端的jsDOM环境。
+Jest自带函数和模块的Mock能力；自己发明了一个专门针对组件测试的快照（snapshot）测试；Jest支持热更新；Jest支持多线程测试。
+
+2019年另一款很火的测试框架Mocha，自身不带断言库，也不带Func/Module Mock，集成社区相对成熟的断言库Chai和mock库SinonJS之后，非常强大。Chai断言库相较于Jest内置的断言库API更加丰富更加强大，SinonJS的mock的API也十分完善。而且Mocha的不带其他杂七杂八功能的理念，让它十分具有可配置性。
+
+
+
+1. Using Jest
+npm install --save-dev jest / yarn add --dev jest
+{
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "21.2.1",
+  }
+}
+
+2. Using Babel
+npm install --save-dev babel-jest babel-core regenerator-runtime
+Note: Explicitly installing regenerator-runtime is not needed if you use npm 3 or 4 or Yarn
+
+3. react-native jest
+{
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "react": "16.0.0",
+    "react-native": "0.50.3",
+    ...
+  },
+  "devDependencies": {
+    "babel-jest": "21.2.0",//被jest依赖
+    "babel-preset-react-native": "4.0.0",//被react-native依赖
+    "jest": "21.2.1",
+    "react-test-renderer": "16.0.0"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
+
+组件化与UI测试  
+组件化并不完全是为了复用，很多情况下也恰恰是为了分治，使得我们可以分组件对UI页面进行开发，然后分别对其进行单元测试。
+
+React.js作为前端框架的后起之秀，却在2015年携着虚拟DOM、组件化、单向数据流等利器，给前端UI构建掀起了一波声势浩大的函数式新潮流。
+React已经让UI测试变得容易很多，React组件都可以被简化为这样一个表达式，即UI=f(data)，这个纯函数返回的只是一个描述UI组件应该是什么样子的虚拟DOM，本质上就是一个树形的数据结构。给这个纯函数输入一些应用程序的状态，就会得到相应的UI描述的输出，这个过程不会去直接操作实际的UI元素，也不会产生所谓的副作用。
+
+React组件树的测试 
+需要对其所包含的所有子组件都进行预先渲染，甚至于最上面的组件需要渲染出整个 UI 页面的真实DOM节点才能对其进行测试，这显然是不可取的。
+浅渲染（Shallow Rendering）解决了这个问题
+
+
+
+Facebook官方提供了react-addons-test-utils可以让我们使用浅渲染这个特性，用于测试虚拟DOM对象，即React.Component的实例。
+This package is deprecated as of version 15.5.0:
+
+TestUtils have been moved to react-dom/test-utils
+Shallow renderer has been moved to react-test-renderer/shallow
+
+
+4. react-native jest enzyme
+{
+  ...
+  "devDependencies": {
+    ...
+    "enzyme": "^3.2.0",
+    "enzyme-adapter-react-16": "^1.1.0",
+    "jest-serializer-enzyme": "",
+    "babel-plugin-module-resolver": "^2.7.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "react-native-mock": "^0.3.1",
+    "react-test-renderer": "16.0.0-alpha.12",
+    "redux-mock-store": "^1.3.0",
+    "sinon": "^4.0.0"
+  },
+  ...
+}
+Enzyme 则来自于活跃在JavaScript开源社区的Airbnb公司，是对官方测试工具库（react-addons-test-utils）的封装，它模拟了jQuery的API，非常直观并且易于使用和学习，提供了一些与众不同的接口和方法来减少测试的样板代码，方便你判断、操纵和遍历React Components的输出，并且减少了测试代码和实现代码之间的耦合。
+
+Enzyme理论上应该与所有TestRunner和断言库相兼容，已经集成了多种测试类库，比如Jest、Mocha&Chai、Jasmine
+
+Enzyme的三种渲染方法   
+shallow(node[, options]) => ShallowWrapper 对官方的Shallow Rendering的封装
+浅渲染在将一个组件作为一个单元进行测试的时候非常有用，可以确保你的测试不会去间接断言子组件的行为。shallow方法只会渲染出组件的第一层DOM结构，其嵌套的子组件不会被渲染出来，从而使得渲染的效率更高，单元测试的速度也会更快。
+const app = shallow(<App />）
+expect(app.find('Todo')).to.have.length(3)
+expect(app.props.children[0].type).to.equal('h1')
+expect(app.props.children[0].props.children).to.equal('Todos')
+
+浅渲染。只渲染根级，不渲染子集，生成的是虚拟DOM。
+
+
+mount(node[, options]) => ReactWrapper 
+将React组件渲染为真实的DOM节点，特别是在你依赖真实的DOM结构必须存在的情况下，比如说按钮的点击事件。
+完全的DOM渲染需要在全局范围内提供完整的DOM API，这也就意味着它必须在至少“看起来像”浏览器环境的环境中运行，如果不想在浏览器中运行测试，推荐使用mount的方法是依赖于一个名为jsdom的库，它本质上是一个完全在JavaScript中实现的headless浏览器。
+const app = mount(<App />）
+app.find('button.delete').at(0).simulate('click')
+
+完整DOM渲染。拥有DOM API交互能力。
+
+render(node[, options]) => CheerioWrapper 将React组件渲染成静态的HTML字符串
+返回的是一个Cheerio实例对象，采用的是一个第三方的HTML解析库Cheerio。
+const app = render(<App />）
+expect(app.contains(<div className="todo" />)).to.equal(true)
+
+静态渲染。用来分析HTML结构。snapshot请使用这个API。
+
+
+
+
+Enzyme 的 API 方法 
+find() 方法与选择器
+Enzyme中的Selectors即选择器类似于CSS选择器，但是只支持非常简单的CSS选择器，如果需要支持复杂的CSS选择器，就需要引入react-dom模块的findDOMNode方法，而这是官方的TestUtils都无法提供的方式。
+/* CSS Selector */
+wrapper.find('.foo') //class syntax
+wrapper.find('input') //tag syntax
+wrapper.find('#foo') //id syntax 
+wrapper.find('[htmlFor="foo"]') //prop syntax
+
+/* Component Constructor */
+wrapper.find(ChildrenComponent)
+myComponent.displayName = 'ChildrenComponent'
+wrapper.find('ChildrenComponent')
+
+/* Object Property Selector */
+const wrapper = mount(
+  <div>
+    <span foo={3} bar={false} title="baz" />
+  </div>
+)
+wrapper.find({ foo: 3 })
+
+
+5.Sinon则是一个可以用来Mock和Stub数据代码的第三方测试工具库，当我们需要检查一个组件当中某个特定的函数是否被调用时，我们可以使用sinon.spy()方法监视所传入该组件作为prop的onButtonClick方法，然后再通过wrapper的simulate方法模拟一个Click事件，最终验证这个被spy的onButtonClick函数是否被调用。
+it('simulates click events', () => {  
+  const onButtonClick = sinon.spy()
+  const wrapper = shallow(
+    <Foo onButtonClick={onButtonClick} />
+  )
+  wrapper.find('button').simulate('click')
+  expect(onButtonClick.calledOnce).to.be.true
+})
+
+
+
+
+测试使用react-dom所构建的React组件，即最终渲染的结果是浏览器当中的DOM结构，但对于React Native来说，JavaScript代码最终会被编译并用于调用iOS或Android上的Native代码，因此无法再使用基于DOM的测试工具了。
+事实上，我们可以通过欺骗React Native让它返回常规的React组件而不是Native组件，然后就又能愉快地使用传统的JavaScript测试库来单独测试React Native组件逻辑。
+Enzyme推荐在测试环境中使用react-native-mock这个辅助库，这是一个使用纯JavaScript将全部的React Native组件进行mock的第三方库，只需要导入这个库就可以对React Native组件进行渲染和测试。
+最基本的 mock 示例代码如下：
+
+const mockComponent = (type) => {
+  return React.createClass({
+    displayName: type,
+    propTypes: {
+      children: React.PropTypes.node
+    },
+    render() {
+      return <div {...this.props}>{this.props.children}</div>
+    }
+  })
+}
+
+RN.View = mockComponent("View")
+RN.Text = mockComponent("Text")
+RN.Image = mockComponent("Image")
+
+
+
+
+
+
+
+
+
+import TestUtils from 'react-dom/test-utils'
+TestUtils: {
+  Simulate,
+  renderIntoDocument(element),
+  mockComponent(module, mockTagName),
+  isElement(element),
+  isElementOfType(element, componentClass),
+  isDOMComponent(instance),
+  isCompositeComponent(instance),
+  isCompositeComponentWithType(instance, componentClass),
+  findAllInRenderedTree(tree, test),
+  scryRenderedDOMComponentsWithClass(root, classNames),
+  findRenderedDOMComponentWithClass(root, className),
+  scryRenderedDOMComponentsWithTag(root, tagName),
+  findRenderedDOMComponentWithTag(root, tagName),
+  scryRenderedComponentsWithType(root, componentType),
+  findRenderedComponentWithType(root, componentType)
+}
+
+Simulate.{eventName}(
+  element,
+  [eventData]
+)
+TestUtils.Simulate.click(node);
+TestUtils.Simulate.change(node);
+TestUtils.Simulate.keyDown(node, {key: "Enter", keyCode: 13, which: 13});
+TestUtils.Simulate.mouseMove(node);
+
+mockComponent() is a legacy API. We recommend using shallow rendering or jest.mock() instead.
+
+
+
+import renderer from 'react-test-renderer'
+import shallow from 'react-test-renderer/shallow'
+import stack from 'react-test-renderer/stack'
+
+renderer: {
+  create: function (element, options) {
+    return {
+      root: {
+          find(),  // react 组件 使用 props.children 属性 非react 组件 如div 直接使用 children 等
+          findByType(),
+          findByProps(),
+          findAll(),
+          findAllByType(),
+          findAllByProps(),
+          instance, // 上一级的 getInstance
+          type,
+          props,
+          parent,
+          children
+        },
+      toJSON: function () {},
+      toTree: function () {},
+      update: function (newElement) {},
+      unmount: function () {},
+      getInstance: function () {
+        return {
+          props,
+          context,
+          refs,
+          updater,
+          ...this // (react 组件 this下各种属性)
+       }
+      }
+    }
+  },
+  unstable_batchedUpdates: function (fn, bookkeeping) {}
+}
+
+shallow: () => {
+  createRenderer: () => {
+    getMountedInstance: function () {},
+    getRenderOutput: function () {},
+    render: function (element) {},
+    unmount: function () {},
+    _mountClassComponent: function (props, context) {},
+    _updateClassComponent: function (props, context) {}
+  }
+}
+render 只渲染第一层，不需要dom环境
+getRenderOutput render后调用，获得浅渲染输出
+
+stack: {
+  create: function (element, options) {
+    return {
+      toJSON: function () {},
+      toTree: function () {},
+      update: function (newElement) {},
+      unmount: function () {},
+      getInstance: function () {}
+    }
+  },
+  unstable_batchedUpdates: function (callback, a, b, c, d, e) {}
+}
+
+
+
+expect(wrapper.root._fiber).toBeDefined()
+expect(wrapper.root.type).toBe(GridView)
+expect(wrapper.root.findByType(GridView)).toBe(wrapper.root)
+expect(wrapper.root.parent).toBeFalsy()
+expect(wrapper.root.props.numColumns).toBe(props.numColumns)
+expect(wrapper.root.children).toHaveLength(1) // View
+expect(wrapper.root.children[0]._fiber).toBeDefined()
+expect(wrapper.root.children[0].type).toBe(View)
+expect(wrapper.root.children[0].parent).toBe(wrapper.root)
+const v = wrapper.root.findByType(View)
+expect(v._fiber).toBeDefined()
+...
+renderer root._fiber   root._fiber.child
+function FiberNode(tag, pendingProps, key, mode) {
+  // Instance
+  this.tag = tag;
+  this.key = key;
+  this.type = null;
+  this.stateNode = null;
+
+  // Fiber
+  this.return = null;
+  this.child = null;
+  this.sibling = null;
+  this.index = 0;
+
+  this.ref = null;
+
+  this.pendingProps = pendingProps;
+  this.memoizedProps = null;
+  this.updateQueue = null;
+  this.memoizedState = null;
+
+  this.mode = mode;
+
+  // Effects
+  this.effectTag = NoEffect;
+  this.nextEffect = null;
+
+  this.firstEffect = null;
+  this.lastEffect = null;
+
+  this.expirationTime = NoWork;
+
+  this.alternate = null;
+
+  if (enableProfilerTimer) {
+    this.selfBaseTime = 0;
+    this.treeBaseTime = 0;
+  }
+
+  {
+    this._debugID = debugCounter++;
+    this._debugSource = null;
+    this._debugOwner = null;
+    this._debugIsCurrentlyTiming = false;
+    if (!hasBadMapPolyfill && typeof Object.preventExtensions === 'function') {
+      Object.preventExtensions(this);
+    }
+  }
+}
+
+
+

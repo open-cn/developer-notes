@@ -1,0 +1,547 @@
+[[React Native Apis]]
+
+
+
+[AccessibilityInfo]
+static fetch()
+static addEventListener(eventName, handler)
+static setAccessibilityFocus(reactTag)
+static announceForAccessibility(announcement)
+static removeEventListener(eventName, handler)
+
+
+
+[ActionSheetIOS]
+static showActionSheetWithOptions(options, callback)
+static showShareActionSheetWithOptions(options, failureCallback, successCallback)
+
+
+
+[Alert]
+static alert(title, message?, buttons?, options?, type?)
+
+
+
+[AlertIOS]
+static alert(title: string, [message]: string, [callbackOrButtons]: ?(() => void), ButtonsArray, [type]: AlertType): [object Object]
+static prompt(title: string, [message]: string, [callbackOrButtons]: ?((text: string) => void), ButtonsArray, [type]: AlertType, [defaultValue]: string, [keyboardType]: string): [object Object]
+
+
+
+[Animated]
+static decay(value, config)
+static timing(value, config)
+static spring(value, config)
+static add(a, b)
+static divide(a, b)
+static multiply(a, b)
+static modulo(a, modulus)
+static diffClamp(a, min, max)
+static delay(time)
+static sequence(animations)
+static parallel(animations, config?)
+static stagger(time, animations)
+static loop(animation)
+static event(argMapping, config?)
+static forkEvent(event, listener)
+static unforkEvent(event, listener)
+
+
+
+[AppRegistry]
+static setWrapperComponentProvider(provider)
+static registerConfig(config)
+static registerComponent(appKey, componentProvider, section?)
+static registerRunnable(appKey, run)
+static registerSection(appKey, component)
+static getAppKeys()
+static getSectionKeys()
+static getSections()
+static getRunnable(appKey)
+static getRegistry()
+static setComponentProviderInstrumentationHook(hook)
+static runApplication(appKey, appParameters)
+static unmountApplicationComponentAtRootTag(rootTag)
+static registerHeadlessTask(taskKey, task)
+static startHeadlessTask(taskId, taskKey, data)
+
+
+
+[AppState]
+static addEventListener(type, handler)
+static removeEventListener(type, handler)
+type: 
+active - The app is running in the foreground
+background - The app is running in the background
+inactive - This is a state that occurs when transitioning between foreground & background, and during periods of inactivity such as entering the Multitasking view or in the event of an incoming call
+
+
+
+[AsyncStorage]
+static getItem(key: string, [callback]: ?(error: ?Error, result: ?string) => void)
+static setItem(key: string, value: string, [callback]: ?(error: ?Error) => void)
+static removeItem(key: string, [callback]: ?(error: ?Error) => void)
+static mergeItem(key: string, value: string, [callback]: ?(error: ?Error) => void)
+static clear([callback]: ?(error: ?Error) => void)
+static getAllKeys([callback]: ?(error: ?Error, keys: ?Array<string>) => void)
+static flushGetRequests(): [object Object]
+static multiGet(keys: Array<string>, [callback]: ?(errors: ?Array<Error>, result: ?Array<Array<string>>) => void)
+static multiSet(keyValuePairs: Array<Array<string>>, [callback]: ?(errors: ?Array<Error>) => void)
+static multiRemove(keys: Array<string>, [callback]: ?(errors: ?Array<Error>) => void)
+static multiMerge(keyValuePairs: Array<Array<string>>, [callback]: ?(errors: ?Array<Error>) => void)
+
+
+
+[BackAndroid] ios 为空实现  Deprecated. Use BackHandler instead.
+on android 返回事件时，每个Listener都会被执行，不能截断。
+RCTDeviceEventEmitter.addListener(DEVICE_BACK_EVENT, function() {
+  var backPressSubscriptions = new Set(_backPressSubscriptions);
+  var invokeDefault = true;
+  backPressSubscriptions.forEach((subscription) => {
+    if (subscription()) {
+      invokeDefault = false;
+    }
+  });
+  if (invokeDefault) {
+    BackAndroid.exitApp();
+  }
+});
+解决方案：一个全局的主页面（如 Navigator）+ 另一份监听器集合（如下）
+handleBackButton(){
+	for (let i = this._handlers.length - 1; i >= 0; i--) {
+      if (this._handlers[i]()) {
+        return true;
+      }
+    }
+}
+_handlers: ([]: Array<() => boolean>),
++  this._handlers.push(listener);
+-  this._handlers = this._handlers.filter((handler) => handler !== listener);
+
+
+[BackHandler] BackAndroid 拦截
+static exitApp()
+static addEventListener(eventName, handler)
+static removeEventListener(eventName, handler)
+解决了 BackAndroid 的返回事件不能被截断问题：
+RCTDeviceEventEmitter.addListener(DEVICE_BACK_EVENT, function() {
+  ...
+  var invokeDefault = true;
+  var subscriptions = [...backPressSubscriptions].reverse();
+  for (var i = 0; i < subscriptions.length; ++i) {
+    if (subscriptions[i]()) {
+      invokeDefault = false;
+      break;
+    }
+  }
+  ...
+});
+
+
+
+[CameraRoll]
+static saveToCameraRoll(tag, type?)
+static getPhotos(params)
+
+Before using this you must link the RCTCameraRoll library.
+Add the NSPhotoLibraryUsageDescription key in your Info.plist, This key will appear as Privacy - Photo Library Usage Description in Xcode.
+
+
+
+[Clipboard]
+static getString(): Promise<string>
+static setString(content)
+
+
+
+[DatePickerAndroid]
+static open(options)
+static dateSetAction
+static dismissedAction
+try {
+  const {action, year, month, day} = await DatePickerAndroid.open({
+    date: new Date(2020, 4, 25)
+  });
+  if (action !== DatePickerAndroid.dismissedAction) {
+    // Selected year, month (0-11), day
+  }
+} catch ({code, message}) {
+  console.warn('Cannot open date picker', message);
+}
+
+
+
+[Dimensions]
+static set(dims)
+static get(dim)
+static addEventListener(type, handler)
+static removeEventListener(type, handler)
+type: 'change'
+
+
+[Easing]
+缓动函数允许将自定义的数学公式应用到动画。
+static back(s)
+static bounce(t)
+static ease(t)
+static elastic(bounciness)
+
+static linear(t)
+static quad(t)
+static cubic(t)
+
+static sin(t)
+static circle(t)
+static exp(t)
+static bezier(x1, y1, x2, y2)
+
+static in(easing)
+static out(easing)
+static inOut(easing)
+
+static step0(n)
+static step1(n)
+static poly(n)
+
+
+
+[Geolocation]
+static setRNConfiguration(config)
+static requestAuthorization()
+static getCurrentPosition(geo_success, geo_error?, geo_options?)
+static watchPosition(success, error?, options?)
+static clearWatch(watchID)
+static stopObserving()
+iOS
+You need to include the NSLocationWhenInUseUsageDescription key in Info.plist to enable geolocation when using the app.
+Android
+add <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> to AndroidManifest.xml
+Android API >= 18 Positions will also contain a mocked boolean to indicate if position was created from a mock provider.
+
+
+
+[ImageEditor]
+static cropImage(uri, cropData, success, failure)
+
+
+
+[ImagePickerIOS] android 上用了报空异常
+static canRecordVideos(callback)
+static canUseCamera(callback)
+static openCameraDialog(config, successCallback, cancelCallback)
+static openSelectDialog(config, successCallback, cancelCallback)
+
+
+
+[ImageStore]
+static hasImageForTag(uri, callback)
+static removeImageForTag(uri)
+static addImageFromBase64(base64ImageData, success, failure)
+static getBase64ForTag(uri, success, failure)
+
+
+
+[InteractionManager]
+static runAfterInteractions(task)
+static createInteractionHandle()
+static clearInteractionHandle(handle)
+static setDeadline(deadline)
+
+Compare this to other scheduling alternatives:
+requestAnimationFrame(): for code that animates a view over time.
+setImmediate/setTimeout(): run code later, note this may delay animations.
+runAfterInteractions(): run code later, without delaying active animations.
+
+
+[Keyboard]
+static addListener(eventName, callback)
+static removeListener(eventName, callback)
+static removeAllListeners(eventName)
+static dismiss()
+
+eventName:
+    keyboardWillShow
+    keyboardDidShow
+    keyboardWillHide
+    keyboardDidHide
+    keyboardWillChangeFrame
+    keyboardDidChangeFrame
+
+
+
+[LayoutAnimation]
+static configureNext(config, onAnimationDidEnd?)
+static create(duration, type, creationProp)
+static checkConfig(config, location, name)
+
+
+[Linking]
+static addEventListener(type, handler)
+static removeEventListener(type, handler)
+static openURL(url)
+static canOpenURL(url)
+static getInitialURL()
+
+
+[ListViewDataSource]
+
+
+[NetInfo]
+static addEventListener(eventName, handler)
+static removeEventListener(eventName, handler)
+static fetch() DEPRECATED - use getConnectionInfo
+static getConnectionInfo()
+static isConnectionExpensive()
+
+
+[PanResponder]
+
+
+
+[PermissionsAndroid]
+static checkPermission(permission) DEPRECATED - use check
+static check(permission) Returns a promise resolving to a boolean value as to whether the specified permissions has been granted
+static requestPermission(permission, rationale?) DEPRECATED - use request
+static request(permission, rationale?)
+static requestMultiple(permissions)
+PermissionsAndroid.PERMISSIONS.CAMERA
+
+
+
+[PixelRatio]
+static get()
+static getFontScale()
+static getPixelSizeForLayoutSize(layoutSize)
+static roundToNearestPixel(layoutSize)
+
+
+[PushNotificationIOS]
+
+
+
+[Share]
+static share(content, options)
+static sharedAction()  返回一个type常量
+static dismissedAction()  返回一个type常量
+
+
+
+[Settings] android上空实现
+static get(key)
+static set(settings)
+static watchKeys(keys, callback)
+static clearWatch(watchId)
+
+[Systrace]
+static installReactHook(useFiber)
+static setEnabled(enabled)
+static isEnabled()
+static beginEvent(profileName?, args?)
+static endEvent()
+static beginAsyncEvent(profileName?)
+static endAsyncEvent(profileName?, cookie?)
+static counterEvent(profileName?, value?)
+static attachToRelayProfiler(relayProfiler)
+static swizzleJSON()
+static measureMethods(object, objectName, methodNames)
+static measure(objName, fnName, func)
+
+
+[TimePickerAndroid] ios 为空实现
+static open(options)
+static timeSetAction()
+static dismissedAction()
+
+
+[ToastAndroid] ios 为空实现
+static show(message, duration)
+static showWithGravity(message, duration, gravity)
+static showWithGravityAndOffset(message, duration, gravity, xOffset, yOffset)
+duration: SHORT, LONG
+gravity: TOP, BOTTOM, CENTER
+
+
+
+[Vibration] VibrationIOS @deprecated
+static vibrate(pattern: number, Array<number>, repeat: boolean)
+static cancel()
+
+Note for Android: add <uses-permission android:name="android.permission.VIBRATE"/> to AndroidManifest.xml
+no effect on devices that do not support Vibration, eg. the simulator.
+
+
+[View Style Props]
+borderRightColor
+backfaceVisibility
+borderBottomColor
+borderBottomEndRadius
+borderBottomLeftRadius
+borderBottomRightRadius
+borderBottomStartRadius
+borderBottomWidth
+borderColor
+borderEndColor
+borderLeftColor
+borderLeftWidth
+borderRadius
+backgroundColor
+borderRightWidth
+borderStartColor
+borderStyle
+borderTopColor
+borderTopEndRadius
+borderTopLeftRadius
+borderTopRightRadius
+borderTopStartRadius
+borderTopWidth
+borderWidth
+opacity
+elevation
+
+
+
+[Shadow Props]  ios上有效
+shadowColor: color
+shadowOffset: {width: number,height: number}
+shadowOpacity: number
+shadowRadius: number
+
+
+
+[Transforms]
+decomposedMatrix
+rotation
+scaleX
+scaleY
+transform
+transformMatrix
+translateX
+translateY
+
+There are all Deprecated expect transform. Use the transform prop instead.
+transform([
+    {perspective: number},
+    {rotate: string}, 
+    {rotateX: string}, 
+    {rotateY: string}, 
+    {rotateZ: string}, 
+    {scale: number}, 
+    {scaleX: number}, 
+    {scaleY: number}, 
+    {translateX: number}, 
+    {translateY: number}, 
+    {skewX: string}, 
+    {skewY: string}
+])
+string '45deg' '0.785398rad'
+
+
+
+[Text Style Props]
+textShadowOffset
+color
+fontSize
+fontStyle
+fontWeight
+lineHeight
+textAlign
+textDecorationLine
+textShadowColor
+fontFamily
+textShadowRadius
+includeFontPadding
+textAlignVertical
+fontVariant
+letterSpacing
+textDecorationColor
+textDecorationStyle
+writingDirection
+
+
+
+[Layout Props]
+marginHorizontal
+alignContent
+alignSelf
+aspectRatio
+borderBottomWidth
+borderEndWidth
+borderLeftWidth
+borderRightWidth
+borderStartWidth
+borderTopWidth
+borderWidth
+bottom
+direction
+display
+end
+flex
+flexBasis
+flexDirection
+flexGrow
+flexShrink
+flexWrap
+height
+justifyContent
+left
+margin
+marginBottom
+marginEnd
+alignItems
+marginLeft
+marginRight
+marginStart
+marginTop
+marginVertical
+maxHeight
+maxWidth
+minHeight
+minWidth
+overflow
+padding
+paddingBottom
+paddingEnd
+paddingHorizontal
+paddingLeft
+paddingRight
+paddingStart
+paddingTop
+paddingVertical
+position
+right
+start
+top
+width
+zIndex
+
+
+
+[Image Style Props]
+borderTopRightRadius
+backfaceVisibility
+borderBottomLeftRadius
+borderBottomRightRadius
+borderColor
+borderRadius
+borderTopLeftRadius
+backgroundColor
+borderWidth
+opacity
+overflow
+resizeMode
+tintColor
+overlayColor
+
+
+
+[StyleSheet]
+static setStyleAttributePreprocessor(property, process)
+static create(obj)
+StyleSheet.hairlineWidth
+StyleSheet.absoluteFill
+...StyleSheet.absoluteFillObject
+
+styles.a 返回样式id
+StyleSheet.flatten(styles.a) 返回样式object
+StyleSheet.flatten([styles.a, styles.b]) 组合样式，重复的属性后者代替前者。返回样式object
+

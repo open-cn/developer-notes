@@ -1,0 +1,18 @@
+hibernate\mybatis主要是用于持久层
+spring主要用于aop和ioc
+spring mvc和struts都是mvc框架
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

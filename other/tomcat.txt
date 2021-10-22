@@ -1,0 +1,169 @@
+【启动tomcat】先在%tomcat_home%\bin\startup.bat 在第一行加入下面两行：
+set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_20
+set  CATALINA_HOME=F:\apache-tomcat-7.0.55
+再双击该文件
+
+CATALINA_HOME环境变量 决定启动哪台tomcat服务器
+
+WEB_INF	固定的目录，是受保护的最安全 存放各种类、第三方jar包、配置文件
+-->>>web.xml	部署文件，结构固定
+-->>>classes	存放.class文件	所有的JavaBean
+-->>>lib	存放第三方jar包
+
+
+部署一个HttpServlet子类
+<servlet>
+	<servlet-name>该子类类名</servlet-name>
+	<servlet-class>该子类类全名</servlet-class>
+</servlet>
+<servlet-mapping>
+	<servlet-name>该子类类名</servlet-name>
+	<url-pattern>/nows</url-pattern>
+</servlet-mapping>
+
+ 手动开发一个servlet步骤：
+          1、在tomcat_home\webapps中创建一个目录（Hello），作为web工程
+          2、创建web应用的目录 结构：
+                Hello
+                     WEB-INF
+                     		classes
+                     		lib
+                     		web.xml
+          3、编写一个类，继承HttpServlet，重写其中的方法：doGet
+                  protected void doGet(HttpServletRequest req,HttpServletResponse rep) throws IOException{
+                  	PrintWriter pw = rep.getWriter();//PrintStream
+                  	pw.writer(new Date());
+                  }
+             这个类位置：Hello\WEB-INF\classess
+             编译这个类：javac -d . HelloWorldServlet.java,把servlet-api.jar
+             加入到classpath环境变量
+             servlet-api.jar位置：tomcat_home\lib
+          4、部署这个类：
+                在web.xml文件中部署：
+                    <servlet>
+                    	<servlet-name>HelloWorldServlet</servlet-name>
+                    	<servlet-class>类全名</servlet-class>
+                    </servlet>
+                    <servlet-mapping>
+                    	<servlet-name>HelloWorldServlet</servlet-name>
+                    	<url-pattern>/nows</url-pattern>
+                    <servlet-mapping>
+使用myeclipe开发第一个servlet:
+         1、打开myeclipse选择一个工作区
+         2、创建一个web project
+                   add new runtime:
+                                        添加一个tomcat服务器
+                    勾选产生web.xml文件          
+         3、创建servlet
+              右击src-->new-->servlet-->类名、报名、重写的方法     
+         4、测试    
+
+
+http:基于请求和响应
+请求类型：
+	GET	url?key1=value1#key2=value2...限制1k
+	POST	请求正文...无限制
+req.setCharacterEncoding("utf-8");//post请求体编码 
+<%@ page contentType="text/html;charset=UTF-8" %> 服务器端以什么样的编码向客户端输出HTML
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 浏览器以什么样的编码来显示网页	同时,指导其提交表单时使用什么编码
+
+
+请求头信息：
+      MIME
+	Accept: text/html,image/*      浏览器能够接受服务器响应的类型
+	Accept-Charset: GBK            浏览器能够接受的编码：gb2312  utf-8
+	Accept-Encoding: gzip,compress    浏览器能够接受压缩类型
+	Accept-Language: en-us,zh-cn 
+	Host: www.gemcot.com:80
+	//用户缓存数据，带到服务器和请求资源比较
+	//如果这个时间比资源更新事件早，说明资源已经做了修改，服务器重新传递数据
+	//如果这个时间比资源更新时间晚，说明资源没有更新，不需要传递数据，直接出响应码：304
+	//直接从浏览器缓存取数据
+	If-Modified-Since: Tue, 12 April 2014 10:23:41 GMT(缓存时间)
+	//说明请求来源
+	Referer: http://www.gemcot.com/index.jsp(来自哪)
+	//浏览器类型
+	User-Agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
+	//服务器之前发过来的小段信息
+	Cookie
+	//表示连接类型
+	Connection: close/Keep-Alive   
+	//访问日期
+	Date: Tue, 12 April 2014 10:23:41 GMT(访问时间)
+
+表单提交
+Content-Type默认为text/plain;charset=UTF-8，参数保存在FromData 使用谷歌或者360浏览器查看
+
+
+
+响应头信息：
+	//响应的服务器资源位置 url
+	Location: http://www.gemcot.com/index.jsp 
+	//服务器的类型
+	Server:apache tomcat
+	//服务器发给客户端的压缩类型
+	Content-Encoding: gzip 
+	//数据长度
+	Content-Length: 80 
+	//语言类型
+	Content-Language: zh-cn 
+	//发送给客户端数据类型和编码
+	Content-Type: text/html; charset=GB2312 
+	//最后的修改时间
+	Last-Modified: Tue, 11 April 2014 18:23:51 GMT
+	//刷新:告诉浏览器1秒中后，再次请求url资源
+	Refresh: 1;url=http://www.gemcot.com
+	//告诉浏览器以下载的方式打开资源
+	Content-Disposition: attachment; filename=aaa.zip(下载文件)
+	//分块传递数据到客户端 
+	Transfer-Encoding: chunked
+	//一段信息：Cookie
+	Set-Cookie:SS=Q0=5Lb_nQ; path=/search
+	//告诉浏览器要不要缓存
+	Expires: -1//3种禁止缓存的头字段
+	Cache-Control: no-cache  
+	Pragma: no-cache   
+	//连接状态
+	Connection: close/Keep-Alive   
+	//响应时间
+	Date: Tue, 11 April  2011 18:23:51 GMT
+
+
+状态码	
+	2xx	请求成功
+	3xx	重定向
+	4xx	客户机出现错误
+		403 禁止--即使有授权也不需要访问
+		404 请求错误 服务器未找到指定资源 文档不存在
+	5xx	服务器出现错误
+		500 服务器端出现错误
+
+Context:对于web开发来说就是一个当前web工程(一个目录)                                
+                一个namespace
+ServletContext:
+  1、可以让多个servlet之间共享数据
+        ServletContext application = request.getSerlvetContext();
+        application.setAttribute(key,value);
+   2、获取web应用的初始化参数:所有serlvet都可以读取的数据
+      <context-param>
+      </context-param>
+   3、实现Servlet的转发。[MVC设计模式]    
+     在服务器上执行的/表示：web工程(SerlvetProject)
+     RequestDispatcher rd = application.getRequestDispatcher("/context/succ.html");//指定转发的文件
+	rd.forward(request, response);//转发
+	
+	在浏览器执行/表示：webapps目录(tomcat服务器下)
+	<form action="/ServletProject/servlet_url">
+	</form>
+  4、读取资源文件
+        相对于工程目录:ServletProject
+            InputStream is =  request.getSerlvetContext().getResouceAsStream("/db.propties");  // WebContent   WebRoot
+        相对于classpath:    工程名/WEB-INF/classes
+            this.getClsss().getClassLoad().getResourceAsStream("/db.propertes");// src
+        相对于工程目录:ServletProject
+            String path = request.getSerlvetContext().getRealPath("/upload/db.propties");//  WebRoot/upload/db.properties
+            File file = new File(path);
+            if(!file.exist()){
+               file.createNewFile();
+            }
+            InputStream is = new FileInputStream(file);
