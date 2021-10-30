@@ -131,6 +131,14 @@ START: 行程开始时间
 TIME: 执行的时间
 COMMAND:所执行的指令
 
+```bash
+# 找出占用内存资源最多的前 10 个进程
+ps -auxf | sort -nr -k 4 | head -10
+
+# 找出占用 CPU 资源最多的前 10 个进程
+ps -auxf | sort -nr -k 3 | head -10
+```
+
 ##### wc
 
 Linux wc命令用于计算字数。

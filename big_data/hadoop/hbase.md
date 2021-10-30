@@ -309,6 +309,203 @@ alter 'student', {NAME => 'info', VERSIONS => 3} #  设置表 student 中ifno列
 
 ```
 
+### 配置
+
+
+```hbase-env.sh
+hbase_thrift_opts $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10103
+hbase_regionserver_opts -Xms1536m -Xmx1536m -Xmn256m -verbose:gc -XX:+PrintGCDetails -XX:SurvivorRatio=2 -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=85 -Xloggc:$HBASE_LOG_DIR/gc-regionserver.log -XX:PermSize=64m $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10102
+hbase_master_opts -Xms128m -Xmx128m -Xmn64m -verbose:gc -XX:+PrintGCDetails -XX:SurvivorRatio=2 -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=85 -Xloggc:$HBASE_LOG_DIR/gc-hmaster.log -XX:PermSize=64m $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10101
+hbase_opts
+hbase_jmx_base -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false
+hbase_security_opts 
+```
+
+```hbase-site.xml
+hbase.balancer.period 300000
+hbase.bulkload.staging.dir ${hbase.fs.tmp.dir}
+hbase.cells.scanned.per.heartbeat.check 10000
+hbase.cluster.distributed true
+hbase.column.max.version 1
+hbase.config.read.zookeeper.config false
+hbase.coordinated.state.manager.class org.apache.hadoop.hbase.coordination.ZkCoordinatedStateManager
+
+hbase.coprocessor.abortonerror true
+hbase.coprocessor.enabled true
+hbase.coprocessor.master.classes
+hbase.coprocessor.region.classes
+hbase.coprocessor.user.enabled true
+
+hbase.data.umask 000
+hbase.data.umask.enable false
+
+hbase.dfs.client.read.shortcircuit.buffer.size 131072
+hbase.dynamic.jars.dir ${hbase.rootdir}/lib
+hbase.fs.tmp.dir /user/${user.name}/hbase-staging
+
+hbase.hregion.majorcompaction 864000000
+hbase.hregion.majorcompaction.jitter 0.50
+hbase.hregion.max.filesize 8589934592
+hbase.hregion.memstore.block.multiplier 24
+hbase.hregion.memstore.chunkpool.initialsize 1
+hbase.hregion.memstore.chunkpool.maxsize 0.1
+hbase.hregion.memstore.flush.size 134217728
+hbase.hregion.memstore.mslab.enabled true
+hbase.hregion.percolumnfamilyflush.size.lower.bound 16777216
+hbase.hregion.preclose.flush.size 5242880
+
+hbase.hstore.blockingStoreFiles 50
+hbase.hstore.blockingWaitTime 3000
+hbase.hstore.bytes.per.checksum 16384
+hbase.hstore.checksum.algorithm CRC32
+hbase.hstore.compaction.kv.max 10
+hbase.hstore.compaction.max 10
+hbase.hstore.compaction.max.size 2147483648
+hbase.hstore.compaction.min 3
+hbase.hstore.compaction.min.size 33554432
+hbase.hstore.compactionThreshold 3
+hbase.hstore.flusher.count 2
+hbase.hstore.time.to.purge.deletes 0
+hbase.hstore.useExploringCompation true
+
+hbase.ipc.server.callqueue.handler.factor 0.1
+hbase.ipc.server.callqueue.read.ratio 0
+hbase.ipc.server.callqueue.scan.ratio 0
+
+hbase.lease.recovery.dfs.timeout 64000
+hbase.lease.recovery.timeout 900000
+
+hbase.local.dir ${hbase.tmp.dir}/local/
+
+hbase.master.catalog.timeout 600000
+hbase.master.distributed.log.replay false
+hbase.master.hfilecleaner.plugins org.apache.hadoop.hbase.master.cleaner.TimeToLiveHFileCleaner
+hbase.master.info.bindAddress 0.0.0.0
+hbase.master.info.port 16010
+hbase.master.infoserver.redirect true
+hbase.master.loadbalancer.class org.apache.hadoop.hbase.master.balancer.StochasticLoadBalancer
+hbase.master.logcleaner.plugins org.apache.hadoop.hbase.master.cleaner.TimeToLiveLogCleaner
+hbase.master.logcleaner.ttl 600000
+hbase.master.port 16000
+
+hbase.metrics.exposeOperationTimes true
+hbase.metrics.showTableName true
+
+hbase.online.schema.update.enable true
+
+hbase.procedure.master.classes null
+hbase.procedure.regionserver.classes
+
+hbase.regions.slop 0.2
+
+hbase.regionserver.catalog.timeout 600000
+hbase.regionserver.checksum.verify true
+hbase.regionserver.dns.interface default
+hbase.regionserver.dns.nameserver default
+hbase.regionserver.global.memstore.lowerLimit 0.3
+hbase.regionserver.global.memstore.size 0.35
+hbase.regionserver.handler.abort.on.error.percent 0.5
+hbase.regionserver.handler.count 100
+hbase.regionserver.hlog.blocksize 268435456
+hbase.regionserver.hlog.reader.impl org.apache.hadoop.hbase.regionserver.wal.ProtobufLogReader
+hbase.regionserver.hlog.splitlog.writer.threads 3
+hbase.regionserver.hlog.writer.impl org.apache.hadoop.hbase.regionserver.wal.ProtobufLogWriter
+hbase.regionserver.info.bindAddress 0.0.0.0
+hbase.regionserver.info.port 16030
+hbase.regionserver.info.port.auto false
+hbase.regionserver.logroll.errors.tolerated 2
+hbase.regionserver.logroll.period 3600000
+hbase.regionserver.maxlogs 32
+hbase.regionserver.msginterval 3000
+hbase.regionserver.optionalcacheflushinterval 3600000
+hbase.regionserver.port 16020
+hbase.regionserver.region.split.policy org.apache.hadoop.hbase.regionserver.IncreasingToUpperBoundRegionSplitPolicy
+hbase.regionserver.regionSplitLimit 1000
+hbase.regionserver.storefile.refresh.period 0
+hbase.regionserver.thread.compaction.large 1
+hbase.regionserver.thread.compaction.small 1
+hbase.regionserver.thread.compaction.throttle 268435456
+hbase.regionserver.thrift.compact false
+hbase.regionserver.thrift.framed false
+hbase.regionserver.thrift.framed.max_frame_size_in_mb 2
+
+hbase.replication false
+
+hbase.rest.filter.classes org.apache.hadoop.hbase.rest.filter.GzipFilter
+hbase.rest.port 8080
+hbase.rest.readonly false
+hbase.rest.support.proxyuser false
+hbase.rest.threads.max 100
+hbase.rest.threads.min 2
+
+hbase.rootdir hdfs://emr-header-1.cluster-245192:9000/hbase
+hbase.rootdir.perms 700
+
+hbase.rpc.shortoperation.timeout 10000
+hbase.rpc.timeout 60000
+
+hbase.rs.cacheblocksonwrite false
+
+hbase.server.compactchecker.interval.multiplier 1000
+hbase.server.hostname.useip true
+hbase.server.scanner.max.result.size 104857600
+hbase.server.thread.wakefrequency 10000
+hbase.server.versionfile.writeattempts 3
+
+hbase.snapshot.enabled true
+hbase.snapshot.restore.failsafe.name hbase-failsafe-{snapshot.name}-{restore.timestamp}
+hbase.snapshot.restore.take.failsafe.snapshot true
+
+hbase.status.listener.class org.apache.hadoop.hbase.client.ClusterStatusListener$MulticastListener
+hbase.status.multicast.address.ip 226.1.1.3
+hbase.status.multicast.address.port 16100
+hbase.status.published false
+hbase.status.publisher.class org.apache.hadoop.hbase.master.ClusterStatusPublisher$MulticastPublisher
+
+hbase.storescanner.parallel.seek.enable false
+hbase.storescanner.parallel.seek.threads 10
+
+hbase.table.lock.enable true
+hbase.table.max.rowsize 1073741824
+
+hbase.thrift.htablepool.size.max 1000
+hbase.thrift.maxQueuedRequests 1000
+hbase.thrift.maxWorkerThreads 1000
+hbase.thrift.minWorkerThreads 16
+
+hbase.tmp.dir ${java.io.tmpdir}/hbase-${user.name}
+
+hbase.zookeeper.dns.interface default
+hbase.zookeeper.dns.nameserver default
+hbase.zookeeper.leaderport 3888
+hbase.zookeeper.peerport 2888
+hbase.zookeeper.property.clientPort 2181
+hbase.zookeeper.property.dataDir /mnt/disk1/hbase/zk-data/zookeeper
+hbase.zookeeper.property.initLimit 10
+hbase.zookeeper.property.maxClientCnxns 300
+hbase.zookeeper.property.syncLimit 5
+hbase.zookeeper.quorum emr-worker-2.cluster-245192,emr-header-1.cluster-245192,emr-worker-1.cluster-245192
+hbase.zookeeper.useMulti true
+
+hfile.block.bloom.cacheonwrite false
+hfile.block.cache.size 0.4
+hfile.block.index.cacheonwrite false
+hfile.index.block.max.size 131072
+
+io.storefile.bloom.block.size 131072
+master_hostname emr-header-1
+
+replication.sleep.before.failover 5000
+replication.source.nb.capacity 2000
+replication.source.ratio 1
+replication.source.size.capacity 2097152
+
+zookeeper.session.timeout 180000
+zookeeper.znode.acl.parent acl
+zookeeper.znode.parent /hbase
+zookeeper.znode.rootserver root-region-server
+```
+
 ### 最佳实践
 
 ##### 高可用

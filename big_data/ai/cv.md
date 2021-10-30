@@ -1,5 +1,5 @@
 ## Computer Vision
-计算机视觉
+计算机视觉，CV
 
 调参工程师
 
