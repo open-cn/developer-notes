@@ -3,24 +3,6 @@
 ### 概述
 YARN是一个分布式的资源管理系统。YARN是Hadoop系统的核心组件，主要功能包括负责在Hadoop集群中的资源管理，负责对任务进行调度运行以及监控。
 
-YARN组件信息如下：
-
-- ResourceManager：负责集群的资源管理与调度，为运行在YARN上的各种类型任务分配资源。
-  非HA集群部署在EMR的Master节点上，HA集群部署在EMR的多个Master节点上，保证了高可用性。
-
-- NodeMananger：负责节点的资源管理、监控和任务运行。
-  部署在EMR的Core或Task节点上。
-
-- ApplicationMaster：负责应用程序相关事务。
-  例如，ApplicationMaster负责协调来自ResourceManager的资源，并通过NodeManager进行监控和资源管理等。
-
-- YARN Client：负责提交任务。
-  部署在EMR的Master、Core和Task节点上。
-
-- JobHistory：解析MapReduce任务的指标，并展示任务执行情况。
-- App Timeline Server：收集任务的指标，并展示任务执行情况。
-- WebAppProxyServer：负责任务链接跳转，降低基于Web的攻击。
-
 EMR集群中的YARN优势如下：
 
 - 高可用集群可以自动开启YARN HA部署。
@@ -32,6 +14,107 @@ EMR集群中的YARN优势如下：
 
 - 弹性伸缩支持优雅下线功能。
   可以在一段时间内等待用户任务执行结束后再下线，而不是直接下线NodeManager导致大量任务重新计算。
+
+#### YARN 组件
+
+YARN组件信息如下：
+
+- ResourceManager(RM)：负责集群的资源管理与调度，为运行在YARN上的各种类型任务分配资源。
+  非HA集群部署在EMR的Master节点上，HA集群部署在EMR的多个Master节点上，保证了高可用性。
+  ResourceManager 在整个集群中就只有一个,其主要负责和客户端进行通信，为每个节点进行资源的调度以及分配，与 AppMaster 一起进行资源的分配。
+
+- NodeMananger(NM)：负责节点的资源管理、监控和任务运行。
+  部署在EMR的Core或Task节点上。
+  YARN 中每个节点都存在一个 NodeManager，其主要对容器中的资源进行监控，处理来自 AppMaster 和 ResourceManager 的命令
+
+- ApplicationMaster：负责应用程序相关事务。
+  ApplicationMaster 管理在 YARN 中运行的每个应用程序实例。还负责协调来自 ResourceManager 的资源，并通过 NodeManager 监视容器的执行和资源的使用（CPU、内存等的资源分配）。
+
+- Container：Container 是 YARN 中的资源抽象，它包含了很多纬度，如内存、CPU、网络等。
+  Resource Manager 为 AppMaster 返回的资源便是用Container 表示的。YARN 会为每个任务分配一个 Container，且该任务只能使用该Container中描述的资源
+
+- YARN Client：负责提交任务。
+  部署在EMR的Master、Core和Task节点上。
+
+- JobHistory：解析MapReduce任务的指标，并展示任务执行情况。
+- App Timeline Server：收集任务的指标，并展示任务执行情况。
+- WebAppProxyServer：负责任务链接跳转，降低基于Web的攻击。
+
+#### YARN 运行机制
+
+1. 客户端程序向 ResourceManager 提交应用并请求一个 ApplicationMaster 实例；
+1. ResourceManager 找到一个可以运行一个 Container 的 NodeManager，并在这个 Container 中启动 ApplicationMaster 实例；
+1. ApplicationMaster 向 ResourceManager 进行注册，注册之后客户端就可以查询 ResourceManager 获得自己 ApplicationMaster 的详细信息，以后就可以和自己的 ApplicationMaster 直接交互了（这个时候，客户端主动和 ApplicationMaster 交流，应用先向 ApplicationMaster 发送一个满足自己需求的资源请求）；
+1. 在平常的操作过程中，ApplicationMaster 根据 resource-request协议 向 ResourceManager 发送 resource-request请求；
+1. 当 Container 被成功分配后，ApplicationMaster 通过向 NodeManager 发送 container-launch-specification信息 来启动Container，container-launch-specification信息包含了能够让Container 和 ApplicationMaster 交流所需要的资料；
+1. 应用程序的代码以 task 形式在启动的 Container 中运行，并把运行的进度、状态等信息通过 application-specific协议 发送给ApplicationMaster；
+1. 在应用程序运行期间，提交应用的客户端主动和 ApplicationMaster 交流获得应用的运行状态、进度更新等信息，交流协议也是 application-specific协议；
+1. 一旦应用程序执行完成并且所有相关工作也已经完成，ApplicationMaster 向 ResourceManager 取消注册然后关闭，用到所有的 Container 也归还给系统。
+
+
+##### 作业提交
+
+RunJar 进程会向集群提交 job，Resource Manager 会为本次 job 提供一个 jobID，还会返回本次作业提交的资源路径 staging-dir。接着，客户端将资源（包括Jar包，配置文件）提交到 HDFS 中，最后，通过调ResourceManager 的 submitApplication 方法来提交作业
+
+##### 作业初始化
+
+提交完成之后，ResourceManager 会将本次作业添加到一个任务队列中，然后将这些任务分配给各个 NodeManager 中，并且为每个 NodeManager 创建一个的资源容器。创建完成之后，ResourceManager 会在容器内启动 AppMaster 进程，启动完成之后在 ResourceManager 中进行注册，这样就保持了ResourceManager 和 AppMaster 的通信
+
+##### 任务分配
+
+由创建的 AppMaster 去分配在哪些 NameNode 上运行 map 和 reduce 程序，运行 map 和 reduce 的程序会从 HDFS 中获取相关的资源再执行 map 和reduce 程序，这个进程为 YarnChild。
+
+任务完成之后，AppMaster向 ResourceManager 注销自己，ResourceManager 会回收相关的资源
+
+##### Yarn内存分配与管理
+
+主要涉及到ResourceManage(RM)、ApplicationMatser(AM)、NodeManager(NM)
+
+**ResourceManage(RM)的内存资源配置**
+
+配置的是资源调度相关
+
+RM1：yarn.scheduler.minimum-allocation-mb分配给AM单个容器可申请的最小内存
+
+RM2：yarn.scheduler.maximum-allocation-mb分配给AM单个容器可申请的最大内存
+
+注：minimum-allocation-mb最小值可以计算一个节点最大Container数量，一旦设置，不可动态改变
+
+**NodeManager (NM)的内存资源配置**
+
+配置的是硬件资源相关
+
+NM1：yarn.nodemanager.resource.memory-mb节点最大可用内存
+
+注： RM1、RM2的值均不能大于NM1的值，NM1可以计算节点最大Container数量，max(Container)=NM1/RM2，一旦设置，不可动态改变
+
+**ApplicationMatser (AM)的内存配置**
+
+配置的是任务相关
+
+AM1：mapreduce.map.memory.mb 分配给map Container的内存大小
+
+AM2：mapreduce.reduce.memory.mb 分配给reduce Container的内存大小
+
+这两个值应该在RM1和RM2这两个值之间
+
+AM2的值最好为AM1的两倍，这两个值可以在启动时改变
+
+AM3：mapreduce.map.java.opts 运行map任务的jvm参数，如-Xmx，-Xms等选项
+
+AM4：mapreduce.reduce.java.opts 运行reduce任务的jvm参数，如-Xmx，-Xms等选项
+
+注：这两个值应该在AM1和AM2之间
+
+**YARN内存最小限制和规整**
+
+yarn.scheduler.minimum-allocation-mb
+
+单个任务可申请的最少物理内存量，默认是1024（MB），如果一个任务申请的物理内存量少于该值，则该对应的值改为这个数
+
+yarn.scheduler.increment-allocation-mb
+
+内存规整化单位，默认是1024（MB），这意味着，如果一个Container请求资源是1.5GB，则将被调度器规整化为ceiling(1.5 GB / 1GB) * 1G=2GB
 
 ### YARN 配置
 
@@ -646,6 +729,120 @@ FIFO Scheduler是最简单也是最容易理解的调度器，也不需要任何
 
 
 ### 最佳实践
+
+#### YRAN 调优
+
+YRAN 调优有三个方面
+
+1. 集群配置，配置各主机
+2. YARN配置，配置内存和CPU资源
+3. MapReduce配置，为每个map和reduce任务分配最大和最小资源
+
+##### 主节点配置
+
+通用平衡增强型实例规格族g6e的特点如下：
+
+1. 依托第三代神龙架构，将大量虚拟化功能卸载到专用硬件，降低虚拟化开销，提供稳定可预期的超高性能。同时通过芯片快速路径加速手段，完成存储、网络性能以及计算稳定性的数量级提升。
+2. 计算：
+  + 处理器与内存配比约为1:4
+  + 处理器：2.5 GHz主频、3.2 GHz睿频的Intel ® Xeon ® Platinum 8269（Cascade），计算性能稳定
+  + 支持开启或关闭超线程配置，ECS实例默认开启超线程配置
+3. 存储：
+  + I/O优化实例
+  + 仅支持ESSD云盘
+  + 实例存储I/O性能与计算规格对应（规格越高存储I/O性能越强）
+4. 网络：
+  + 支持IPv6
+  + 超高网络PPS收发包能力，如果需要更高的并发连接能力和网络收发包能力，建议您选用g7ne。
+5. 适用场景：
+  + 高网络包收发场景，例如视频弹幕、电信业务转发等
+  + 各种类型和规模的企业级应用
+  + 网站和应用服务器
+  + 游戏服务器
+  + 中小型数据库系统、缓存、搜索集群
+  + 数据分析和计算
+  + 计算集群、依赖内存的数据处理
+
+
+主节点内存和CPU规划：
+
+| 服务组件                 | CPU（cores） | Memory（MB） | 建议和描述                                   |
+| ------------------------ | ------------ | ------------ | -------------------------------------------- |
+| 操作系统                 | 2            | 8192         | 大多数操作系统最低使用4-8GB                  |
+| 其他服务                 | 0            | 0            | 为不属于操作系统的，非作业服务使用           |
+| HDFS NameNode            | 1            | 1792         | HDFS NameNode 堆的分配    |
+| HDFS SecondaryNameNode   | 1            | 1024         | HDFS SecondaryNameNode 堆的分配   |
+| HDFS HttpFS              | 0            |              |    |
+| HDFS KMS                 | 0            |              |     |
+| YARN JobHistory          | 0            | 512          | 堆的分配 |
+| YARN ResourceManager     | 35           | 2304         | YARN ResourceManager 堆的分配                             |
+| YARN WebAppProxyServer   | 0            | 512          | 堆的分配 |
+| YARN App Timeline Server | 0            | 512          | 堆的分配 |
+| Impala Catalog Server    | 0            | 0            | 可选，建议至少分配16GB                       |
+| Impala StateStore Server | 0            | 0            | 可选，建议至少分配16GB                       |
+| HBase Master             | 0            | 0        | 可选，建议分配内存不超过12-16GB              |
+| HBase ThriftServer       | 0            | 0        | 可选，建议分配内存不超过12-16GB              |
+| Hive MetaStore           | 0            | 512            | 可选，建议至少1GB                            |
+| HiveServer2              | 0            | 512            | 可选，建议至少1GB                            |
+| Jindo Namespace Service  | 0            | 0            |                                              |
+| Jindo Manager Service    | 0            | 0            |                                              |
+| Hue                      | 0            | 0            |                                              |
+| Zeppelin                 | 0            | 0            |                                              |
+| OpenLDAP                 | 0            | 0            |                                              |
+| Knox                     | 0            | 1024            |                                              |
+| Superset                 | 0            | 0            |                                              |
+| Storm UI                 | 0            | 0            |                                              |
+| Storm Nimbus             | 0            | 0            |                                              |
+| PrestoMaster             | 0            | 0            |                                              |
+| Tez Tomcat               | 0            | 0            |                                              |
+| Oozie                    | 0            | 0            |                                              |
+| SparkHistory             | 0            | 0            |                                              |
+| Spark ThriftServer       | 0            | 0            |                                              |
+| Ganglia Httpd            | 0            | 0            |                                              |
+| Ganglia Gmetad           | 0            | 0            |                                              |
+
+##### 工作节点配置
+
+工作节点内存和CPU规划：
+
+| 服务组件              | CPU（cores） | Memory（MB） | 建议和描述                                   |
+| --------------------- | ------------ | ------------ | -------------------------------------------- |
+| 操作系统              | 2            | 8192         | 大多数操作系统最低使用4-8GB                  |
+| 其他服务              | 0            | 0            | 为不属于操作系统的，非作业服务使用           |
+| HDFS DataNode         | 1            | 1152         | HDFS DataNode 堆的分配：默认1GB和1个vcore    |
+| YARN NodeManager      | 1            | 1536         | YARN NodeManager 堆的分配：默认1GB和1个vcore |
+| Impala Daemon Server  | 0            | 0            | 可选，建议至少分配16GB                       |
+| HBase RegionServer    | 0            | 1536         | 可选，建议分配内存不超过12-16GB              |
+| Solr Server           | 0            | 0            | 可选，建议至少1GB                            |
+| Kudu Server           | 0            | 0            | 可选，建议至少1GB                            |
+| Jindo Storage Service | 0            | 0            | 可选，建议至少1GB                            |
+| YARN 容器资源          | 35           | 0            |                                              |
+| Storm Supervisor      | 0            | 0            |                                              |
+| PrestoWorker          | 0            | 0            |                                              |
+
+##### 全部节点配置
+
+| 服务组件         | CPU（cores） | Memory（MB） | 建议和描述 |
+| ---------------- | ------------ | ------------ | ---------- |
+| HDFS Client      | 0            | 0            |            |
+| DeltaLake        | 0            | 0            |            |
+| HUDI             | 0            | 0            |            |
+| Flume Client     | 0            | 0            |            |
+| Flume Agent      | 0            | 0            |            |
+| Storm Client     | 0            | 0            |            |
+| Storm Logviewer  | 0            | 0            |            |
+| Sqoop Client     | 0            | 0            |            |
+| Presto Client    | 0            | 0            |            |
+| Phoenix Client   | 0            | 0            |            |
+| Tez Client       | 0            | 0            |            |
+| Spark Client     | 0            | 0            |            |
+| ZooKeeper        | 0            | 1024            |            |
+| ZooKeeper Client | 0            | 0            |            |
+| Ganglia Client   | 0            | 0            |            |
+| Ganglia Gmond    | 0            | 0            |            |
+| FlowAgentJobServer    | 0            | 1024            |            |
+
+#### FAQ
 
 1. 增大MapReduce作业内存，在YARN服务的配置页面，调大mapreduce.map.java.opts或mapreduce.reduce.java.opts的值。
 

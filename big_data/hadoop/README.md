@@ -267,7 +267,7 @@ CDP的版本号延续了之前CDH的版本号，从7.0开始，目前最新的�
 - Apache Sqoop
 - Apache Zookeeper
 - Apache Parquet
-- Apache Phoenix（*CDH中需要额外安装）
+- Apache Phoenix（\*CDH中需要额外安装）
 
 基本上只是版本做了一定的升级。如果你之前是使用CDH的用户，那么其中值得一提的是Hive的版本在CDP中使用的是3.1.2，对比CDH6来说是很大的升级（CDH6中Hive为2.1.1）。之前Cloudera在组件的选择上是比较保守的，对比之下Hortonworks的策略会比较激进（HDP已经上了Hive3），会更贴近社区最新的版本。
 
@@ -290,7 +290,7 @@ CDH中存在，CDP还在准备中的部分：Apache Accumulo、Navigator Encrypt
 - Key Trustee Server
 - Apache Kudu
 - Apache Solr
-- Apache Kafka（*CDH中需要额外安装）
+- Apache Kafka（\*CDH中需要额外安装）
 
 HDP中存在，CDP还在准备中的部分：Apache Druid、Apache Knox、Apache Livy、Ranger KMS、Apache Zeppelin。其中最需要关注的就是Apache Druid。Apache Druid是一款实时大数据分析引擎。（注意它与阿里巴巴出品的一款数据库连接池Druid恰好重名，但实际是两款不同的软件，两者之间并没有什么关系。）
 
@@ -763,6 +763,295 @@ command [genericOptions] [commandOptions]
 ```
 
 ### 最佳实践
+
+#### Web UI
+
+| 软件     | 服务                 | 访问地址                                                  |
+| -------- | -------------------- | --------------------------------------------------------- |
+| Hadoop   | yarn resourcemanager | masternode1_private_ip:8088,masternode2_private_ip:8088   |
+| Hadoop   | jobhistory           | masternode1_private_ip:19888                              |
+| Hadoop   | timeline             | server masternode1_private_ip:8188                        |
+| Hadoop   | hdfs                 | masternode1_private_ip:50070,masternode2_private_ip:50070 |
+| Spark    | spark ui             | masternode1_private_ip:4040                               |
+| Spark    | history              | masternode1_private_ip:18080                              |
+| Tez      | tez-ui               | masternode1_private_ip:8090/tez-ui2                       |
+| Hue      | hue                  | masternode1_private_ip:8888                               |
+| Zeppelin | zeppelin             | masternode1_private_ip:8080                               |
+| Hbase    | hbase                | masternode1_private_ip:16010                              |
+| Presto   | presto               | masternode1_private_ip:9090                               |
+| Oozie    | oozie                | masternode1_private_ip:11000                              |
+| Ganglia  | ganglia              | masternode1_private_ip:9292/ganglia                       |
+
+#### 集群类型
+
+- Hadoop集群
+- Druid集群
+- Dataflow-Kafka集群
+- Flink集群
+- ZooKeeper集群
+- Data Science集群
+- ClickHouse集群
+- Data Development集群
+
+##### Hadoop集群
+
+以EMR-3.29.0版本为例，Hadoop集群服务组件的具体部署信息如下。
+
+| 服务名          | 主实例节点                                                   | 核心实例节点                                               |
+| --------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| HDFS            | KMS<br>SecondaryNameNode<br>HttpFS<br>HDFS Client<br>NameNode | DataNode<br>HDFS Client                                    |
+| YARN            | ResourceManager<br>App Timeline Server<br>JobHistory<br>WebAppProxyServer<br>Yarn Client | Yarn Client<br>NodeManager                                 |
+| Hive            | Hive MetaStore<br>HiveServer2<br>Hive Client                 | Hive Client                                                |
+| Spark           | Spark Client                                                 | SparkHistory<br>ThriftServer                               |
+| Knox            | Knox                                                         | 无                                                         |
+| Tez             | Tomcat<br>Tez Client                                         | Tez Client                                                 |
+| Ganglia         | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client                   | Gmond<br>Ganglia Client                                    |
+| Sqoop           | Sqoop Client                                                 | Sqoop Client                                               |
+| Bigboot         | Bigboot Client<br>Bigboot Monitor                            | Bigboot Client<br>Bigboot Monitor                          |
+| OpenLDAP        | OpenLDAP                                                     | 无                                                         |
+| Hue             | Hue                                                          | 无                                                         |
+| SmartData       | Jindo Namespace Service<br>Jindo Storage Service<br>Jindo Client | Jindo Storage Service<br>Jindo Client                      |
+| LIVY(可选)      | Livy                                                         | 无                                                         |
+| Superset(可选)  | Superset                                                     | 无                                                         |
+| Flink(可选)     | FlinkHistoryServer<br>Flink Client                           | Flink Client                                               |
+| RANGER(可选)    | RangerPlugin/RangerAdmin<br>RangerUserSync<br>Solr           | RangerPlugin                                               |
+| Storm(可选)     | Storm Client<br>UI<br>Nimbus<br>Logviewer                    | Storm Client<br>Supervisor                                 |
+| Phoenix(可选)   | Phoenix Client                                               | Phoenix Client                                             |
+| Kudu(可选)      | Kudu Master<br>Kudu Client                                   | Kudu Tserver<br>Kudu Master<br>Kudu Client                 |
+| HBase(可选)     | HMaster<br>HBase Client<br>ThriftServer                      | HBase Client<br>HRegionServer                              |
+| ZooKeeper(可选) | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
+| Oozie(可选)     | Oozie                                                        | 无                                                         |
+| Presto(可选)    | Presto Client<br>PrestoMaster                                | Presto Client<br>PrestoWorker                              |
+| Impala(可选)    | Impala Runtime and Shell<br>Impala Catalog Server<br>Impala StateStore Server | Impala Runtime and Shell<br>Impala Daemon Server           |
+| Pig(可选)       | Pig Client                                                   | Pig Client                                                 |
+| Zeppelin(可选)  | Zeppelin                                                     | 无                                                         |
+| FLUME(可选)     | Flume Agent<br>Flume Client                                  | Flume Agent<br>Flume Client                                |
+
+
+##### Druid集群
+
+| 服务名         | 主实例节点                                                   | 核心实例节点                                               |
+| -------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| Druid          | Druid Client<br>Coordinator<br>Overlord<br>Broker<br>Router  | MiddleManager<br>Historical<br>Druid Client                |
+| HDFS           | KMS<br>SecondaryNameNode<br>HttpFS<br>HDFS Client<br>NameNode | DataNode<br>HDFS Client                                    |
+| Ganglia        | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client                   | Gmond<br>Ganglia Client                                    |
+| ZooKeeper      | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
+| OpenLDAP       | OpenLDAP                                                     | 无                                                         |
+| Bigboot        | Bigboot Client<br>Bigboot Monitor                            | Bigboot Client<br>Bigboot Monitor                          |
+| SmartData      | Jindo Namespace Service<br>Jindo Storage Service<br>Jindo Client | Jindo Storage Service<br>Jindo Client                      |
+| YARN(可选)     | ResourceManager<br>App Timeline Server<br>JobHistory<br>WebAppProxyServer<br>Yarn Client | Yarn Client<br>NodeManager                                 |
+| Superset(可选) | Superset                                                     | 无                                                         |
+
+##### Dataflow-Kafka集群
+
+以EMR-3.29.0版本为例，Dataflow-Kafka集群服务组件的具体部署信息如下。
+
+| 服务名        | 主实例节点                                                   | 核心实例节点                                               |
+| ------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| Kafka-Manager | Kafka Manager                                                | 无                                                         |
+| Kafka         | Kafka Client<br>KafkaMetadataMonitor<br>Kafka Rest Proxy<br>Kafka Broker broker<br>Kafka Schema Registry | Kafka Broker broker<br>Kafka Client                        |
+| Ganglia       | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client                   | Gmond<br>Ganglia Client                                    |
+| ZooKeeper     | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
+| OpenLDAP      | OpenLDAP                                                     | 无                                                         |
+| RANGER(可选)  | RangerPlugin/RangerAdmin<br>RangerUserSync<br>Solr           | RangerPlugin                                               |
+| Knox(可选)    | Knox                                                         | 无                                                         |
+
+##### Flink集群
+
+以EMR-3.30.0版本为例，Flink集群服务组件的具体部署信息如下。
+
+| 服务名          | 主实例节点                                                   | 核心实例节点                                               |
+| --------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| HDFS            | KMS<br>SecondaryNameNode<br>HttpFS<br>HDFS Client<br>NameNode | DataNode<br>HDFS Client                                    |
+| YARN            | ResourceManager<br>App Timeline Server<br>JobHistory<br>WebAppProxyServer<br>Yarn Client | Yarn Client<br>NodeManager                                 |
+| Ganglia         | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client                   | Gmond<br>Ganglia Client                                    |
+| ZooKeeper       | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
+| Knox            | Knox                                                         | 无                                                         |
+| Flink-Vvp       | Flink-Vvp                                                    | 无                                                         |
+| OpenLDAP        | OpenLDAP                                                     | 无                                                         |
+| PAI-Alink(可选) | Alink                                                        | 无                                                         |
+
+##### ZooKeeper集群
+
+以EMR-3.29.0版本为例，ZooKeeper集群服务组件的具体部署信息如下。
+
+| 服务名    | 主实例节点                                 | 核心实例节点                                               |
+| --------- | ------------------------------------------ | ---------------------------------------------------------- |
+| Ganglia   | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client | Gmond<br>Ganglia Client                                    |
+| ZooKeeper | ZooKeeper follower<br>ZooKeeper Client     | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
+
+##### Data Science集群
+
+以EMR-3.29.1版本为例，Data Science集群服务组件的具体部署信息如下。
+
+| 服务名             | 主实例节点                                                   | 核心实例节点                                               |
+| ------------------ | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| HDFS               | KMS<br>SecondaryNameNode<br>HttpFS<br>HDFS Client<br>NameNode | DataNode<br>HDFS Client                                    |
+| YARN               | ResourceManager<br>App Timeline Server<br>JobHistory<br>WebAppProxyServer<br>Yarn Client | Yarn Client<br>NodeManager                                 |
+| ZooKeeper          | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
+| Knox               | Knox                                                         | 无                                                         |
+| Tensorflow on YARN | TensorFlow-On-YARN-Gateway<br>TensorFlow-On-YARN-History-Server<br>TensorFlow-On-YARN | TensorFlow-On-YARN-Client<br>TensorFlow-On-YARN-Gateway    |
+| SmartData          | Jindo Namespace Service<br>Jindo Storage Service<br>Jindo Client | Jindo Storage Service<br>Jindo Client                      |
+| Bigboot            | Bigboot Client<br>Bigboot Monitor                            | Bigboot Client<br>Bigboot Monitor                          |
+| PAI-EASYREC        | Easyrec                                                      | Easyrec                                                    |
+| PAI-EAS            | PAIEAS                                                       | PAIEAS                                                     |
+| PAI-Faiss          | Faiss                                                        | Faiss                                                      |
+| PAI-Redis          | Redis                                                        | Redis                                                      |
+| PAI-Alink          | Alink                                                        | 无                                                         |
+| Flink-Vvp          | Flink-Vvp                                                    | 无                                                         |
+| OpenLDAP           | OpenLDAP                                                     | 无                                                         |
+| Jindo SDK          | Jindo SDK                                                    | Jindo SDK                                                  |
+| Zeppelin(可选)     | Zeppelin                                                     | 无                                                         |
+| PAI-REC(可选)      | Rec                                                          | 无                                                         |
+| AUTOML(可选)       | AUTOML                                                       | AUTOML                                                     |
+| TensorFlow(可选)   | TensorFlow                                                   | TensorFlow                                                 |
+
+##### ClickHouse集群
+
+以EMR-3.35.0版本为例，ClickHouse集群服务组件的具体部署信息如下。
+
+| 服务名     | 主实例节点                                 | 核心实例节点                                               |
+| ---------- | ------------------------------------------ | ---------------------------------------------------------- |
+| Ganglia    | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client | Gmond<br>Ganglia Client                                    |
+| ZooKeeper  | ZooKeeper follower<br>ZooKeeper Client     | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
+| ClickHouse | ClickHouse Server<br>ClickHouse Client     | ClickHouse Server<br>ClickHouse Client                     |
+
+##### Data Development集群
+
+以EMR-3.33.102版本为例，Data Development集群服务组件的具体部署信息如下。
+
+| 服务名                  | 主实例节点                                               | 核心实例节点                     |
+| ----------------------- | -------------------------------------------------------- | -------------------------------- |
+| Ganglia                 | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client               | Gmond<br>Ganglia Client          |
+| Zeppelin                | ZooKeeper Master                                         | ZooKeeper Worker                 |
+| JupyterHub              | JupyterHub                                               | 无                               |
+| RabbitMQ                | RabbitMQ                                                 | 无                               |
+| Mysql                   | MySQL                                                    | 无                               |
+| Data Development Center | Data Development Center                                  | 无                               |
+| Airflow                 | Airflow Client<br>Airflow Scheduler<br>Airflow WebServer | Airflow Client<br>Airflow Worker |
+
+#### 健康检查
+##### HOST
+
+- 主机内存使用情况检查：检查近半个小时主机内存使用率的平均值是否大于90%
+- 主机磁盘利用率情况检查：检查近半个小时主机所有磁盘分区中最高利用率的平均值是否大于90%
+- 主机磁盘利用率情况检查：检查近半个小时主机所有磁盘分区中最大IO操作等待时间的平均值是否大于100ms
+- 主机心跳情况检查：检查近5分钟内主机是否上报心跳
+- 主机监控日志检查：检查近30分钟内主机监控日志是否缺失检查
+
+##### HDFS
+
+**NameNode**
+
+- 集群HDFS总容量检查：检查近半个小时集群HDFS总容量是否超过80%
+- 集群HDFS总容量检查：检查近半个小时DataNode节点HDFS容量是否超过85%
+- NameNode HTTP端口状态检查：检查近半个小时NameNode HTTP端口（50070）状态是否正常
+- NameNode IPC端口状态检查：检查近半个小时NameNode IPC端口（9000/8020）状态是否正常
+- NameNode是否进入安全模式：检查近5分钟NameNode是否已进入安全模式
+
+**DateNode**
+
+- DateNode端口状态检查：检查近5分钟DateNode端口是否正常
+- DateNode IPC端口（50020）状态检查：检查近5分钟DateNode IPC端口是否正常
+- DateNode HTTP端口（50075）状态检查：检查近5分钟DateNode进程状态是否正常
+
+**JournalNode**
+
+- JournalNode RPC端口（8485）状态检：检查近5分钟JournalNode RPC端口（8485）状态是否正常
+- JournalNode RPC端口（8480）状态检查：检查近5分钟JournalNode RPC端口（8480）状态是否正常
+
+##### YARN
+- JobHistory端口（10020）状态检查：检查近5分钟JobHistory端口（10020）状态是否正常
+- JobHistory WebApp端口（19888）状态检查：检查近5分钟JobHistory WebApp端口（19888）状态是否正常
+- ResourceManager WebApp端口（8088）状态检查：检查近5分钟ResourceManager WebApp端口（8088）状态是否正常
+- ResourceManager Admin端口（8033）状态检查：检查近5分钟ResourceManager Admin端口（8033）状态是否正常
+- TimeLineServer端口（10200）状态检查：检查近5分钟TimeLineServer端口（10200）状态是否正常
+- TimeLineServer WebApp端口（8188）状态检查：检查近5分钟TimeLineServer WebApp端口（8188）状态是否正常
+- ProxyServer端口（20888）状态检查：检查近5分钟ProxyServer端口（20888）状态是否正常
+- NodeManager HTTP端口（8042）状态检查：检查近5分钟NodeManager HTTP端口（8042）状态是否正常
+
+##### HBASE
+
+**HMaster**
+
+- HMaster端口（16000）状态检查：检查近5分钟HMaster端口（16000）状态是否正常
+- HMaster HTTP端口（16010）状态检查：检查近5分钟HTTP端口（16010）状态是否正常
+- HMaster JMX端口（10101）状态检查：检查近5分钟HMaster JMX端口（10101）状态是否正常
+
+**HRegionServer**
+
+- HRegionServer端口（16020）状态检查：检查近5分钟HRegionServer端口（16020）状态是否正常
+- HRegionServer HTTP端口（16030）状态检查：检查近5分钟HRegionServer HTTP端口（16030）状态是否正常
+- HRegionServer JMX端口（10102）状态检查：检查近5分钟HRegionServer JMX端口（10102）状态是否正常
+
+**ThriftServer**
+
+- HBase ThriftServer端口（9099）状态检查：检查近5分钟HBase ThriftServer端口（9099）状态是否正常
+- HBase ThriftServer INFO端口（9095）状态检查：检查近5分钟HBase ThriftServer INFO端口（9095）状态是否正常
+- HBase ThriftServer JMX端口（10103）状态检查：检查近5分钟HBase ThriftServer JMX端口（10103）状态是否正常
+
+##### Hive
+
+**HiveServer**
+
+- HiveServer2端口（10000）状态检查：检查近5分钟HiveServer2端口（10000）状态是否正常
+- HiveServer2 WebUI端口（10002）状态检查：检查近5分钟HiveServer2 WebUI端口（10002）状态是否正常
+
+**HiveMetaStore**
+
+- HiveMetaStore端口（9083）状态检查：检查近5分钟HiveMetaStore端口（9083）状态是否正常
+
+##### Zookeeper
+- Zookeeper Client端口（2181）状态检查：检查近5分钟Zookeeper Client端口（2181）状态是否正常
+- Zookeeper Leader端口（3888）状态检查：检查近5分钟Zookeeper Leader端口（3888）状态是否正常
+- Zookeeper Peer端口（2888）状态检查：检查近5分钟Zookeeper Peer端口（2888）状态是否正常
+
+##### HUE
+- Hue端口（8888）状态检查：检查近5分钟Hue端口（8888）状态是否正常
+
+##### Kafka
+
+**Broker**
+
+- Kafka 状态检查：检查近5分钟Kafka1分钟跨度内的每秒FailedFetchRequests平均数目是否大于1000
+- Kafka 状态检查：检查近5分钟Kafka1分钟跨度内的每秒FailedProduceRequests平均数目是否大于1000
+
+##### OOZIE
+- OOZIE HTTP端口（11000）状态检查：检查近5分钟OOZIE HTTP端口（11000）状态是否正常
+- OOZIE Admin端口（11001）状态检查：检查近5分钟OOZIE Admin端口（11001）状态是否正常
+
+##### PRESTO
+- PrestoMaster端口（9090）状态检查：检查近5分钟PrestoMaster端口（9090）状态是否正常
+- PrestoWorker端口（9090）状态检查：检查近5分钟PrestoWorker端口（9090）状态是否正常
+
+##### Spark
+- SparkHistory端口（18080）状态检查：检查近5分钟SparkHistory端口（18080）状态是否正常
+
+##### Storm
+- Nimbus Thrift端口（6627）状态检查：检查近5分钟Nimbus Thrift端口（6627）状态是否正常
+- Storm UI端口（9999）状态检查：检查近5分钟Storm UI端口（9999）状态是否正常
+
+##### Zeppelin
+- Zeppelin端口（8080）状态检查：检查近5分钟Zeppelin端口（8080）状态是否正常
+
+
+#### 状态检查
+
+##### Hadoop
+
+- Configured Capacity: This displays the total capacity (storage space) of HDFS.配置容量：显示 HDFS 的总容量（存储空间）。
+- DFS Used: This displays the total space used in HDFS.显示在 HDFS 中使用的总空间。
+- Non DFS Used: This displays the amount of space used by other files that are not part of HDFS. This is the space used by the operating system and other files.这显示不属于 HDFS 的其他文件使用的空间量。这是操作系统和其他文件使用的空间。
+- DFS Remaining: This displays the total space remaining in HDFS.显示 HDFS 中剩余的总空间。
+- DFS Used%: This displays the total HDFS space utilization shown as percentage.这显示以百分比形式显示的总 HDFS 空间利用率。
+- DFS Remaining%: This displays the total HDFS space remaining shown as percentage.显示剩余的总 HDFS 空间百分比。
+- Block Pool Used: This displays the total space utilized by the current namespace.显示当前命名空间使用的总空间。
+- Block Pool Used%: This displays the total space utilized by the current namespace shown as percentage. As you can see in the preceding screenshot, in this case, the value matches that of the DFS Used% parameter. This is because there is only one namespace (one namenode) and HDFS is not federated.显示当前命名空间使用的总空间百分比。正如您在前面的屏幕截图中看到的，在这种情况下，该值与 DFS Used% 参数的值匹配。这是因为只有一个命名空间（一个 namenode）并且 HDFS 没有联合。
+- DataNodes usages% (Min, Median, Max, stdDev): This displays the usages across all datanodes in the cluster. This helps administrators identify unbalanced nodes, which may occur when data is not uniformly placed across the datanodes. Administrators have the option to rebalance the datanodes using a balancer.显示集群中所有数据节点的使用情况。这有助于管理员识别不平衡的节点，当数据没有均匀地放置在数据节点上时可能会发生这种情况。管理员可以选择使用平衡器重新平衡数据节点。
+- Live Nodes: This link displays all the datanodes in the cluster.此链接显示集群中的所有数据节点。
+- Dead Nodes: This link displays all the datanodes that are currently in a dead state in the cluster. A dead state for a datanode daemon is when the datanode daemon is not running or has not sent a heartbeat message to the namenode daemon. Datanodes are unable to send heartbeats if there exists a network connection issue between the machines that host the datanode and namenode daemons. Excessive swapping on the datanode machine causes the machine to become unresponsive, which also prevents the datanode daemon from sending heartbeats.
+- Decommissioning Nodes: This link lists all the datanodes that are being decommissioned.此链接列出了所有正在退役的数据节点。
+- Number of Under-Replicated Blocks: This represents the number of blocks that have not replicated as per the replication factor configured in the hdfs-site.xml file.这表示根据 hdfs-site.xml 文件中配置的复制因子尚未复制的块数。
 
 #### 作业类型
 
@@ -1481,11 +1770,9 @@ yarn.nodemanager.log-dirs {% set comma = joiner(',') %}{% for idx in range(diskC
 yarn.nodemanager.process-kill-wait.ms 2000
 yarn.nodemanager.remote-app-log-dir hdfs://emr-header-1.cluster-245192:9000/tmp/logs
 yarn.nodemanager.resource.cpu-vcores 8
-# 集群中某个计算节点分配给nodemanager的最大可用内存，这个最大可用内存不是该节点最大内存，而是该节点最大内存划分出来的给nodemanager使用的内存。
 yarn.nodemanager.resource.memory-mb 11584
 yarn.nodemanager.sleep-delay-before-sigkill.ms 250
 yarn.nodemanager.vmem-check-enabled false
-# 虚拟内存的比例，默认是2.1，即每使用1G物理内存，分配2.1的虚拟内存。
 yarn.nodemanager.vmem-pmem-ratio 5000
 
 yarn.resourcemanager.address emr-header-1.cluster-245192:8032
@@ -1529,10 +1816,8 @@ yarn.scheduler.fair.update-interval-ms 500
 yarn.scheduler.fair.user-as-default-queue false
 yarn.scheduler.increment-allocation-mb 1024
 yarn.scheduler.increment-allocation-vcores 1
-# 指定单个容器(container)可申请的最大内存资源，
 yarn.scheduler.maximum-allocation-mb 11584
 yarn.scheduler.maximum-allocation-vcores 32
-# 指定单个容器(container)可申请的最小内存资源，
 yarn.scheduler.minimum-allocation-mb 32
 
 yarn.timeline-service.bind-host 0.0.0.0
@@ -1581,7 +1866,6 @@ mapreduce.job.running.reduce.limit 0
 mapreduce.job.tags
 mapreduce.job.userlog.retain.hours 48
 
-# Jobhistory 历史服务器
 mapreduce.jobhistory.address emr-header-1.cluster-245192:10020
 mapreduce.jobhistory.admin.acl *
 mapreduce.jobhistory.admin.address emr-header-1.cluster-245192:10033
@@ -1598,10 +1882,8 @@ mapreduce.jobtracker.restart.recover false
 mapreduce.jobtracker.taskscheduler org.apache.hadoop.mapred.JobQueueTaskScheduler
 
 mapreduce.map.cpu.vcores 1
-# 在map阶段的yarnchild进程执行jvm参数，必须小于mapreduce.map.memory.mb
 mapreduce.map.java.opts -Xmx1158m -XX:ParallelGCThreads=2 -XX:CICompilerCount=2
 mapreduce.map.log.level INFO
-# 指定 map 任务时申请的内存
 mapreduce.map.memory.mb 1448
 mapreduce.map.output.compress true
 mapreduce.map.output.compress.codec org.apache.hadoop.io.compress.DefaultCodec
@@ -1614,10 +1896,8 @@ mapreduce.output.fileoutputformat.compress.type BLOCK
 mapreduce.outputcommitter.class com.aliyun.emr.fs.oss.commit.JindoOssCommitter
 
 mapreduce.reduce.cpu.vcores 1
-# 在reduce阶段的yarnchild进程执行jvm参数， 必须小于mapreduce.reduce.memory.mb
 mapreduce.reduce.java.opts -Xmx2316m -XX:ParallelGCThreads=2 -XX:CICompilerCount=2
 mapreduce.reduce.log.level INFO
-# 指定 reduce 任务时申请的内存
 mapreduce.reduce.memory.mb 2896
 mapreduce.reduce.shuffle.parallelcopies 20
 mapreduce.reduce.speculative true
@@ -1648,7 +1928,6 @@ yarn.app.mapreduce.am.jhs.backup-dir file:///mnt/disk1/log/hadoop-mapreduce/hist
 yarn.app.mapreduce.am.jhs.backup.enabled true
 yarn.app.mapreduce.am.job.task.listener.thread-count 60
 yarn.app.mapreduce.am.resource.cpu-vcores 1
-# 指定appMaster的运行内存，默认是1.5G。必须小于 yarn.scheduler.maximum-allocation-mb。
 yarn.app.mapreduce.am.resource.mb 2896
 yarn.app.mapreduce.am.staging-dir /tmp/hadoop-yarn/staging
 yarn.app.mapreduce.client.job.max-retries 0
@@ -2142,6 +2421,166 @@ zookeeper.znode.rootserver root-region-server
 
 #### 参数调优
 
+##### Java 内存设置
+
+java进程的内存组成 = heap + stack + metaspaceSize + directMemory
+
+JVM的内存粗略可分为堆和非堆：
+
+- Heap：新生代New Generation（Eden、Survivor from、Survivor to）、老年代Old Generation、String Constant Pool
+- NoHeap：Code Cache、compressed class space、Metaspace 元空间、Thread stack、Direct ByteBuffer直接缓冲区、Mapped、JVM、Native Memory
+
+堆内存参数：
+
+- -Xmx512m：最大总堆内存，推荐设置为物理内存的1/4
+- -Xms512m：初始总堆内存，推荐和最大堆内存一样大（GC之后就不必调整堆内存大小）
+- -Xmn192m：年轻代堆内存，官方推荐为整个堆的3/8
+
+
+JDK1.8开始，自带的hostspot虚拟机取消了过去的永久区，而新增了metaspace区，从功能上看，metaspace可以认为和永久区类似，其最主要的功用也是存放类元数据，但实际的机制则有较大的不同。
+
+永久代参数：
+
+- -XX:PermSize=128m 堆的初始大小，一般设置为128m即可，原则为预留30%的空间
+- -XX:MaxPermSize=128m：堆的最大大小，一般设置为128m即可，原则为预留30%的空间
+
+
+- -XX:MetaspaceSize=64m：元空间限制
+- -XX:MaxMetaspaceSize=128m：元空间限制
+- -XX:MaxDirectMemorySize=128m：直接内存使用限制
+
+栈内存参数：
+
+- -Xss1024K：控制每个stack的大小
+
+**通过jmap查看JVM内存分配**
+
+jmap -heap 打印heap的概要信息，GC使用的算法，heap（堆）的配置及JVM堆内存的使用情况.
+
+``` jmap -heap 12287
+Attaching to process ID 12287, please wait...
+Debugger attached successfully.
+Server compiler detected.
+JVM version is 25.252-b09
+
+using thread-local object allocation.
+Parallel GC with 4 thread(s)
+
+Heap Configuration:
+   MinHeapFreeRatio         = 0
+   MaxHeapFreeRatio         = 100
+   MaxHeapSize              = 536870912 (512.0MB)
+   NewSize                  = 84934656 (81.0MB)
+   MaxNewSize               = 178782208 (170.5MB)
+   OldSize                  = 170917888 (163.0MB)
+   NewRatio                 = 2
+   SurvivorRatio            = 8
+   MetaspaceSize            = 21807104 (20.796875MB)
+   CompressedClassSpaceSize = 1073741824 (1024.0MB)
+   MaxMetaspaceSize         = 17592186044415 MB
+   G1HeapRegionSize         = 0 (0.0MB)
+
+Heap Usage:
+PS Young Generation
+Eden Space:
+   capacity = 130547712 (124.5MB)
+   used     = 29798640 (28.418197631835938MB)
+   free     = 100749072 (96.08180236816406MB)
+   22.82586155167545% used
+From Space:
+   capacity = 22544384 (21.5MB)
+   used     = 4800752 (4.5783538818359375MB)
+   free     = 17743632 (16.921646118164062MB)
+   21.29466921784157% used
+To Space:
+   capacity = 21495808 (20.5MB)
+   used     = 0 (0.0MB)
+   free     = 21495808 (20.5MB)
+   0.0% used
+PS Old Generation
+   capacity = 358088704 (341.5MB)
+   used     = 339766968 (324.0270309448242MB)
+   free     = 18321736 (17.47296905517578MB)
+   94.88346440551221% used
+
+38196 interned Strings occupying 3996120 bytes.
+```
+
+**通过jcmd命令分析java进程的内存**
+
+jcmd <pid> VM.native_memory
+
+本质是通过NMT分析java进程的内存分配。NMT的全称是Native Memory Tracker，是一个本地内存跟踪工具。常用来分析JVM的内存使用情况。NMT功能默认关闭，可以通过以下方式开启:
+
+`-XX:NativeMemoryTracking=[off | summary | detail]`
+
+off 默认配置;summary 只收集汇总信息;detail 收集每次调用的信息。
+
+注意，根据Java官方文档，开启NMT会有5%－10%的性能损耗；
+
+如果想JVM退出时打印退出时的内存使用情况，可以通过如下配置项:`-XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics`
+
+采用如下命令重启项目：
+
+```bash
+java -Xmx8g -Xms8g - -XX:+UseG1GC -XX:NativeMemoryTracking=detail -jar /home/pgcp/pgcp-0.0.1-SNAPSHOT.jar
+```
+
+```
+Native Memory Tracking:
+Total: reserved=6988749KB, committed=3692013KB
+ 堆内存
+- Java Heap (reserved=5242880KB, committed=3205008KB)
+ (mmap: reserved=5242880KB, committed=3205008KB)
+ 类加载信息
+- Class (reserved=1114618KB, committed=74642KB)
+ (classes #10657)
+ (malloc=4602KB #32974)
+ (mmap: reserved=1110016KB, committed=70040KB)
+ 线程栈
+- Thread (reserved=255213KB, committed=255213KB)
+ (thread #248)
+ (stack: reserved=253916KB, committed=253916KB)
+ (malloc=816KB #1242)
+ (arena=481KB #494)
+ 代码缓存
+- Code (reserved=257475KB, committed=46551KB)
+ (malloc=7875KB #10417)
+ (mmap: reserved=249600KB, committed=38676KB)
+ 垃圾回收
+- GC (reserved=31524KB, committed=23560KB)
+ (malloc=17180KB #2113)
+ (mmap: reserved=14344KB, committed=6380KB)
+ 编译器
+- Compiler (reserved=598KB, committed=598KB)
+ (malloc=467KB #1305)
+ (arena=131KB #3)
+ 内部
+- Internal (reserved=6142KB, committed=6142KB)
+ (malloc=6110KB #23691)
+ (mmap: reserved=32KB, committed=32KB)
+ 符号
+- Symbol (reserved=11269KB, committed=11269KB)
+ (malloc=8544KB #89873)
+ (arena=2725KB #1)
+ nmt
+- Native Memory Tracking (reserved=2781KB, committed=2781KB)
+ (malloc=199KB #3036)
+ (tracking overhead=2582KB)
+- Arena Chunk (reserved=194KB, committed=194KB)
+ (malloc=194KB)
+- Unknown (reserved=66056KB, committed=66056KB)
+ (mmap: reserved=66056KB, committed=66056KB)
+```
+
+可以看到java进程的整个memory主要包含了Java Heap、Class、Thread、Code、GC、Internal、Symbol、Native Memory Tracking、unknown这几部分；其中reserved表示应用可用的内存大小，committed表示应用正在使用的内存大小。
+
+```
+Max Memory = eden + survivor + old + String Constant Pool + Code cache + compressed class space + Metaspace + Thread stack(*thread num) + Direct + Mapped + JVM + Native Memory
+```
+
+##### 其他
+
 2. 增大Spark 作业内存，在YARN服务的配置页面，调大spark.executor.memory或 spark.driver.memory的值。
 
 3. 作业Task数目过多或Spark Executor数目过多，导致AppMaster调度启动Task的时间过长，单个Task运行时间较短，作业调度的Overhead较大。
@@ -2175,129 +2614,6 @@ sqoop import \
 ```
 解决方法：在使用TIMESTAMP字段导入数据至HDFS时，请删除--direct参数。
 
-
-#### 健康检查
-##### HOST
-
-- 主机内存使用情况检查：检查近半个小时主机内存使用率的平均值是否大于90%
-- 主机磁盘利用率情况检查：检查近半个小时主机所有磁盘分区中最高利用率的平均值是否大于90%
-- 主机磁盘利用率情况检查：检查近半个小时主机所有磁盘分区中最大IO操作等待时间的平均值是否大于100ms
-- 主机心跳情况检查：检查近5分钟内主机是否上报心跳
-- 主机监控日志检查：检查近30分钟内主机监控日志是否缺失检查
-
-##### HDFS
-
-**NameNode**
-
-- 集群HDFS总容量检查：检查近半个小时集群HDFS总容量是否超过80%
-- 集群HDFS总容量检查：检查近半个小时DataNode节点HDFS容量是否超过85%
-- NameNode HTTP端口状态检查：检查近半个小时NameNode HTTP端口（50070）状态是否正常
-- NameNode IPC端口状态检查：检查近半个小时NameNode IPC端口（9000/8020）状态是否正常
-- NameNode是否进入安全模式：检查近5分钟NameNode是否已进入安全模式
-
-**DateNode**
-
-- DateNode端口状态检查：检查近5分钟DateNode端口是否正常
-- DateNode IPC端口（50020）状态检查：检查近5分钟DateNode IPC端口是否正常
-- DateNode HTTP端口（50075）状态检查：检查近5分钟DateNode进程状态是否正常
-
-**JournalNode**
-
-- JournalNode RPC端口（8485）状态检：检查近5分钟JournalNode RPC端口（8485）状态是否正常
-- JournalNode RPC端口（8480）状态检查：检查近5分钟JournalNode RPC端口（8480）状态是否正常
-
-##### YARN
-- JobHistory端口（10020）状态检查：检查近5分钟JobHistory端口（10020）状态是否正常
-- JobHistory WebApp端口（19888）状态检查：检查近5分钟JobHistory WebApp端口（19888）状态是否正常
-- ResourceManager WebApp端口（8088）状态检查：检查近5分钟ResourceManager WebApp端口（8088）状态是否正常
-- ResourceManager Admin端口（8033）状态检查：检查近5分钟ResourceManager Admin端口（8033）状态是否正常
-- TimeLineServer端口（10200）状态检查：检查近5分钟TimeLineServer端口（10200）状态是否正常
-- TimeLineServer WebApp端口（8188）状态检查：检查近5分钟TimeLineServer WebApp端口（8188）状态是否正常
-- ProxyServer端口（20888）状态检查：检查近5分钟ProxyServer端口（20888）状态是否正常
-- NodeManager HTTP端口（8042）状态检查：检查近5分钟NodeManager HTTP端口（8042）状态是否正常
-
-##### HBASE
-
-**HMaster**
-
-- HMaster端口（16000）状态检查：检查近5分钟HMaster端口（16000）状态是否正常
-- HMaster HTTP端口（16010）状态检查：检查近5分钟HTTP端口（16010）状态是否正常
-- HMaster JMX端口（10101）状态检查：检查近5分钟HMaster JMX端口（10101）状态是否正常
-
-**HRegionServer**
-
-- HRegionServer端口（16020）状态检查：检查近5分钟HRegionServer端口（16020）状态是否正常
-- HRegionServer HTTP端口（16030）状态检查：检查近5分钟HRegionServer HTTP端口（16030）状态是否正常
-- HRegionServer JMX端口（10102）状态检查：检查近5分钟HRegionServer JMX端口（10102）状态是否正常
-
-**ThriftServer**
-
-- HBase ThriftServer端口（9099）状态检查：检查近5分钟HBase ThriftServer端口（9099）状态是否正常
-- HBase ThriftServer INFO端口（9095）状态检查：检查近5分钟HBase ThriftServer INFO端口（9095）状态是否正常
-- HBase ThriftServer JMX端口（10103）状态检查：检查近5分钟HBase ThriftServer JMX端口（10103）状态是否正常
-
-##### Hive
-
-**HiveServer**
-
-- HiveServer2端口（10000）状态检查：检查近5分钟HiveServer2端口（10000）状态是否正常
-- HiveServer2 WebUI端口（10002）状态检查：检查近5分钟HiveServer2 WebUI端口（10002）状态是否正常
-
-**HiveMetaStore**
-
-- HiveMetaStore端口（9083）状态检查：检查近5分钟HiveMetaStore端口（9083）状态是否正常
-
-##### Zookeeper
-- Zookeeper Client端口（2181）状态检查：检查近5分钟Zookeeper Client端口（2181）状态是否正常
-- Zookeeper Leader端口（3888）状态检查：检查近5分钟Zookeeper Leader端口（3888）状态是否正常
-- Zookeeper Peer端口（2888）状态检查：检查近5分钟Zookeeper Peer端口（2888）状态是否正常
-
-##### HUE
-- Hue端口（8888）状态检查：检查近5分钟Hue端口（8888）状态是否正常
-
-##### Kafka
-
-**Broker**
-
-- Kafka 状态检查：检查近5分钟Kafka1分钟跨度内的每秒FailedFetchRequests平均数目是否大于1000
-- Kafka 状态检查：检查近5分钟Kafka1分钟跨度内的每秒FailedProduceRequests平均数目是否大于1000
-
-##### OOZIE
-- OOZIE HTTP端口（11000）状态检查：检查近5分钟OOZIE HTTP端口（11000）状态是否正常
-- OOZIE Admin端口（11001）状态检查：检查近5分钟OOZIE Admin端口（11001）状态是否正常
-
-##### PRESTO
-- PrestoMaster端口（9090）状态检查：检查近5分钟PrestoMaster端口（9090）状态是否正常
-- PrestoWorker端口（9090）状态检查：检查近5分钟PrestoWorker端口（9090）状态是否正常
-
-##### Spark
-- SparkHistory端口（18080）状态检查：检查近5分钟SparkHistory端口（18080）状态是否正常
-
-##### Storm
-- Nimbus Thrift端口（6627）状态检查：检查近5分钟Nimbus Thrift端口（6627）状态是否正常
-- Storm UI端口（9999）状态检查：检查近5分钟Storm UI端口（9999）状态是否正常
-
-##### Zeppelin
-- Zeppelin端口（8080）状态检查：检查近5分钟Zeppelin端口（8080）状态是否正常
-
-
-#### 状态检查
-
-##### Hadoop
-
-- Configured Capacity: This displays the total capacity (storage space) of HDFS.配置容量：显示 HDFS 的总容量（存储空间）。
-- DFS Used: This displays the total space used in HDFS.显示在 HDFS 中使用的总空间。
-- Non DFS Used: This displays the amount of space used by other files that are not part of HDFS. This is the space used by the operating system and other files.这显示不属于 HDFS 的其他文件使用的空间量。这是操作系统和其他文件使用的空间。
-- DFS Remaining: This displays the total space remaining in HDFS.显示 HDFS 中剩余的总空间。
-- DFS Used%: This displays the total HDFS space utilization shown as percentage.这显示以百分比形式显示的总 HDFS 空间利用率。
-- DFS Remaining%: This displays the total HDFS space remaining shown as percentage.显示剩余的总 HDFS 空间百分比。
-- Block Pool Used: This displays the total space utilized by the current namespace.显示当前命名空间使用的总空间。
-- Block Pool Used%: This displays the total space utilized by the current namespace shown as percentage. As you can see in the preceding screenshot, in this case, the value matches that of the DFS Used% parameter. This is because there is only one namespace (one namenode) and HDFS is not federated.显示当前命名空间使用的总空间百分比。正如您在前面的屏幕截图中看到的，在这种情况下，该值与 DFS Used% 参数的值匹配。这是因为只有一个命名空间（一个 namenode）并且 HDFS 没有联合。
-- DataNodes usages% (Min, Median, Max, stdDev): This displays the usages across all datanodes in the cluster. This helps administrators identify unbalanced nodes, which may occur when data is not uniformly placed across the datanodes. Administrators have the option to rebalance the datanodes using a balancer.显示集群中所有数据节点的使用情况。这有助于管理员识别不平衡的节点，当数据没有均匀地放置在数据节点上时可能会发生这种情况。管理员可以选择使用平衡器重新平衡数据节点。
-- Live Nodes: This link displays all the datanodes in the cluster.此链接显示集群中的所有数据节点。
-- Dead Nodes: This link displays all the datanodes that are currently in a dead state in the cluster. A dead state for a datanode daemon is when the datanode daemon is not running or has not sent a heartbeat message to the namenode daemon. Datanodes are unable to send heartbeats if there exists a network connection issue between the machines that host the datanode and namenode daemons. Excessive swapping on the datanode machine causes the machine to become unresponsive, which also prevents the datanode daemon from sending heartbeats.
-- Decommissioning Nodes: This link lists all the datanodes that are being decommissioned.此链接列出了所有正在退役的数据节点。
-- Number of Under-Replicated Blocks: This represents the number of blocks that have not replicated as per the replication factor configured in the hdfs-site.xml file.这表示根据 hdfs-site.xml 文件中配置的复制因子尚未复制的块数。
 
 ### Hadoop 生态圈
 ![](images/README0.jpg)
