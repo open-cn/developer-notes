@@ -18,7 +18,7 @@ MapReduce 中主要是对 InputFormat 和 OutputFormat 进行定制。
 
 sqoop 一般和哪些组件打交道：HDFS， MapReduce， YARN， ZooKeeper， Hive， HBase， MySQL
 
-sqoop list-databases --connect jdbc:mysql://hadoop201:3306/ --username root --password aaa
+sqoop list-databases --connect jdbc:mysql://hadoop101:3306/ --username root --password aaa
 
 虽然 Sqoop 能够实现对关系型数据的全量同步，但在很多业务场景下，由于数据量非常非常大，每天全量同步，对于 Hadoop 的压力较大，因此要慎用。
 

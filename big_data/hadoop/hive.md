@@ -1,8 +1,14 @@
 ## hive
 
-Apache Hive 是一种数据仓库，可以非常方便的使用 SQL 去读、写、管理存储在分布式式系统的大数据。
+Apache Hive 是一种数据仓库，可以非常方便的使用 SQL 去读、写、管理存储在分布式式系统的大数据。用户可以使用一个命令行工具和 JDBC 去连接到 Hive。
 
-用户可以使用一个命令行工具和 JDBC 去连接到 Hive。
+Hive 表面是使用 SQL 像在数据库中查询数据一样从 HDFS 查询数据。本质是，Hive 把 SQL 转换成 MapReduce 程序去执行相应的操作，并返回结果。
+
+由Facebook开源，最初用于解决海量结构化的日志数据统计问题。
+
+Hive定义了一种类SQL查询语言：HQL（类似SQL但不完全相同）。
+
+### 概述
 
 Hive 的设计初衷是：
 
@@ -10,9 +16,11 @@ Hive 的设计初衷是：
 - 它提供 SQL，允许用户更加简单的进行查询，汇总和数据分析。
 - 对用户的复杂需求，Hive 的 SQL 允许用户来集成自己的功能，做定制化的查询。例如使用自定义函数(User Defined Functions，UDFs)
 
-Hive 表面是使用 SQL 像在数据库中查询数据一样从 HDFS 查询数据。
+Hive 产生背景：
 
-本质是，Hive 把 SQL 转换成 MapReduce 程序去执行相应的操作，并返回结果
+- MapReduce编程的不便性。
+- HDFS上的文件缺少Schema(表名，名称，ID等，为数据库对象的集合)。
+
 
 ### 架构
 
@@ -20,27 +28,438 @@ Hive 通过给用户提供的一系列交互接口，接收到用户的指令(SQ
 
 主要分 4 部分:
 
-1. 用户接口：Client
-
-    CLI（hive shell）、JDBC/ODBC(java访问hive)、WEBUI（浏览器访问hive）
-
-2. 元数据：Metastore。
-
-    元数据包括：表名、表所属的数据库（默认是default）、表的拥有者、列/分区字段、表的类型（是否是外部表）、表的数据所在目录等；
-
+1. 用户接口：Client<br>
+    CLI（hive shell）、JDBC/ODBC(java访问hive)、WEB UI（浏览器访问hive）
+2. 元数据：Metastore<br>
+    元数据包括：表名、表所属的数据库（默认是default）、表的拥有者、列/分区字段、表的类型（是否是外部表）、表的数据所在目录等；<br>
     默认存储在自带的derby数据库中，推荐使用MySQL存储Metastore
-
 3. 驱动器：Driver
-
-    （1）解析器（SQL Parser）：将SQL字符串转换成抽象语法树AST，这一步一般都用第三方工具库完成，比如antlr；对AST进行语法分析，比如表是否存在、字段是否存在、SQL语义是否有误。 （2）编译器（Physical Plan）：将AST编译生成逻辑执行计划。 （3）优化器（Query Optimizer）：对逻辑执行计划进行优化。 （4）执行器（Execution）：把逻辑执行计划转换成可以运行的物理计划。对于Hive来说，就是MR/Spark。
-
-4. Hadoop
-
+    1. 解析器（SQL Parser）：将SQL字符串转换成抽象语法树AST，这一步一般都用第三方工具库完成，比如antlr；对AST进行语法分析，比如表是否存在、字段是否存在、SQL语义是否有误。 
+    2. 编译器（Physical Plan）：将AST编译生成逻辑执行计划。
+    3. 优化器（Query Optimizer）：对逻辑执行计划进行优化。
+    4. 执行器（Execution）：把逻辑执行计划转换成可以运行的物理计划。对于Hive来说，就是MR/Spark/Tez。
+4. Hadoop<br>
     使用 HDFS 进行存储，使用 MapReduce 进行计算。
 
 ![hive 架构](images/hive0.png)
 
+#### HiveService2
+
+#### CLI
+
+```java
+CliDriver.main();
+return executeDriver(ss, conf, oproc);
+cli.processLine(line, true);
+processCmd(command);
+processFile(cmd_1);
+
+ShellCmdExecutor executor = new ShellCmdExecutor(shell_cmd, ss.out, ss.err);
+executor.execute();
+Process executor = Runtime.getRuntime().exec(cmd);
+executor.waitFor();
+
+processLocalCmd(cmd, proc, ss);
+CommandProcessor.run(cmd);
+```
+
+Driver 处理流程
+```java
+Driver.run(cmd);
+CommandProcessorResponse cpr = runInternal(command, alreadyCompiled);
+driverRunHook.preDriverRun(hookContext);
+
+compileInternal(command, true);
+ASTNode tree = ParseUtils.parse(command, ctx);
+
+BaseSemanticAnalyzer sem = SemanticAnalyzerFactory.get(queryState, tree);
+
+sem.analyze(tree, ctx);
+analyzeInternal(ast);
+PlanUtils.addInputsForView(pCtx);
+
+transformations.add(new HiveOpConverterPostProc());
+
+transformations.add(new Generator());
+
+pCtx = t.transform(pCtx);
+
+TableAccessAnalyzer tableAccessAnalyzer = new TableAccessAnalyzer(pCtx);
+
+setTableAccessInfo(tableAccessAnalyzer.analyzeTableAccess());
+
+Optimizer optm = new Optimizer();
+
+optm.setPctx(pCtx);
+
+optm.initialize(conf);
+
+pCtx = optm.optimize();
+
+TaskCompiler compiler = TaskCompilerFactory.getCompiler(conf, pCtx);
+
+compiler.init(queryState, console, db);
+
+compiler.compile(pCtx, rootTasks, inputs, outputs);
+optimizeOperatorPlan(pCtx, inputs, outputs);
+
+FetchWork fetch = new FetchWork(loadFileDesc.getSourcePath(), resultTab, outerQueryLimit);
+
+fetch.setHiveServerQuery(isHiveServerQuery);
+
+fetch.setSource(pCtx.getFetchSource());
+
+fetch.setSink(pCtx.getFetchSink());
+
+generateTaskTree(rootTasks, pCtx, mvTask, inputs, outputs);
+new GenMRTableScan1();
+new GenMRRedSink1();
+new GenMRRedSink2();
+new GenMRFileSink1();
+new GenMRUnion1();
+new GenMRRedSink3();
+MapJoinFactory.getTableScanMapJoin();
+new GenMROperator();
+DefaultRuleDispatcher.dispatch();
+proc.process(nd, ndStack, procCtx, nodeOutputs);
+GenMapRedUtils.initPlan(op, ctx);
+GenMapRedUtils.splitPlan(op, ctx);
+
+optimizeTaskPlan(rootTasks, pCtx, ctx);
+PhysicalOptimizer physicalOptimizer = new PhysicalOptimizer(
+    physicalContext, conf);
+physicalOptimizer.optimize();
+decideExecMode(rootTasks, ctx, globalLimitCtx);
+
+enforceScanLimits(pCtx, origFetchTask);
+
+
+sem.validate();
+
+plan = new QueryPlan(queryStr, sem, perfLogger.getStartTime(PerfLogger.DRIVER_RUN), queryId,
+    queryState.getHiveOperation(), schema);
+
+plan.getFetchTask().initialize(queryState, plan, null, ctx.getOpContext());
+work.initializeForFetch(opContext);
+
+fetch = new FetchOperator(work, job, source, getVirtualColumns(source));
+
+source.initialize(conf, new ObjectInspector[]{fetch.getOutputObjectInspector()});
+
+ExecMapper.setDone(false);
+
+
+ret = execute(true);
+
+plan.setStarted();
+
+// Query ID = hadoop_20211119135115_dec65e7d-3986-4bdd-b5be-d91fea6bf342
+// Total jobs = 1
+
+DriverContext driverCxt = new DriverContext(ctx);
+
+driverCxt.prepare(plan);
+
+task = driverCxt.getRunnable(maxthreads);
+
+TaskRunner runner = launchTask(task, queryId, noName, jobname, jobs, driverCxt);
+// Launching Job 1 out of 1
+tsk.initialize(queryState, plan, cxt, ctx.getOpContext());
+
+TaskRunner tskRun = new TaskRunner(tsk, tskRes);
+
+tskRun.start();
+tsk.executeTask();
+
+// 省略各种task执行
+
+TaskRunner tskRun = driverCxt.pollFinished();
+
+hookContext.addCompleteTask(tskRun);
+
+driverCxt.finished(tskRun);
+
+releasePlan(plan);
+plan.setDone();
+
+Map<String, MapRedStats> stats = SessionState.get().getMapRedStats();
+// MapReduce Jobs Launched:
+// Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.69 sec   HDFS Read: 2569 HDFS Write: 105 SUCCESS
+// Total MapReduce CPU Time Spent: 6 seconds 690 msec
+
+// OK
+
+
+driverRunHook.postDriverRun(hookContext);
+```
+
+SerializationUtilities.serializePlan(plan, out);
+executor = Runtime.getRuntime().exec(cmdLine, env, new File(workDir));
+
+MapRedTask 执行流程
+```java
+MapRedTask.this.execute();
+setNumberOfReducers();
+// Number of reduce tasks determined at compile time: 1
+// 
+// In order to change the average load for a reducer (in bytes):
+//   set hive.exec.reducers.bytes.per.reducer=<number>
+// In order to limit the maximum number of reducers:
+//   set hive.exec.reducers.max=<number>
+// In order to set a constant number of reducers:
+//   set mapreduce.job.reduces=<number>
+
+inputSummary = Utilities.getInputSummary(driverContext.getCtx(), work.getMapWork(), null);
+int numExecutors = getMaxExecutorsForInputListing(ctx.getConf(), pathNeedProcess.size());
+
+double samplePercentage = Utilities.getHighestSamplePercentage(work.getMapWork());
+
+totalInputFileSize = Utilities.getTotalInputFileSize(inputSummary, work.getMapWork(), samplePercentage);
+
+totalInputNumFiles = Utilities.getTotalInputNumFiles(inputSummary, work.getMapWork(), samplePercentage);
+
+int ret = super.execute(driverContext);
+MapWork mWork = work.getMapWork();
+
+ReduceWork rWork = work.getReduceWork();
+
+HiveFileFormatUtils.prepareJobOutput(job);
+
+job.setOutputFormat(HiveOutputFormatImpl.class);
+
+job.setMapperClass(ExecMapper.class);
+
+job.setMapOutputKeyClass(HiveKey.class);
+
+job.setMapOutputValueClass(BytesWritable.class);
+
+job.setPartitionerClass(JavaUtils.loadClass(partitioner));
+
+propagateSplitSettings(job, mWork);
+
+job.setReducerClass(ExecReducer.class);
+
+setInputAttributes(job);
+
+job.setInputFormat(JavaUtils.loadClass(inpFormat));
+
+job.setOutputKeyClass(Text.class);
+
+job.setOutputValueClass(Text.class);
+
+Utilities.setInputPaths(job, inputPaths);
+
+Utilities.setMapRedWork(job, work, ctx.getMRTmpPath());
+
+handleSampling(ctx, mWork, job);
+
+jc = new JobClient(job);
+
+Throttle.checkJobTracker(job, LOG);
+
+// 提交 job 类似于shell的hadoop jar
+rj = jc.submitJob(job);
+
+returnVal = jobExecHelper.progress(rj, jc, ctx);
+runningJobs.add(rj);
+
+jobInfo(rj);
+// Starting Job = job_1635995641146_96916, Tracking URL = http://emr-header-1.cluster-245192:20888/proxy/application_1635995641146_96916/
+// Kill Command = /usr/lib/hadoop-current/bin/hadoop job  -kill job_1635995641146_96916
+
+MapRedStats mapRedStats = progress(th);
+while (!rj.isComplete()) {
+    // Hadoop job information for Stage-3: number of mappers: 1; number of reducers: 1
+    updateCounters(ctrs, rj);
+    if (mapProgress == lastMapProgress && reduceProgress == lastReduceProgress &&
+      System.currentTimeMillis() < reportTime + maxReportInterval) {
+        continue;
+    }
+    // 2021-11-19 13:53:33,524 Stage-3 map = 0%,  reduce = 0%, Cumulative CPU 59.0 sec
+    // 2021-11-21 14:39:24,663 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.69 sec
+    // MapReduce Total cumulative CPU time: 6 seconds 690 msec
+}
+
+
+Counters ctrs = th.getCounters();
+
+updateCounters(ctrs, rj);
+
+
+computeReducerTimeStatsPerJob(rj);
+
+String statusMesg = getJobEndMsg(rj.getID());
+// Ended Job = job_1635995641146_97403
+```
+
+##### Beeline
+Hive 0.11引入，作为Hive JDBC Client访问HiveServer2，解决了CLI并发访问问题。
+
+JDBC的本质是一个HiveServer2的Thrift Client，只不过对用户暴露了JDBC接口。
+
+#### Driver
+对输入的sql字符串进行解析，转化程抽象语法树，再转化成逻辑计划Logicl Plan，然后使用优化工具对逻辑计划进行优化，最终生成物理计划Phsical plan（序列化反序列化，UDF函数），交给Execution执行引擎，提交到MapReduce上执行（输入和输出可以是本地的也可以是HDFS/Hbase）。
+
+##### 流程
+
+1. Parser：Antlr 定义 SQL 的语法规则，完成 SQL 词法，语法解析，将 SQL 转化为抽象语法树 AST Tree；会进行语法校验，AST本质还是字符串。
+2. Analyzer：语法解析，遍历 AST Tree，抽象出查询的基本组成单元 QueryBlock。
+    1. AST Tree生成后由于其复杂度依旧较高，不便于翻译为mapreduce程序，需要进行进一步抽象和结构化，形成QueryBlock。
+    2. QueryBlock是一条SQL最基本的组成单元，包括三个部分：输入源，计算过程，输出。简单来讲一个QueryBlock就是一个子查询。
+    3. QueryBlock的生成过程为一个递归过程，先序遍历 AST Tree ，遇到不同的 Token 节点(理解为特殊标记)，保存到相应的属性中。
+3. Logicl Plan：逻辑执行计划解析，遍历 QueryBlock，翻译为执行操作树 OperatorTree。
+    1. 基本的操作符包括：TableScanOperator，SelectOperator，FilterOperator，JoinOperator，GroupByOperator，ReduceSinkOperator
+    2. Operator在Map Reduce阶段之间的数据传递都是一个流式的过程。每一个Operator对一行数据完成操作后之后将数据传递给childOperator计算。
+    3. 由于Join/GroupBy/OrderBy均需要在Reduce阶段完成，所以在生成相应操作的Operator之前都会先生成一个ReduceSinkOperator，将字段组合并序列化为Reduce Key/value, Partition Key。
+4. Logical optimizer:进行逻辑执行计划优化，进行 OperatorTree 变换，合并 Operator，达到减少 MapReduce Job，减少数据传输及 shuffle 数据量。
+    1. 逻辑查询优化可以大致分为以下几类：投影修剪，推导传递谓词，谓词下推，将Select-Select，Filter-Filter合并为单个操作，多路 Join，查询重写以适应某些列值的Join倾斜。
+5. Phsical plan：物理执行计划解析，遍历 OperatorTree，翻译为 MapReduce Job。
+    1. 对输出表生成MoveTask
+    2. 从OperatorTree的其中一个根节点向下深度优先遍历
+    3. ReduceSinkOperator标示Map/Reduce的界限，多个Job间的界限
+    4. 遍历其他根节点，遇过JoinOperator合并MapReduceTask
+    5. 生成StatTask更新元数据
+    6. 剪断Map与Reduce间的Operator的关系
+6. Phsical Optimizer：进行物理执行计划优化，进行 MapReduce 任务的变换，生成优化后的tasktree，该任务即是集群上的执行的作业。
+    1. 物理优化可以大致分为以下几类：
+        1. 分区修剪(Partition Pruning)
+        1. 基于分区和桶的扫描修剪(Scan pruning)
+        1. 如果查询基于抽样，则扫描修剪
+        1. 在某些情况下，在 map 端应用 Group By
+        1. 在 mapper 上执行 Join
+        1. 优化 Union，使Union只在 map 端执行
+        1. 在多路 Join 中，根据用户提示决定最后流哪个表
+        1. 删除不必要的 ReduceSinkOperators
+        1. 对于带有Limit子句的查询，减少需要为该表扫描的文件数
+        1. 对于带有Limit子句的查询，通过限制 ReduceSinkOperator 生成的内容来限制来自 mapper 的输出
+        1. 减少用户提交的SQL查询所需的Tez作业数量
+        1. 如果是简单的提取查询，避免使用MapReduce作业
+        1. 对于带有聚合的简单获取查询，执行不带 MapReduce 任务的聚合
+        1. 重写 Group By 查询使用索引表代替原来的表
+        1. 当表扫描之上的谓词是相等谓词且谓词中的列具有索引时，使用索引扫描
+
+解析器Parser：将SQL语句生成AST语法树。
+
+编译器Compiler：对不同的查询块和查询表达式进行语义分析，并最终借助表和从 metastore 查找的分区元数据来生成执行计划。生成DAG形式的Job链，成为逻辑计划。
+
+优化器：只提供了基于规则的优化
+
+- 列过滤：去除查询中不需要的列。
+- 行过滤：Where条件判断等在TableScan阶段就进行过滤，利用Partition信息，只读取符合条件的Partition。
+- 谓词下推：减少后面的数据量。
+- Join方式
+    + Map端join： 调整Join顺序，确保以大表作为驱动表，小表载入所有mapper内存中
+    + shuffle join：按照hash函数，将两张表的数据发送给join
+    + 对于数据分布不均衡的表Group by时，为避免数据集中到少数的reducer上，分成两个map-reduce阶段。第一个阶段先用Distinct列进行shuffle，然后在reduce端部分聚合，减小数据规模，第二个map-reduce阶段再按group-by列聚合。
+    + sort merge join：排序，按照顺序切割数据，相同的范围发送给相同的节点(运行前在后台创建立两张排序表，或者建表的时候指定)
+    + 在map端用hash进行部分聚合，减小reduce端数据处理规模。
+
+执行引擎：执行引擎Execution Engine将DAG转换为MR任务。执行引擎会顺序执行其中所有的Job，如果Job不存在依赖关系，采用并发的方式进行执行。
+
+- 执行引擎负责提交 COMPILER 阶段编译好的执行计划到不同的平台上。
+- Hive 底层支持多种不同的执行引擎：MapReduce、Tez、Spark。
+
+如果是 map/reduce 作业，该计划包括 map operator trees 和一个  reduce operator tree，执行引擎将会把这些作业发送给 MapReduce ：
+
+##### explain执行计划
+HIVE提供了EXPLAIN命令来展示一个sql的执行计划，这个执行计划对于我们了解底层原理，hive 调优，排查数据倾斜等很有帮助。
+
+使用语法如下：
+`EXPLAIN [EXTENDED|CBO|AST|DEPENDENCY|AUTHORIZATION|LOCKS|VECTORIZATION|ANALYZE] query`
+
+- EXTENDED：加上 extended 可以输出有关计划的额外信息。这通常是物理信息，例如文件名。这些额外信息对我们用处不大。
+- CBO：输出由Calcite优化器生成的计划。CBO 从 hive 4.0.0 版本开始支持。
+- AST：输出查询的抽象语法树。AST 在hive 2.1.0 版本删除了，存在bug，转储AST可能会导致OOM错误，将在4.0.0版本修复。
+- DEPENDENCY：dependency在EXPLAIN语句中使用会产生有关计划中输入的额外信息。它显示了输入的各种属性。
+- AUTHORIZATION：显示所有的实体需要被授权执行（如果存在）的查询和授权失败。
+- LOCKS：这对于了解系统将获得哪些锁以运行指定的查询很有用。LOCKS 从 hive 3.2.0 开始支持。
+- VECTORIZATION：将详细信息添加到EXPLAIN输出中，以显示为什么未对Map和Reduce进行矢量化。从 Hive 2.3.0 开始支持。
+- ANALYZE：用实际的行数注释计划。从 Hive 2.2.0 开始支持。
+
+一个HIVE查询被转换为一个由一个或多个stage组成的序列（有向无环图DAG）。这些stage可以是MapReduce stage，也可以是负责元数据存储的stage，也可以是负责文件系统的操作（比如移动和重命名）的stage。
+
+stage dependencies： 各个stage之间的依赖性
+stage plan： 各个stage的执行计划
+
+- Map Reduce
+    + Map Operator Tree： MAP端的执行计划树
+        * TableScan 表扫描操作，常见的属性：
+            - alias： 表名称
+            - Statistics： 表统计信息，包含表中数据条数，数据大小等
+            - Filter Operator、Select Operator、[Group By Operator、]Reduce Output Operator
+    + Reduce Operator Tree： Reduce端的执行计划树
+        - Group By Operator、File Output Operator
+- Alter Table Operator:
+- Pre Insert operator:
+- Insert operator:
+- Select Operator： 选取操作，常见的属性 ：
+    + expressions：需要的字段名称及字段类型
+    + outputColumnNames：输出的列名称
+    + Statistics：表统计信息，包含表中数据条数，数据大小等
+- Group By Operator：分组聚合操作，常见的属性：
+    + aggregations：显示聚合函数信息
+    + mode：聚合模式，值有 hash：随机聚合，就是hash partition；partial：局部聚合；final：最终聚合
+    + keys：分组的字段，如果没有分组，则没有此字段
+    + outputColumnNames：聚合之后输出列名
+    + Statistics： 表统计信息，包含分组聚合之后的数据条数，数据大小等
+- Reduce Output Operator：输出到reduce操作，常见属性：
+    + sort order：值为空 不排序；值为 + 正序排序，值为 - 倒序排序；值为 +- 排序的列为两列，第一列为正序，第二列为倒序
+    + Filter Operator：过滤操作，常见的属性：
+    + predicate：过滤条件，如sql语句中的where id>=1，则此处显示(id >= 1)
+- Map Join Operator：join 操作，常见的属性：
+    + condition map：join方式 ，如Inner Join 0 to 1 Left Outer Join0 to 2
+    + keys: join 的条件字段
+    + outputColumnNames： join 完成之后输出的字段
+    + Statistics： join 完成之后生成的数据条数，大小等
+- File Output Operator：文件输出操作，常见的属性：
+    + compressed：是否压缩
+    + table：表的信息，包含输入输出文件格式化方式，序列化方式等
+- Fetch Operator 客户端获取数据操作，常见的属性：
+    + limit，值为 -1 表示不限制条数，其他值为限制的条数
+
+#### Metastore
+
+Metadata即元数据。元数据包含用Hive创建的database、table、表的字段等元信息。元数据存储在关系型数据库中。如hive内置的Derby、第三方如MySQL等。
+
+MetaStore：存储和管理Hive的元数据，使用关系数据库来保存元数据信息。
+
+Metastore即元数据服务，是Hive用来管理库表元数据的一个服务。有了它上层的服务不用再跟裸的文件数据打交道，而是可以基于结构化的库表信息构建计算框架。
+
+Derby（内置）：Derby只接受一个Hive的会话访问；
+Mysql：Hive跑在Hadoop之上的，Mysql进行主备（定时同步操作）；
+
+通过metastore服务将Hive的元数据暴露出去，而不是需要通过对Hive元数据库mysql的访问才能拿到Hive的元数据信息，metastore服务实际上就是一种thrift服务，通过它用户可以获取到Hive元数据，并且通过thrift获取元数据的方式，屏蔽了数据库访问需要驱动，url，用户名，密码等细节。
+
+##### Metastore 配置
+
+1、内嵌模式
+
+内嵌模式使用的是内嵌的Derby数据库来存储元数据，也不需要额外起Metastore服务。数据库和Metastore服务都嵌入在主Hive Server进程中。这个是默认的，配置简单，但是一次只能一个客户端连接，适用于用来测试，不适用于生产环境。
+
+
+优点：配置简单，解压hive安装包 bin/hive 启动即可使用。
+
+缺点：不同路径启动hive，每一个hive拥有一套自己的元数据，无法共享。
+
+2、本地模式
+
+本地模式采用外部数据库来存储元数据，目前支持的数据库有：MySQL、Postgres、Oracle、MS SQL Server。本文介绍的是MySQL。
+
+本地模式不需要单独起metastore服务，用的是跟Hive在同一个进程里的metastore服务。也就是说当启动一个hive服务时，其内部会启动一个metastore服务。Hive根据 hive.metastore.uris 参数值来判断，如果为空，则为本地模式。
+
+
+缺点：每启动一次hive服务，都内置启动了一个metastore，在hive-site.xml中暴露的数据库的连接信息。
+
+优点：配置较简单，本地模式下hive的配置中指定mysql的相关信息即可。
+
+3、远程模式
+
+远程模式下，需要单独起metastore服务，然后每个客户端都在配置文件里配置连接到该metastore服务。
+
+远程模式的metastore服务和hive运行在不同的进程里。
+
 #### 优缺点
+
 优点
 
 - 操作使用 HiveQL(非常类似于 SQL)语法，对开发人员来说比较简单，容易上手，提供快速开发的能力。
@@ -279,9 +698,39 @@ hplsql.conn.hiveconn org.apache.hive.jdbc.HiveDriver;jdbc:hive2://
 
 ### 使用
 
+#### hive 启动流程
+
+```java
+/************************************************************
+STARTUP_MSG: Starting HiveServer2
+STARTUP_MSG:   host = Test-Env-003/172.18.248.187
+STARTUP_MSG:   args = []
+STARTUP_MSG:   version = 2.3.8
+STARTUP_MSG:   classpath = /usr/local/hive/conf:/usr/local/hive/lib/*:/usr/local/hbase/lib/*
+```
+
+#### 启动hive
 运行 Hive 前必须先启动 Hadoop 的 HDFS 和 Yarn
 
-hive相对于 Hadoop 集群来说仅仅是个客户端，所以不用分发其他设备上使用.
+hive相对于 Hadoop 集群来说仅仅是个客户端，所以不用分发其他设备上使用。
+
+- 运行 Hive CLI(Command Line Interface) 。如果已经把 Hive 的下的/bin配置到了 PATH 中，那么可以直接运行 hive 进入。
+- 开启一个 hiveserver2 服务器，然后使用 beeline 客户端连接。
+
+```shell
+hiveserver2 &
+
+beeline
+# 然后输入
+!connect jdbc:hive2://hadoop101:10000
+# 然后根据提示输入用户名和密码
+
+# 查看配置
+set hive.input.format
+
+# 修改配置
+set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat
+```
 
 #### 数据类型
 
@@ -289,18 +738,23 @@ hive相对于 Hadoop 集群来说仅仅是个客户端，所以不用分发其�
 
 string 就是在传统数据库中的varchar类型. 该类型是一个可变的字符串. 不过不能声明他的上限. 理论上可以存储2GB字节.
 
-| hive 类型 | java类型 | 长度                                         | 例子    |
-| --------- | -------- | -------------------------------------------- | ------- |
-| TINYINT   | byte     | 1byte 有符号整数                             | 20      |
-| SMALINT   | short    | 2byte 有符号整数                             | 20      |
-| INT       | int      | 4byte 有符号整数                             | 20      |
-| BIGINT    | long     | 8byte 有符号整数                             | 20      |
-| BOOLEAN   | boolean  | 布尔类型                                     | true    |
-| FLOAT     | float    | 单精度浮点数                                 | 3.14159 |
-| DOUBLE    | double   | 双精度浮点数                                 | 3.14159 |
-| STRING    | string   | 字符，可以指定字符集，可以使用单引号或双引号 |         |
-| TIMESTAMP |          | 时间类型                                     |         |
-| BINARY    |          | 字节数组                                     |         |
+| hive 类型                 | java类型 | 长度                                              | 例子    |
+| ------------------------- | -------- | ------------------------------------------------- | ------- |
+| TINYINT                   | byte     | 1byte 有符号整数                                  | 20      |
+| SMALINT                   | short    | 2byte 有符号整数                                  | 20      |
+| INT                       | int      | 4byte 有符号整数                                  | 20      |
+| BIGINT                    | long     | 8byte 有符号整数                                  | 20      |
+| BOOLEAN                   | boolean  | 布尔类型                                          | true    |
+| FLOAT                     | float    | 单精度浮点数                                      | 3.14159 |
+| DOUBLE                    | double   | 双精度浮点数                                      | 3.14159 |
+| STRING                    | string   | 字符，可以指定字符集，可以使用单引号或双引号         |         |
+| BINARY                    | byte[]   | 字节数组(Note: Available in Hive 0.8.0 and later) |         |
+| TIMESTAMP                 |          | 时间类型(Note: Available in Hive 0.8.0 and later) |         |
+| DECIMAL                   |BigDecimal| (Note: Available in Hive 0.11.0 and later)       |         |
+| DECIMAL(precision, scale) |BigDecimal| (Note: Available in Hive 0.13.0 and later)        |         |
+| DATE                      |          | (Note: Available in Hive 0.12.0 and later)        |         |
+| VARCHAR                   | string   | (Note: Available in Hive 0.12.0 and later)        |         |
+| CHAR                      | string   | (Note: Available in Hive 0.13.0 and later)        |         |
 
 ##### 复杂数据类型
 Hive 有 4 中复杂类型：
@@ -324,7 +778,8 @@ Hive 有 4 中复杂类型：
 复杂类型允许任意深层次的嵌套。
 
 ##### 类型的转换
-Hive 的原子数据类型是可以进行隐式转换的，类似于 Java 的类型转换，例如某表达式使用 INT 类型，TINYINT 会自动转换为 INT 类型，但是 Hive 不会进行反向转化，
+Hive 的原子数据类型是可以进行隐式转换的，类似于 Java 的类型转换，例如某表达式使用 INT 类型，TINYINT 会自动转换为 INT 类型，但是Hive 不会进行反向转化
+，
 
 例如，某表达式使用 TINYINT 类型，INT 不会自动转换为 TINYINT 类型，它会返回错误，除非使用 CAST 操作。
 
@@ -347,11 +802,40 @@ Hive 中的数据库的概念本质上仅仅是表的一个目录或者命名空
 默认数据库位置: /user/hive/warehouse/xxx.db
 
 ```sql
+show databases;
+show databases like 'db.*'; 
+
+create database if not exists db_test comment 'this is test db' location '/hive/db/db_test';
+show create database db_test; -- 显示数据库DDL信息
+
+describe database db_test;
 desc database default; -- 显示数据库信息
 desc database extended default; -- 显示数据库详细信息
 
-desc t_xxx; -- 显示数据表信息
-show create table t_xxx; -- 显示数据表DDL信息
+use db_test;
+
+# 创建表
+create table test_tb (col_name data_type);
+# 复制表结构
+create table tb_test like select * from tb_test0;
+# 复制表结构以及数据
+create table tb_test as select * from tb_test0;
+
+# 修改表
+ALTER TABLE test1 RENAME TO test2;
+ALTER TABLE employee CHANGE name ename String; 
+ALTER TABLE employee CHANGE salary salary double;
+ALTER TABLE employee ADD COLUMNS (dept STRING COMMENT 'Department name'); 
+ALTER TABLE table_name add columns( dept string COMMENT '') CASCADE；
+
+desc test_tb; -- 显示数据表信息
+
+
+
+# 默认情况下是不允许直接删除一个有表的数据库的：
+# 1、 先把表删干净，再删库
+# 2、删库时在后面加上cascade，表示级联删除此数据库下的所有表
+drop database if exists db_test cascade; 
 ```
 
 ##### 内部表和外部表
@@ -370,7 +854,7 @@ Hive 默认情况创的表都是内部表。
 
 当删除表(drop)的时候，表的元数据和实际存储的数据都会被删除，所以数据彻底会消失。
 
-内部表使用简单，但是不方便的地方是不能与其他应用程序共享数据
+内部表使用简单，但是不方便的地方是不能与其他应用程序共享数据。
 
 **外部表**
 
@@ -477,7 +961,7 @@ show partitions dept_partition2 partition(month='201709')
 ##### 分桶表
 分桶表是通过对数据进行Hash，放到不同文件存储，方便抽样和join查询。分桶表主要是将内部表、外部表和分区表进一步组织，可以指定表的某些列通过Hash算法进一步分解成不同的文件存储。创建分桶表是需要使用关键字clustered by并指定分桶的个数。
 
-```
+```sql
 #创建分桶表buk_table根据id分桶，放入3个桶中
 create table buk_table(id string,name string) clustered by(id) into 3 buckets ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
 #加载数据，将inner_table中数据加载到buk_table;
@@ -487,6 +971,202 @@ insert into buk_table select * from inner_table;
 select * from buk_table tablesample(bucket 1 out of 1 on id);
 ```
 
+##### 元数据表
+
+1. 存储Hive版本的元数据表(VERSION)：如果该表出现问题，根本进入不了Hive-Cli。比如该表不存在，当启动Hive-Cli时候，就会报错”Table ‘hive.version’ doesn’t exist”。
+
+| 表字段          | 说明     | 示例数据          |
+| --------------- | -------- | ----------------- |
+| VER_ID          | ID主键   | 1                 |
+| SCHEMA_VERSION  | Hive版本 | 1.1.0             |
+| VERSION_COMMENT | 版本说明 | Set  by MetaStore |
+
+2. Hive数据库相关的元数据表(DBS、DATABASE_PARAMS)
+
+DBS表存储Hive中所有数据库的基本信息。
+
+| 表字段          | 说明               | 示例数据                                |
+| --------------- | ------------------ | --------------------------------------- |
+| DB_ID           | 数据库ID           | 1                                       |
+| DESC            | 数据库描述         | Default  Hive database                  |
+| DB_LOCATION_URI | 数据HDFS路径       | hdfs://193.168.1.75:9000/test-warehouse |
+| NAME            | 数据库名           | default                                 |
+| OWNER_NAME      | 数据库所有者用户名 | public                                  |
+| OWNER_TYPE      | 所有者角色         | ROLE                                    |
+
+DATABASE_PARAMS表存储数据库的相关参数，在CREATE DATABASE时候用WITH DBPROPERTIES(property_name=property_value, …)指定的参数。
+
+| 表字段      | 说明     | 示例数据  |
+| ----------- | -------- | --------- |
+| DB_ID       | 数据库ID | 1         |
+| PARAM_KEY   | 参数名   | createdby |
+| PARAM_VALUE | 参数值   | root      |
+
+DBS和DATABASE_PARAMS这两张表通过DB_ID字段关联。
+
+3. Hive表和视图相关的元数据表
+
+主要有TBLS、TABLE_PARAMS、TBL_PRIVS，这三张表通过TBL_ID关联。
+
+TBLS:该表中存储Hive表，视图，索引表的基本信息
+
+| 表字段             | 说明              | 示例数据                   |
+| ------------------ | ----------------- | -------------------------- |
+| TBL_ID             | 表ID              | 21                         |
+| CREATE_TIME        | 创建时间          | 1447675704                 |
+| DB_ID              | 数据库ID          | 1                          |
+| LAST_ACCESS_TIME   | 上次访问时间      | 1447675704                 |
+| OWNER              | 所有者            | root                       |
+| RETENTION          | 保留字段          | 0                          |
+| SD_ID              | 序列化配置信息    | 41，对应SDS表中的SD_ID     |
+| TBL_NAME           | 表名              | ex_detail_ufdr_30streaming |
+| TBL_TYPE           | 表类型            | EXTERNAL_TABLE             |
+| VIEW_EXPANDED_TEXT | 视图的详细HQL语句 |                            |
+| VIEW_ORIGINAL_TEXT | 视图的原始HQL语句 |                            |
+
+TABLE_PARAMS:该表存储表/视图的属性信息
+
+
+| 表字段      | 说明   | 示例数据                     |
+| ----------- | ------ | ---------------------------- |
+| TBL_ID      | 表ID   | 1                            |
+| PARAM_KEY   | 属性名 | totalSize，numRows，EXTERNAL |
+| PARAM_VALUE | 属性值 | 970107336、21231028、TRUE    |
+
+TBL_PRIVS：该表存储表/视图的授权信息
+
+| 表字段         | 说明           | 示例数据               |
+| -------------- | -------------- | ---------------------- |
+| TBL_GRANT_ID   | 授权ID         | 1                      |
+| CREATE_TIME    | 授权时间       | 1436320455             |
+| GRANT_OPTION   |               | 0                      |
+| GRANTOR        | 授权执行用户   | root                   |
+| GRANTOR_TYPE   | 授权者类型     | USER                   |
+| PRINCIPAL_NAME | 被授权用户     | username               |
+| PRINCIPAL_TYPE | 被授权用户类型 | USER                   |
+| TBL_PRIV       | 权限           | Select、Alter          |
+| TBL_ID         | 表ID           | 21，对应TBLS表的TBL_ID |
+
+4. Hive文件存储信息相关的元数据表
+
+主要涉及SDS、SD_PARAMS、SERDES、SERDE_PARAMS，由于HDFS支持的文件格式很多，而建Hive表时候也可以指定各种文件格式，Hive在将HQL解析成MapReduce时候，需要知道去哪里，使用哪种格式去读写HDFS文件，而这些信息就保存在这几张表中。
+
+SDS:该表保存文件存储的基本信息，如INPUT_FORMAT、OUTPUT_FORMAT、是否压缩等。TBLS表中的SD_ID与该表关联，可以获取Hive表的存储信息。
+
+| 表字段                    | 说明             | 示例数据                                                   |
+| ------------------------- | ---------------- | ---------------------------------------------------------- |
+| SD_ID                     | 存储信息ID       | 41                                                         |
+| CD_ID                     | 字段信息ID       | 21，对应CDS表                                              |
+| INPUT_FORMAT              | 文件输入格式     | org.apache.hadoop.mapred.TextInputFormat                   |
+| IS_COMPRESSED             | 是否压缩         | 0                                                          |
+| IS_STOREDASSUBDIRECTORIES | 是否以子目录存储 | 0                                                          |
+| LOCATION                  | HDFS路径         | hdfs://193.168.1.75:9000/detail_ufdr_streaming_test        |
+| NUM_BUCKETS               | 分桶数量         | 0                                                          |
+| OUTPUT_FORMAT             | 文件输出格式     | org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat |
+| SERDE_ID                  | 序列化类ID       | 41，对应SERDES表                                           |
+
+SD_PARAMS: 该表存储Hive存储的属性信息，在创建表时候使用STORED BY ‘storage.handler.class.name’ [WITH SERDEPROPERTIES (…)指定。
+
+| 表字段      | 说明       | 示例数据 |
+| ----------- | ---------- | -------- |
+| SD_ID       | 存储配置ID | 41       |
+| PARAM_KEY   | 存储属性名 |          |
+| PARAM_VALUE | 存储属性值 |          |
+
+SERDES:该表存储序列化使用的类信息
+
+| 表字段   | 说明           | 示例数据                                           |
+| -------- | -------------- | -------------------------------------------------- |
+| SERDE_ID | 序列化类配置ID | 41                                                 |
+| NAME     | 序列化类别名   | NULL                                               |
+| SLIB     | 序列化类       | org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+
+SERDE_PARAMS:该表存储序列化的一些属性、格式信息，比如:行、列分隔符
+
+| 表字段      | 说明           | 示例数据    |
+| ----------- | -------------- | ----------- |
+| SERDE_I     | 序列化类配置ID | 41          |
+| PARAM_KEY   | 属性名         | field.delim |
+| PARAM_VALUE | 属性值         | \|          |
+
+5. Hive表字段相关的元数据表
+
+主要涉及COLUMNS_V2
+
+COLUMNS_V2：该表存储表对应的字段信息
+
+| 表字段      | 说明       | 示例数据          |
+| ----------- | ---------- | ----------------- |
+| CD_I        | 字段信息ID | 21                |
+| COMMENT     | 字段注释   | NULL              |
+| COLUMN_NAME | 字段名     | air_port_duration |
+| TYPE_NAME   | 字段类型   | bigint            |
+| INTEGER_IDX | 字段顺序   | 119               |
+
+6. Hive表分分区相关的元数据表
+
+主要涉及PARTITIONS、PARTITION_KEYS、PARTITION_KEY_VALS、PARTITION_PARAMS
+
+PARTITIONS:该表存储表分区的基本信息
+
+| 表字段           | 说明             | 示例数据              |
+| ---------------- | ---------------- | --------------------- |
+| PART_ID          | 分区ID           | 21                    |
+| CREATE_TIME      | 分区创建时间     | 1450861405            |
+| LAST_ACCESS_TIME | 最后一次访问时间 | 0                     |
+| PART_NAME        | 分区名           | hour=15/last_msisdn=0 |
+| SD_ID            | 分区存储ID       | 43                    |
+| TBL_ID           | 表ID             | 22                    |
+| LINK_TARGET_ID   |                  | NULL                  |
+
+PARTITION_KEYS:该表存储分区的字段信息
+
+| 表字段       | 说明         | 示例数据 |
+| ------------ | ------------ | -------- |
+| TBL_ID       | 表ID         | 22       |
+| PKEY_COMMENT | 分区字段说明 | NULL     |
+| PKEY_NAME    | 分区字段名   | hour     |
+| PKEY_TYPE    | 分区字段类型 | int      |
+| INTEGER_IDX  | 分区字段顺序 | 0        |
+
+PARTITION_KEY_VALS:该表存储分区字段值
+
+| 表字段       | 说明           | 示例数据 |
+| ------------ | -------------- | -------- |
+| PART_ID      | 分区ID         | 21       |
+| PART_KEY_VAL | 分区字段值     | 0        |
+| INTEGER_IDX  | 分区字段值顺序 | 1        |
+
+PARTITION_PARAMS:该表存储分区的属性信息
+
+| 表字段      | 说明       | 示例数据          |
+| ----------- | ---------- | ----------------- |
+| PART_ID     | 分区ID     | 21                |
+| PARAM_KEY   | 分区属性名 | numFiles，numRows |
+| PARAM_VALUE | 分区属性值 | 1，502195         |
+
+7. 其他不常用的元数据表
+
+DB_PRIVS：数据库权限信息表。通过GRANT语句对数据库授权后，将会在这里存储。
+
+IDXS：索引表，存储Hive索引相关的元数据
+
+INDEX_PARAMS：索引相关的属性信息
+
+TBL_COL_STATS：表字段的统计信息。使用ANALYZE语句对表字段分析后记录在这里
+
+TBL_COL_PRIVS：表字段的授权信息
+
+PART_PRIVS：分区的授权信息
+
+PART_COL_PRIVS：分区字段的权限信息
+
+PART_COL_STATS：分区字段的统计信息
+
+FUNCS：用户注册的函数信息
+
+FUNC_RU：用户注册函数的资源信息
+
 #### DML 数据操作
 
 DML(Data Manipulation Language)执行的是对表中的数据增删改的操作。
@@ -495,7 +1175,7 @@ DML(Data Manipulation Language)执行的是对表中的数据增删改的操作�
 
 **向表中装载文件**
 
-Hive 处理的数据多是以文件的方式存在的.所以 Hive 最常见的就是把数据导入到数据库中.
+Hive 处理的数据多是以文件的方式存在的。所以 Hive 最常见的就是把数据导入到数据库中。
 
 语法:
 ```shell
@@ -504,8 +1184,8 @@ LOAD DATA [LOCAL] INPATH 'filepath' [OVERWRITE] INTO TABLE tablename
 ```
 说明:
 
-- load data 表示加载数据
-- local 表示从本地文件系统导入数据。如果不加local表示从 HDFS 文件系统导入数据
+- load data 表示加载数据。
+- local 表示从本地文件系统导入数据。如果不加local表示从 HDFS 文件系统导入数据。
 - filepath 用引号括起来，表示要加载的数据的路径。
 - overwrite 表示覆盖表中已有数据，不加参数表示追加数据到表中。
 - partition 上传到指定分区。
@@ -629,6 +1309,33 @@ truncate table student_3;
 4. 在hive的命令行窗口删除函数 Drop [temporary] function [if exists] [dbname.]function_name;
 
 
+#### 文件存储格式和压缩格式
+
+表的文件存储格式尽量采用Parquet或ORC，不仅降低存储量，还优化了查询，压缩，表关联等性能。
+
+- TextFile：默认使用
+    + 行存储，每一行都是一条记录，每行都以换行符"\n"结尾。
+    + 默认是不压缩，但可以使用GZip和BZip等压缩方式，部分压缩算法压缩后不支持split。
+    + 该类型的格式可以识别在hdfs上的普通文件格式（如txt、csv），因此该模式常用语仓库数据接入和导出层。
+    + 无法区分数据类型，各个字段都被认为是文本，但需要指定列分隔符和行分隔符。
+- SequenceFile
+    + 二进制文件，以<key,value>的形式序列化到文件中。
+    + 行存储。
+    + 支持三种压缩格式：None、Record、Block。Record压缩率最高，一般用Block。
+    + 和Hadoop API的MapFile是相互兼容的。
+    + 缺点是由于该种模式是在textfile基础上加了些其他信息，故该类格式的大小要大于textfile，现阶段基本上不用。
+- RCFile
+    + 数据按行分块，每块按照列存储。 
+    + 相对来说，RCFile对于提升任务执行性能提升不大，但是能节省一些存储空间。可以使用升级版的ORC格式。
+- ORCFile：效率比RCFile高
+    + 数据按行分块，每块按照列存储。
+    + Hive提供的新格式，属于RCFile的升级版，性能有大幅度提升，而且数据可以压缩存储，压缩快，快速列存取。
+    + ORC File会基于列创建索引，当查询的时候会很快，现阶段主要使用的文件格式。
+- Parquet File
+    + 列式存储。
+    + Parquet对于大型查询的类型是高效的。对于扫描特定表格中的特定列查询，Parquet特别有用。
+    + Parquet一般使用Snappy、Gzip压缩，默认是Snappy。
+
 ### 最佳实践
 
 #### 数据倾斜
@@ -698,18 +1405,18 @@ Hive做group by查询，当遇到group by字段的某些值特别多的时候，
 
 参数设置：
 
-参数名称|默认值|说明
----|---|---
-hive.map.aggr|true（Hive 0.3+）|是否开启Map端聚合
-hive.groupby.mapaggr.checkinterval|100000|在Map端进行聚合操作的条目数目
+| 参数名称                           | 默认值            | 说明                          |
+| ---------------------------------- | ----------------- | ----------------------------- |
+| hive.map.aggr                      | true（Hive 0.3+） | 是否开启Map端聚合             |
+| hive.groupby.mapaggr.checkinterval | 100000            | 在Map端进行聚合操作的条目数目 |
 
 (2) 有数据倾斜时进行负载均衡
 
 参数设置：
 
-参数名称|默认值|说明
----|---|---
-hive.groupby.skewindata|false|当GROUP BY有数据倾斜时是否进行负载均衡
+| 参数名称                | 默认值 | 说明                                   |
+| ----------------------- | ------ | -------------------------------------- |
+| hive.groupby.skewindata | false  | 当GROUP BY有数据倾斜时是否进行负载均衡 |
 
 当设定 hive.groupby.skewindata 为 true 时，生成的查询计划会有两个 MapReduce 任务。在第一个 MapReduce 中，map 的输出结果集合会随机分布到 reduce 中， 每个 reduce 做部分聚合操作，这样处理之后，相同的 Group By Key 有可能分发到不同的 reduce 中，从而达到负载均衡的目的。在第二个 MapReduce 任务再根据第一步中处理的数据按照Group By Key 分布到 reduce 中，（这一步中相同的 key 在同一个 reduce 中），最终生成聚合操作结果。
 
@@ -732,7 +1439,7 @@ Hive on MR 调优主要从三个层面进行，分别是基于MapReduce优化、
 
 运行map和reduce任务的JVM，内存通过mapred.child.java.opts属性来设置，尽可能设大内存。容器的内存大小通过mapreduce.map.memory.mb和mapreduce.reduce.memory.mb来设置，默认都是1024M。
 
-1. 在map阶段主要包括：数据的读取、map处理以及写出操作(排序和合并/sort&merge)，其中可以针对spill文件输出数量、Combiner的merge过程和数据压缩进行优化，避免写入多个spill文件可能达到最好的性能，一个spill文件是最好的。通过估计map的输出大小，设置合理的mapreduce.task.io.sort.*属性，使得spill文件数量最小。例如尽可能调大mapreduce.task.io.sort.mb。其次增加combine阶段以及对输出进行压缩设置进行mapper调优。
+1. 在map阶段主要包括：数据的读取、map处理以及写出操作(排序和合并/sort&merge)，其中可以针对spill文件输出数量、Combiner的merge过程和数据压缩进行优化，避免写入多个spill文件可能达到最好的性能，一个spill文件是最好的。通过估计map的输出大小，设置合理的mapreduce.task.io.sort.\*属性，使得spill文件数量最小。例如尽可能调大mapreduce.task.io.sort.mb。其次增加combine阶段以及对输出进行压缩设置进行mapper调优。
 
     (1)合理设置map数。
 
@@ -825,14 +1532,14 @@ Hive on MR 调优主要从三个层面进行，分别是基于MapReduce优化、
 
 1. 不执行mapreduce
 
-   (1)hive从HDFS读取数据，有两种方式：启用mapreduce读取、直接抓取。
+   (1)hive从HDFS读取数据，有两种方式：启用mapreduce读取、Fetch直接抓取。
 
-   (2)hive.fetch.task.conversion参数设置成more，可以在 select、where 、limit 时启用直接抓取方式，能明显提升查询速度。
+   (2)hive.fetch.task.conversion参数设置成more，可以在 select、where、limit 时启用直接抓取方式，能明显提升查询速度。
    `set hive.fetch.task.conversion=more`
 
 2. 本地执行mapreduce
 
-   hive在集群上查询时，默认是在集群上N台机器上运行，需要多个机器进行协调运行，这个方式很好地解决了大数据量的查询问题。但是当hive查询处理的数据量比较小时，其实没有必要启动分布式模式去执行，因为以分布式方式执行就涉及到跨网络传输、多节点协调等，并且消耗资源。这个时间可以只使用本地模式来执行mapreduce job，只在一台机器上执行，速度会很快。
+   hive在集群上查询时，默认是在集群上N台机器上运行，需要多个机器进行协调运行，这个方式很好地解决了大数据量的查询问题。但是当hive查询处理的数据量比较小时，其实没有必要启动分布式模式去执行，因为以分布式方式执行就涉及到跨网络传输、多节点协调等，并且消耗资源。这个时间可以只使用本地模式来执行mapreduce job，只在一台机器上执行，速度会很快。`set mapreduce.framework.name=local`
 
 3. JVM重用
 
@@ -890,7 +1597,7 @@ Hive on MR 调优主要从三个层面进行，分别是基于MapReduce优化、
 
     (1)where 条件优化
 
-    where只在map端阶段执行，不会在reduce阶段执行,尽早地过滤数据，减少每个阶段的数据量,对于分区表要加分区，同时只选择需要使用到的字段。
+    where只在map端阶段执行，不会在reduce阶段执行，尽早地过滤数据，减少每个阶段的数据量,对于分区表要加分区，同时只选择需要使用到的字段。
 
     (2)join优化
 
@@ -908,10 +1615,10 @@ Hive on MR 调优主要从三个层面进行，分别是基于MapReduce优化、
        ```
 
     4. Common/shuffle/Reduce JOIN
-      发生在reduce 阶段， 适用于大表 连接 大表(默认的方式)
+        发生在reduce 阶段， 适用于大表 连接 大表(默认的方式)
 
     5. Map JOIN
-      连接发生在map阶段 ，适用于小表 连接 大表，大表的数据从文件中读取，小表的数据存放在内存中（hive中已经自动进行了优化，自动判断小表，然后进行缓存）
+        连接发生在map阶段 ，适用于小表 连接 大表，大表的数据从文件中读取，小表的数据存放在内存中（hive中已经自动进行了优化，自动判断小表，然后进行缓存）
 
        ```sql
        set hive.auto.convert.join=true; 
@@ -937,13 +1644,13 @@ Hive on MR 调优主要从三个层面进行，分别是基于MapReduce优化、
     因为order by只能是在一个reduce进程中进行的，所以如果对一个大数据集进行order by，会导致一个reduce进程中处理的数据相当大，造成查询执行超级缓慢。
 
     (5)mapjoin
-       
+    
     mapjoin是将join双方比较小的表直接分发到各个map进程的内存中，在map进程中进行join操作，这样就省掉了reduce步骤，提高了速度。
-       
+    
     但慎重使用mapjoin,一般行数小于2000行，大小小于1M(扩容后可以适当放大)的表才能使用,小表要注意放在join的左边。否则会引起磁盘和内存的大量消耗。 
-       
+    
     (6) 桶表mapjoin
-       
+    
     当两个分桶表join时，如果join on的是分桶字段，小表的分桶数时大表的倍数时，可以启用map join来提高效率。启用桶表mapjoin要启用hive.optimize.bucketmapjoin参数。
 
     (7) 消灭子查询内的 group by 、 COUNT(DISTINCT)，MAX，MIN。 可以减少job的数量。
@@ -957,7 +1664,7 @@ Hive on MR 调优主要从三个层面进行，分别是基于MapReduce优化、
     (11) Join字段显示类型转换。
    
     (12) 单个SQL所起的JOB个数尽量控制在5个以下。
-   
+
 
 #### Hive on MR OOM
 
@@ -988,6 +1695,8 @@ Hive 中出现 OOM 的异常原因大致分为以下几种：
 
     1. 减少分区数量，将历史数据做成一张整合表，做成增量数据表，这样分区就很少了。
     2. 调大 Hive CLI Driver 的 heap size, 默认是 256MB，调节成 512MB或者更大。具体做法是在 bin/hive bin/hive-config 里可以找到启动 CLI 的 JVM OPTIONS。设置 export HADOOP_HEAPSIZE=512
+
+#### Hive on tez
 
 #### FAQ
 ##### return code 2 from org.apache.hadoop.hive.ql.exec.mr.MapRedTask
@@ -1109,4 +1818,8 @@ on_hbase(2500万记录，3G，HFile on HDFS)
 根据rowkey过滤，hive_on_hbase性能上略好于hive_on_hdfs，特别是数据量大的时候；
 
 设置了caching之后，尽管比不设caching好很多，但还是略逊于hive_on_hdfs；
+
+### Hive 结合 phoenix
+
+https://repo1.maven.org/maven2/org/apache/phoenix/phoenix-hive/
 

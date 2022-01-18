@@ -32,6 +32,7 @@ HBase 是 Google BigTable 的开源实现，但是也有很多不同之处：
 
 
 #### 特点
+
 - 海量存储
 
     Hbase 适合存储 PB 级别的海量数据，在 PB 级别的数据以及采用廉价 PC 存储的情况下，能在几十到百毫秒内返回数据。这与Hbase的极易扩展性息息相关。
@@ -39,7 +40,7 @@ HBase 是 Google BigTable 的开源实现，但是也有很多不同之处：
     正式因为Hbase良好的扩展性，才为海量数据的存储提供了便利。
 
 - 列式存储
- 
+
     这里的列式存储其实说的是列族存储，Hbase是根据列族来存储数据的。
 
     列族下面可以有非常多的列，列族在创建表的时候不必指定列。
@@ -56,7 +57,7 @@ HBase 是 Google BigTable 的开源实现，但是也有很多不同之处：
     备注：RegionServer 的作用是管理 region、承接业务的访问，通过横向添加 Datanode 的机器，进行存储层扩容，提升Hbase 的数据存储能力和提升后端存储的读写能力。
 
 - 高并发
- 
+
     由于目前大部分使用 Hbase 的架构，都是采用的廉价 PC，因此单个 IO 的延迟其实并不小，一般在几十到上百ms之间。这里说的高并发，主要是在并发的情况下，Hbase 的单个 IO 延迟下降并不多。能获得高并发、低延迟的服务。
 
 - 稀疏
@@ -79,8 +80,12 @@ ZooKeeper 在 HBase 中扮演的角色类似一个管家。ZooKeeper 管理了 H
 
 客户端每次与 HBase 连接，其实都是先与 ZooKeeper 通信，查询出哪个 RegionServer 需要连接，然后再连接 RegionServer。
 
+ACID，指数据库事务正确执行的四个基本要素的缩写，即：原子性（Atomicity），一致性（Consistency），隔离性（Isolation），持久性（Durability）。
+
+HBase支持单行操作下的ACID，即对同一行的Put操作保证完全的ACID。
 
 #### Master
+
 可能你们会想当然地觉得 Master 是 HBase 的领导，所有的数据、所有的操作都会经过它。错！其实在HBase中Master的角色不像领导，更像是打杂的。
 
 客户端从 ZooKeeper 获取了 RegionServer 的地址后，会直接从 RegionServer 获取数据。其实不光是获取数据，包括插入、删除等所有的数据操作都是直接操作 RegionServer，而不需要经过 Master。
@@ -140,7 +145,7 @@ Region有以下特性：
 - Region 是基于 HDFS 的，它的所有数据存取操作都是调用了 HDFS 的客户端接口来实现的。
 
 
-### 存储
+#### 存储
 
 最基本的存储单位是列（column），一个列或者多个列形成一行 （row）。
 
@@ -154,21 +159,79 @@ Region有以下特性：
 
 ![hbase 表结构](images/hbase1.png)
 
-#### 三维有序存储
-Hfile是HBase中Key-value数据的存储格式。key就是{row key，column(=< family> + < label>)，version} ，而value就是cell中的值。
+- 命名空间（Namespace）：对表的逻辑分组，类似于关系型数据库中的Database概念。Namespace可以帮助用户在多租户场景下做到更好的资源和数据隔离。
+- 表（Table）：HBase会将数据组织进一张张的表里面，一个HBase 表由多行组成。
+- 行（Row）：HBase中的一行包含一个行键和一个或多个与其相关的值的列。在存储行时，行按字母顺序排序。出于这个原因，行键的设计非常重要。目标是以相关行相互靠近的方式存储数据。常用的行键模式是网站域。如果你的行键是域名，则你可能应该将它们存储在相反的位置（org.apache.www，org.apache.mail，org.apache.jira）。这样表中的所有Apache域都彼此靠近，而不是根据子域的第一个字母分布。
+- 列（Column） ：HBase中的列由一个列族和一个列限定符组成，它们由冒号（:）字符分隔。
+- 列族（Column Family）：由于性能原因，列族在物理上共同存在一组列和它们的值。在HBase中每个列族都有一组存储属性，例如其值是否应缓存在内存中，数据如何压缩或其行编码是如何编码的等等。表中的每一行都有相同的列族，但给定的行可能不会在给定的列族中存储任何内容。列族一旦确定后，就不能轻易修改，因为它会影响到HBase真实的物理存储结构，但是列族中的列标识（Column Qualifier）以及其对应的值可以动态增删。
+- 列限定符（Column Qualifier）：列限定符被添加到列族中，以提供给定数据段的索引。鉴于列族的content，列限定符可能是content:html，而另一个可能是content:pdf。虽然列族在创建表时是固定的，但列限定符是可变的，并且在行之间可能差别很大。
+- 单元格（Cell） ：单元格是行、列族和列限定符的组合，并且包含值和时间戳，它表示值的版本。
+- 时间戳（Timestamp） ：时间戳与每个值一起编写，并且是给定版本的值的标识符。默认情况下，时间戳表示写入数据时RegionServer上的时间，但可以在将数据放入单元格时指定不同的时间戳值。
 
-HBase的三维有序存储中的三维是指：rowkey（行主键），column key(columnFamily+< label>)，timestamp(时间戳或者版本号)三部分组成的三维有序存储。
 
-##### rowkey
-rowkey是行的主键，它是以字典顺序排序的。所以 rowkey的设计是至关重要的，关系到你应用层的查询效率。我们在根据rowkey范围查询的时候，我们一般是知道startRowkey，如果我们通过scan只传startRowKey ：d开头的，那么查询的是所有比d大的都查了，而我们只需要d开头的数据，那就要通过endRowKey来限制。我们可以通过设定endRowKey为：d 开头，后面的根据你的rowkey组合来设定，一般是加比startKey大一位。
+##### 三维有序存储
 
-##### column key
-column key是第二维，数据按rowkey字典排序后，如果rowkey相同，则是根据column key来排序的，也是按字典排序。
+Hfile是HBase中Key-value数据的存储格式。key就是{row key，column key (= <family> + <label>)，version} ，而value就是cell中的值。
 
-我们在设计table的时候要学会利用这一点。比如我们的收件箱。我们有时候需要按主题排序，那我们就可以把主题这设置为我们的column key，即设计为columnFamily+主题这样的设计。
+HBase的三维有序存储中的三维是指：rowkey（行主键），column key(= columnFamily + <label>)，timestamp(时间戳或者版本号)三部分组成的三维有序存储。
+
+数据首先按rowkey字典排序，如果rowkey相同，则再根据column key来排序的，也是按字典排序。然后是按label排序。
+
+timestamp 时间戳按降序排序的，即最新的数据排在最前面。
+
+##### Rowkey
+
+Rowkey的概念和mysql中的主键是完全一样的，Hbase使用Rowkey来唯一的区分某一行的数据。
+
+Hbase只支持3种查询方式：
+
+1. 基于Rowkey的单行查询 
+2. 基于Rowkey的范围扫描 
+3. 全表扫描
+
+因此，Rowkey对Hbase的性能影响非常大，Rowkey的设计就显得尤为的重要。设计的时候要兼顾基于Rowkey的单行查询也要兼顾Rowkey的范围扫描。
+
+在 HBase 内部，rowkey 保存为字节数组。
+
+rowkey 行键可以是任意字符串，最大长度是64KB，实际应用中长度一般为 10\~100bytes。不过建议是越短越好，控制在 64 个字节以内是比较好。目前操作系统是都是 64 位系统，内存 8 字节对齐。控制在 8 个字节的次幂比较好: 比如，16字节，32字节，64字节比较好。
+
+HBase 中无法根据某个column来排序 系统永远是根据 rowkey 来排序的。因此，rowkey 就是决定 row 存储顺序的唯一凭证。而这个排序也很简单：根据字典排序。
+
+如果插入 HBase 的时候，不小心用了之前已经存在的 rowkey。那就会把之前存在的那个row 更新掉。之前已经存在的值会被放到这个单元格的历史记录里面，并不会丢掉，只是需要带上版本参数才可以找到这个值。
+
+一个列上可以存储多个版本的单元格。单元格就是数据存储的最小单元。
+
+##### ColumnFamily
+
+Hbase通过列族划分数据的存储，列族可以包含任意多的列，实现灵活的数据存取。列族是由一个一个的列组成（任意多）。
+
+Hbase表的创建的时候就必须指定列族。就像关系型数据库创建的时候必须指定具体的列是一样的。
+
+Hbase的列族不是越多越好，官方推荐的是列族最好小于或者等于3。
+
+HBase会把相同列族的列尽量放在同一台机器上，所以说，如果想让某几个列被放到一起，你就给他们定义相同的列族。
+
+##### Column
+列，可理解成MySQL列。
+
+在 HBase 中一个列的名称前面总是带着它所属的列族。列名称的规范是列族:列名，比如brother:age、brother:name、parent:age、 parent:name。
 
 ##### timestamp
-timestamp 时间戳，是第三维，这是个按降序排序的，即最新的数据排在最前面。
+timestamp 时间戳
+
+##### 单元格
+
+虽然列已经是 HBase 的最基本单位了，但是，一个列上可以存储多个版本的值，多个版本的值被存储在多个单元格里面，多个版本之间用版本号(Version)来区分。
+
+所以，唯一确定一条结果的表达式应该是行键:列族:列:版本号（rowkey:column family:column:version）。
+
+不过，版本号是可以省略的，默认最后一个版本。
+
+每个列或者单元格的值都被赋予一个时间戳。这个时间戳默认是由系统制定的，也可以由用户显示指定。
+
+##### Rigion 和行的关系
+一个 Region 就是多个行的集合。在 Region 中行的排序按照行键（rowkey）字典排序。
+
 
 #### OLTP 和 OLAP
 数据处理大致可以分成两大类：联机事务处理OLTP（on-line transaction processing）、联机分析处理OLAP（On-Line Analytical Processing）。
@@ -182,58 +245,6 @@ OLAP是数据仓库系统的主要应用，支持复杂的分析操作，侧重�
 面向列的数据库适用于在线分析处理(OLAP)，可以设计为巨大表。
 
 
-#### 名词概念
-
-##### 1. Rowkey的概念
-Rowkey的概念和mysql中的主键是完全一样的，Hbase使用Rowkey来唯一的区分某一行的数据。
-
-Hbase只支持3种查询方式：
-
-1. 基于Rowkey的单行查询 
-2. 基于Rowkey的范围扫描 
-3. 全表扫描
-
-因此，Rowkey对Hbase的性能影响非常大，Rowkey的设计就显得尤为的重要。设计的时候要兼顾基于Rowkey的单行查询也要兼顾Rowkey的范围扫描。
-
-在 HBase 内部，rowkey 保存为字节数组。
-
-rowkey 行键可以是任意字符串，最大长度是64KB，实际应用中长度一般为 10~100bytes。不过建议是越短越好，控制在 64 个字节以内是比较好。目前操作系统是都是 64 位系统，内存 8 字节对齐。控制在 8 个字节的次幂比较好: 比如，16字节，32字节，64字节比较好。
-
-HBase 中无法根据某个column来排序 系统永远是根据 rowkey 来排序的。因此，rowkey 就是决定 row 存储顺序的唯一凭证。而这个排序也很简单：根据字典排序。
-
-如果插入 HBase 的时候，不小心用了之前已经存在的 rowkey。那就会把之前存在的那个row 更新掉。之前已经存在的值会被放到这个单元格的历史记录里面，并不会丢掉，只是需要带上版本参数才可以找到这个值。
-
-一个列上可以存储多个版本的单元格。单元格就是数据存储的最小单元。
-
-##### 2. Column的概念
-列，可理解成MySQL列。
-
-在 HBase 中一个列的名称前面总是带着它所属的列族。列名称的规范是列族:列名，比如brother:age、brother:name、parent:age、 parent:name。
-
-
-##### 3. ColumnFamily的概念
-Hbase通过列族划分数据的存储，列族可以包含任意多的列，实现灵活的数据存取。列族是由一个一个的列组成（任意多）。
-
-Hbase表的创建的时候就必须指定列族。就像关系型数据库创建的时候必须指定具体的列是一样的。
-
-Hbase的列族不是越多越好，官方推荐的是列族最好小于或者等于3。
-
-HBase会把相同列族的列尽量放在同一台机器上，所以说，如果想让某几个列被放到一起，你就给他们定义相同的列族。
-
-
-##### 4.单元格
-虽然列已经是 HBase 的最基本单位了，但是，一个列上可以存储多个版本的值，多个版本的值被存储在多个单元格里面，多个版本之间用版本号(Version)来区分。
-
-所以，唯一确定一条结果的表达式应该是行键:列族:列:版本号（rowkey:column family:column:version）。
-
-不过，版本号是可以省略的，默认最后一个版本。
-
-每个列或者单元格的值都被赋予一个时间戳。这个时间戳默认是由系统制定的，也可以由用户显示指定。
-
-##### 5.Rigion 和行的关系
-一个 Region 就是多个行的集合。在 Region 中行的排序按照行键（rowkey）字典排序。
-
-
 ### 安装和使用
 Hbase 也有 3 种运行模式:
 
@@ -241,9 +252,137 @@ Hbase 也有 3 种运行模式:
 - 伪分布模式
 - 完全分布式模式
 
+https://hbase.apache.org/book.html#quickstart
+
+#### 单机模式
+Standalone HBase
+
+包含所有 HBase 守护进程：HMaster、RegionServers 和 ZooKeeper（在一个持久化到本地文件系统的 JVM 中运行）。
+
+```shell
+start-hbase.sh
+
+hbase-daemon.sh start master
+hbase-daemon.sh start regionserver
+
+stop-hbase.sh
+```
+
+#### 伪分布模式
+Pseudo-Distributed for Local Testing
+
+hbase-site.xml
+```xml
+<configuration>
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  <!-- hbase存放数据目录 -->
+  <property>
+    <name>hbase.rootdir</name>
+    <value>hdfs://hadoop101:9000/hbase</value>
+  </property>
+<!--
+  <property>
+    <name>hbase.tmp.dir</name>
+    <value>./tmp</value>
+  </property>
+  <property>
+    <name>hbase.unsafe.stream.capability.enforce</name>
+    <value>false</value>
+  </property>
+-->
+</configuration>
+```
+
+```shell
+start-hbase.sh
+
+local-master-backup.sh start 2 3 5
+cat /tmp/hbase-xxx-1-master.pid |xargs kill -9
+cat /tmp/hbase-xxx-2-master.pid |xargs kill -9
+cat /tmp/hbase-xxx-master.pid |xargs kill -9
+
+local-regionservers.sh start 2 3 4 5
+local-regionservers.sh stop 3
+
+stop-hbase.sh
+
+```
+Each HMaster uses two ports (16000 and 16010 by default). The port offset is added to these ports, so using an offset of 2, the backup HMaster would use ports 16002 and 16012. The following command starts 3 backup servers using ports 16002/16012, 16003/16013, and 16005/16015.
+
+
+#### 完全分布模式
+Fully Distributed for Production
+
+| Node Name | Master | ZooKeeper | RegionServer |
+| --------- | ------ | --------- | ------------ |
+| node-a    | yes    | yes       | no           |
+| node-b    | backup | yes       | yes          |
+| node-c    | no     | yes       | yes          |
+
+修改 conf/hbase-env.sh 文件
+`export HBASE_MANAGES_ZK=false`
+
+修改 conf/hbase-site.xml
+```xml
+<!-- hbase 在 hdfs 上存储数据时的目录 -->
+<property>     
+    <name>hbase.rootdir</name>     
+    <value>hdfs://hadoop201:9000/hbase</value>   
+</property>
+
+<!-- 是否开启集群 -->
+<property>   
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+</property>
+
+<!-- master 的端口号 0.98后的新变动，之前版本没有.port,默认端口为16000 -->
+<property>
+    <name>hbase.master.port</name>
+    <value>16000</value>
+</property>
+
+<!-- 配置 Zookeeper -->
+<property>   
+    <name>hbase.zookeeper.quorum</name>
+    <value>hadoop101:2181,hadoop102:2181,hadoop103:2181</value>
+</property>
+<!-- Zookeeper 的 dataDir 目录 -->
+<property>   
+    <name>hbase.zookeeper.property.dataDir</name>
+    <value>/data/zookeeper</value>
+</property>
+```
+
+修改conf/regionservers文件。这个类似于 Hadoop 中的 slaves 文件，用来配置 Hbase 集群中的 RegionServer 的。
+```
+hadoop101
+hadoop102
+hadoop103
+```
+
+由于 Hbase 需要向 HDFS 中写入数据。所以 Hbase 需要知道 Hadoop 的一些配置。有 3 种办法：
+
+1. 在 hbase-env.sh 文件中添加一个变量 HBASE_CLASSPATH 指向 HADOOP_CONF_DIR。
+2. 把 hdfs-site.xml和core-site.xml copy 到 conf 目录下，或者更好的方式: 创建一个到 hdfs-site.xml, core-site.xml的软连接
+    ```shell
+    ln -s /usr/local/hadoop-2.10.1/etc/hadoop/core-site.xml /usr/local/hbase-1.3.1/conf/core-site.xml
+    ln -s /usr/local/hadoop-2.10.1/etc/hadoop/hdfs-site.xml /usr/local/hbase-1.3.1/conf/hdfs-site.xml
+    ```
+3. 如果 hdfs 的配置比较少，直接 copy 到 hbase-site.xml 文件中。
+
+```shell
+start-dfs.sh
+start-yarn.sh
+zkServer.sh start
+```
+
 #### hbase shell
 
-```bash
+```shell
 help # 帮助命令
 
 list # 查看当前数据库中有哪些表
@@ -307,6 +446,51 @@ describe 'student'
 # 变更表结构
 alter 'student', {NAME => 'info', VERSIONS => 3} #  设置表 student 中ifno列族每列可以保存 3 个版本的数据
 
+# 快照
+snapshot 'student', 'student20211201'
+
+# 列出快照
+list_snapshots 
+
+# 删除快照
+delete_snapshot 'student20211201' 
+
+# 快照恢复
+disable 'student'
+restore_snapshot 'student20211201'
+enable 'student'
+
+# 从快照克隆表
+clone_snapshot 'student20211201', 'myTable' 
+
+
+# Distcp
+# CopyTable
+# export  import 
+
+
+list_namespace
+
+list_namespace_tables "default"
+list_namespace_tables "hbase"
+
+describe_namespace "hbase"
+
+create_namespace "test"
+create_namespace "test002", {"author"=>"testor", "create_time"=>"2021-12-02 17:51:53"}
+
+# 修改属性
+alter_namespace "test", {METHOD => 'set', 'PROPERTY_NAME' => 'PROPERTY_VALUE'}
+
+# 删除属性
+alter_namespace 'test', {METHOD => 'unset', NAME=>'PROPERTY_NAME'}
+
+drop_namespace 'test'
+
+create 'test:student','info'
+
+scan 'hbase:meta'
+scan 'hbase:namespace'
 ```
 
 ### 配置
@@ -520,11 +704,10 @@ HBase 集群支持对 Hmaster 的高可用配置。
 有几种预分区的方式:
 
 1. 手动设定分区点
-create 'staff1','info','partition1',SPLITS =>['1000','2000','3000','4000']
+`create 'staff1','info','partition1',SPLITS =>['1000','2000','3000','4000']`
 
 2. 生成16进制序列预分区
-create 'staff2','info','partition2',{NUMREGIONS => 15, SPLITALGO => 'HexStringSplit'}
-
+`create 'staff2','info','partition2',{NUMREGIONS => 15, SPLITALGO => 'HexStringSplit'}`
 
 3. 按照文件中设置的规则预分区
 创建splits.txt文件内容如下：
@@ -535,7 +718,7 @@ cccc
 dddd
 ```
 
-然后执行：create 'staff3','partition3',SPLITS_FILE => 'splits.txt'
+然后执行：`create 'staff3','partition3',SPLITS_FILE => 'splits.txt'`
 
 4. 使用 JavaAPI 创建预分区
 ```java
@@ -623,6 +806,24 @@ RowKey 是按照字典序存储，因此，设计 RowKey 时，要充分利用�
 
 加盐：这里所说的加盐不是密码学中的加盐，而是在rowkey的前面增加随机数，具体就是给rowkey分配一个随机前缀以使得它和之前的rowkey的开头不同。
 
+加盐通常用来解决数据热点和范围查询同时存在的场景。
+
+加盐有较强的适用场景要求，场景不合适将会达不到预期期望：
+
+- 写热点或写不均衡：比如以时间作为第一列主键，永远写表头或者表尾。
+- 需要范围查询：要按第一列主键进行范围查询，不能使用hash打散。
+
+有热点就要打散，但打散就难以做范围查询。因此，要同时满足这对相互矛盾的需求，必须有一种折中的方案：既能在一定程度上打散数据，又能保证有序。这个解决方案就是加盐，亦称分桶（salt buckets）。数据在桶内保序，桶之间随机。写入时按桶个数取模，数据随机落在某个桶里，保证写请求在桶之间是均衡的。查询时读取所有的桶来保证结果集的有序和完备。
+
+一般来说，严格满足上述条件的业务场景并不常见。大多数场景都可以找到其他的业务字段来协助散列。考虑到其严重的副作用，不建议使用这个特性。
+
+副作用：
+
+- 写瓶颈：一般全表只有buckets个region用于承担写。当业务体量不断增长时，因为无法调整bucket数量，不能有更多的region帮助分担写，会导致写入吞吐无法随集群扩容而线性增加。导致写瓶颈，从而限制业务发展。
+- 读扩散：select会按buckets数量进行拆分和并发，每个并发都会在执行时占用一个线程。select本身一旦并发过多会导致线程池迅速耗尽或导致QueryServer因过高的并发而FGC。同时，本应一个RPC完成的简单查询，现在也会拆分成多个，使得查询RT大大增加。
+
+以上副作用会制约业务的发展，尤其对于大体量的、发展快速的业务。因为桶个数不能修改，写瓶颈会影响业务的扩张。读扩散带来的RT增加也大大降低了资源使用效率。
+
 哈希：哈希会使同一行永远用一个前缀加盐。哈希也可以使负载分散到整个集群，但是读却是可以预测的。使用确定的哈希可以让客户端重构完整的rowkey，可以使用get操作准确获取某一个行数据。
 
 反转：反转固定长度或者数字格式的rowkey。这样可以使得rowkey中经常改变的部分（最没有意义的部分）放在前面。这样可以有效的随机rowkey，但是牺牲了rowkey的有序性。
@@ -678,6 +879,869 @@ Region状态迁移是如何发生的？
 
 
 
+### 时空大数据
+一个包含管理「空间几何数据」、「时空轨迹」、「专题栅格」、「遥感影像」的时空大数据引擎系统。兼容开源GeoMesa、GeoServer等生态，内置高效的时空索引算法、空间拓扑几何算法、遥感影像处理算法等，结合HBase强大的分布式存储能力以及Spark分析平台能力，可广泛应用于空间/时空/遥感大数据存储、查询、分析与数据挖掘场景。
+
+##### 时空几何
+
+- 时空几何对象。
+  + 矢量数据，如点、线、面状要素。
+  + 在矢量数据基础上结合时间属性，组成的时空数据或时空轨迹数据。
+- 针对时空几何对象的相关操作，如时空关系的判断
+
+##### 时空索引
+为时空数据建立高效的时空索引以提供优异的查询性能。在阿里云HBase Ganos中，时空索引以HBase的Rowkey形式存在。
+
+1. ID索引
+
+适应于根据空间对象ID（称为FID）查询的场景，要求每个空间对象的FID必须唯一。
+
+2. Z2/XZ2索引
+
+适应于空间查询，如地理围栏判断、周边范围查询等；其中Z2是用于「点」对象；XZ2用于「线」、「面」对象。
+
+3. Z3/XZ3索引
+
+适应于时空查询，如某个空间范围以及时间段内的历史轨迹等；其中Z3是用于「点」对象；XZ3用于「线」、「面」对象。
+
+4. XYZ索引
+
+适应于含有经度、纬度、高程信息的三维索引，目前仅用于为「点」对象构建三维索引。
+
+5. 属性索引
+
+适应于根据其他属性查询的场景。
+
+```java
+// sft为SimpleFeatureType的一个实例对象
+sft.getUserData().put("geomesa.indices.enabled", "{index_name}:{col1}:{col2}:...,{index_name}:{col}");
+
+// 一共创建了z3和attr两个索引，其中start列+dtg列为z3索引；end列+dtg列为z3索引；name列和dtg列为attr索引。
+sft.getUserData().put("geomesa.indices.enabled", "z3:start:dtg,z3:end:dtg,attr:name:dtg");
+```
+
+**说明**
+
+- Index_name取下面常量之一：id,attr,z2,z3,xz2,xz3,xyz。
+- col为SimpleFeatureType中定义的列。
+- 可以创建多个index，每个index之间用，分割。
+- 可以将多个列添加到同一个索引中，索引和每个列之间用：分割。
+
+##### 时空关系
+时空关系是指两个时空几何对象之间的时间和空间的相对位置。典型的时空关系包括：相交、相离、覆盖、包含等。 在现实场景中“地理围栏判断”是指一个面状要素表示的地理围栏与目标对象（点、线、面）之间的关系。如果目标对象在地理围栏之内，则称之为包含；在面状要素之外，则称之为相离。 
+
+##### OGC
+OGC全称是开放地理空间信息联盟（Open Geospatial Consortium），是一个非盈利的国际标准组织，它制定了数据模型和相关操作的一系列标准，GIS厂商按照这个标准进行开发可保证空间数据的互操作。
+
+##### GeoTools
+GeoTools是一个遵循OGC标准，用于处理地理空间数据的工具包，实现了OGC标准的数据模型和接口，很多地理工具都基于GeoTools开发。
+
+##### Geometry
+在OGC的定义中，Geometry用来表示一个空间对象，例如空间点对象、空间线对象、空间面对象。Geometry只包含空间对象的位置信息，并不包含其附带的属性信息。 GeoTools提供了GeometryFactory工具类来帮助构建Geometry。具体可以通过两种方式创建：
+
+- 通过Coordinate对象<br/>
+这种方式创建比较直观，该对象表示一个坐标点，推荐使用。
+
+- 通过WKT文本创建<br/>
+WKT（Well-known text）是一种空间对象的文本标记语言，如字符串"POINT (1 1)"表示一个点对象，其坐标为1，1；字符串"LINESTRING(0 2, 2 0, 8 6)"表示一条线对象，由三个坐标点组成；字符串"POLYGON((20 10, 30 0, 40 10, 30 20, 20 10))"表示一个面对象，最首尾两个坐标点相同构成一个环。
+
+```java
+// 点对象
+// 通过Coordinate对象创建
+GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+Coordinate coord = new Coordinate(1, 1);
+Point point = geometryFactory.createPoint(coord);
+
+// 通过WKT创建
+GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+WKTReader reader = new WKTReader(geometryFactory);
+Point point = (Point) reader.read("POINT (1 1)");
+
+// 线对象
+// 通过Coordinate对象
+GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+Coordinate[] coords  =
+ new Coordinate[] {new Coordinate(0, 2), new Coordinate(2, 0), new Coordinate(8, 6) };
+LineString line = geometryFactory.createLineString(coordinates);
+
+// 通过WKT描述：
+GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+WKTReader reader = new WKTReader( geometryFactory );
+LineString line = (LineString) reader.read("LINESTRING(0 2, 2 0, 8 6)");
+
+// 面对象
+// 通过Coordinate对象
+GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+Coordinate[] coords  =
+   new Coordinate[] {new Coordinate(4, 0), new Coordinate(2, 2),
+                     new Coordinate(4, 4), new Coordinate(6, 2), new Coordinate(4, 0) };
+LinearRing ring = geometryFactory.createLinearRing( coords );
+LinearRing holes[] = null; // use LinearRing[] to represent holes
+Polygon polygon = geometryFactory.createPolygon(ring, holes );
+      
+// 通过WKT描述：
+GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory( null );
+WKTReader reader = new WKTReader( geometryFactory );
+Polygon polygon = (Polygon) reader.read("POLYGON((20 10, 30 0, 40 10, 30 20, 20 10))");
+
+```
+
+##### SimpleFeature
+简单要素，SimpleFeature包含Geometry以及其他属性信息。通常所说的一个轨迹点就是一个SimpleFeature，包含了该轨迹点的空间位置、时间信息以及其他属性信息，其中时间信息也是作为属性信息的一部分。
+
+```java
+SimpleFeatureType sft = ....;
+SimpleFeatureBuilder sfBuilder = new SimpleFeatureBuilder(sft);
+builder.set("属性名", 属性值);
+ ...
+builder.set("geom", Geometry); //设置空间对象，"geom"为固定写法
+SimpleFeature feature = builder.buildFeature(object_id + "_" + date.getTime());
+            
+```
+
+##### CQL&ECQL
+CQL全称为Common Query Language，是OGC为方便地理服务的查询而定义的查询语言。ECQL全称Extended Common Query Language，是CQL的扩展版，比CQL更强大。 一般来说，ECQL更多的是定义filter，类似于SQL语言的where子句，通过文本描述的方式来筛选出目标对象。
+
+##### WKT
+WKT全称Well-known text，是OGC定义的一种用文本来描述空间对象的格式。例如点就可以写成POINT(0,0)，这在查询语句中经常使用，CQL&ECQL中也是用WKT来表示空间对象。
+
+##### WKB
+WKB全称Well-known Binary，是OGC定义的一种通过序列化字节来描述几何对象的格式。与WKT相比，其优点在于数据较小，适宜传输。GeoTools提供了工具可用于WKB与WKT之间的转换。
+
+### Phoenix
+
+Phoenix表是映射的hbase表，hbase存储的数据都是字节数组，因此限制数据类型的只能是Phoenix自己。
+
+Phoenix的系统表有以下五张表：
+
+1. SYSTEM.CATALOG：保存了建表的元数据信息
+2. SYSTEM.FUNCTION
+3. SYSTEM.LOG
+4. SYSTEM.SEQUENCE
+5. SYSTEM.STATS
+
+#### shell 操作
+
+https://phoenix.apache.org/language/index.html
+
+```shell
+sqlline.py
+
+# 查看其他操作
+help
+
+# 查看执行的历史SQL
+!history
+
+# 数据库信息
+!dbinfo
+
+# 查看表信息
+!tables 
+
+# 查看表字段信息
+!describe tablename
+
+# 查看表的索引
+!index tablename
+
+# 插入数据 
+# upsert into
+upsert into test values('ak','hhh',222)
+upsert into test (stat,city,num) values('ak','hhh',222)
+
+# upsert select
+upsert into test2 (state,city,population) select state,city,population from tb2 where population > 1;
+
+
+# 删除数据
+delete from test where id = 1;
+
+# 清空表中所有记录，Phoenix中不能使用truncate table test
+delete from test
+
+# 删除表 
+drop table tb
+delete from system.catalog where table_name = 'test';
+drop table if exists test;
+drop table my_schema.test;
+drop table my_schema.test cascade; # 用于删除表的同时删除基于该表的所有视图。
+
+# 修改数据
+# 由于HBase的主键设计，相同rowkey的内容可以直接覆盖，这就变相的更新了数据。
+# 所以Phoenix的更新操作仍旧是upsert into 和 upsert select
+upsert into test (state,city,population) values('ak','juneau',40711);
+
+# 查询数据
+# union all， group by， order by， limit
+select * from test limit 1000 offset 100;
+select full_name from sales_person where ranking >= 5.0 union all select reviewer_name from customer_review where score >= 8.0
+
+# 创建表
+# Salting(加盐)
+# 加盐能够通过预分区(pre-splitting)数据到多个region中来显著提升读写性能。
+# 本质是在hbase中，rowkey的byte数组的第一个字节位置设定一个系统生成的byte值，
+# 这个byte值是由主键生成rowkey的byte数组做一个哈希算法，计算得来的。
+# Salting之后可以把数据分布到不同的region上，这样有利于phoenix并发的读写操作。
+# SALT_BUCKETS的值范围在（1 ~ 256）
+create table test(host varchar not null primary key, description  varchar)salt_buckets=16;
+
+# Pre-split（预分区）
+# Salting能够自动的设置表预分区，但是你得去控制表是如何分区的，
+# 在建phoenix表时，可以精确的指定要根据什么值来做预分区
+create table test (host varchar not null primary key, description varchar) split on ('cs','eu','na');
+
+# 使用多列族
+# 列族包含相关的数据都在独立的文件中，在Phoenix设置多个列族可以提高查询性能。
+create table test (
+ mykey varchar not null primary key,
+ a.col1 varchar,
+ a.col2 varchar, 
+ b.col3 varchar
+);
+
+# 使用压缩
+create table test (host varchar not null primary key, description varchar) compression='snappy';
+
+
+# 创建视图
+create view "my_hbase_table"( k varchar primary key, "v" unsigned_long) default_column_family='a';
+create view my_view ( new_col smallint ) as select * from my_table where k = 100;
+create view my_view_on_view as select * from my_view where new_col > 70
+create view v1 as select *  from test where description in ('s1','s2','s3')
+
+# 删除视图
+drop view my_view
+drop view if exists my_schema.my_view
+drop view if exists my_schema.my_view cascade
+
+# 创建二级索引
+# 支持可变数据和不可变数据（数据插入后不再更新）上建立二级索引
+create index my_idx on sales.opportunity(last_updated_date desc)
+create index my_idx on log.event(created_date desc) include (name, payload) salt_buckets=10
+create index if not exists my_comp_idx on server_metrics ( gc_time desc, created_date desc ) data_block_encoding='none',versions=?,max_filesize=2000000 split on (?, ?, ?)
+create index my_idx on sales.opportunity(upper(contact_name))
+create index test_index on test (host) include (description);
+
+# 删除索引
+drop index my_idx on sales.opportunity
+drop index if exists my_idx on server_metrics
+drop index if exists xdgl_acct_fee_index on xdgl_acct_fee
+
+# 默认是可变表，手动创建不可变表
+create table hao2 (k varchar primary key, v varchar) immutable_rows=true;
+alter table HAO2 set IMMUTABLE_ROWS = false; # 修改为可变
+alter index index1 on tb rebuild; # 索引重建是把索引表清空后重新装配数据。
+
+# 与现有的HBase表关联
+# 首先创建一张HBase表，再创建的Phoenix表，表名必须和HBase表名一致即可。
+create  'stu' ,'cf1','cf2'
+put 'stu', 'key1','cf1:name','zhangsan'
+put 'stu', 'key1','cf1:sex','man'
+put 'stu', 'key1','cf2:age','24'
+put 'stu', 'key1','cf2:adress','jiangsu'
+
+create table "stu" (
+id VARCHAR NOT NULL PRIMARY KEY,
+"cf1"."name" VARCHAR,
+"cf1"."sex" VARCHAR,
+"cf2"."age" VARCHAR,
+"cf2"."adress" VARCHAR);
+upsert into "stu"(id,"cf1"."name","cf1"."sex","cf2"."age","cf2"."adress") values('key6','zkk','man','111','Beijing');
+
+```
+
+#### Data Types
+
+##### INTEGER
+Possible values: -2147483648 to 2147483647.
+
+Mapped to java.lang.Integer. The binary representation is a 4 byte integer with the sign bit flipped (so that negative values sorts before positive values).
+
+##### UNSIGNED_INT
+Possible values: 0 to 2147483647.
+
+Mapped to java.lang.Integer. The binary representation is a 4 byte integer, matching the HBase Bytes.toBytes(int) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### BIGINT
+Possible values: -9223372036854775808 to 9223372036854775807. 
+
+Mapped to java.lang.Long. The binary representation is an 8 byte long with the sign bit flipped (so that negative values sorts before positive values).
+
+##### UNSIGNED_LONG
+Possible values: 0 to 9223372036854775807. 
+
+Mapped to java.lang.Long. The binary representation is an 8 byte integer, matching the HBase Bytes.toBytes(long) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### TINYINT
+Possible values: -128 to 127. 
+
+Mapped to java.lang.Byte. The binary representation is a single byte, with the sign bit flipped (so that negative values sorts before positive values).
+
+##### UNSIGNED_TINYINT
+Possible values: 0 to 127. 
+
+Mapped to java.lang.Byte. The binary representation is a single byte, matching the HBase Bytes.toBytes(byte) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### SMALLINT
+Possible values: -32768 to 32767. 
+
+Mapped to java.lang.Short. The binary representation is a 2 byte short with the sign bit flipped (so that negative values sort before positive values).
+
+##### UNSIGNED_SMALLINT
+Possible values: 0 to 32767. 
+
+Mapped to java.lang.Short. The binary representation is an 2 byte integer, matching the HBase Bytes.toBytes(short) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### FLOAT
+Possible values: -3.402823466 E + 38 to 3.402823466 E + 38. 
+
+Mapped to java.lang.Float. The binary representation is an 4 byte float with the sign bit flipped (so that negative values sort before positive values).
+
+##### UNSIGNED_FLOAT
+Possible values: 0 to 3.402823466 E + 38. 
+
+Mapped to java.lang.Float. The binary representation is an 4 byte float matching the HBase Bytes.toBytes(float) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### DOUBLE
+Possible values: -1.7976931348623158 E + 308 to 1.7976931348623158 E + 308. 
+
+Mapped to java.lang.Double. The binary representation is an 8 byte double with the sign bit flipped (so that negative values sort before positive value).
+
+##### UNSIGNED_DOUBLE
+Possible values: 0 to  1.7976931348623158 E + 308. 
+
+Mapped to java.lang.Double. The binary representation is an 8 byte double matching the HBase Bytes.toBytes(double) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### DECIMAL
+DECIMAL ( precisionInt , scaleInt )
+
+Data type with fixed precision and scale. A user can specify precision and scale by expression DECIMAL(precision,scale) in a DDL statement, for example, DECIMAL(10,2). The maximum precision is 38 digits. 
+
+Mapped to java.math.BigDecimal. The binary representation is binary comparable, variable length format. When used in a row key, it is terminated with a null byte unless it is the last column.
+
+##### BOOLEAN
+Possible values: TRUE and FALSE.
+
+Mapped to java.lang.Boolean. The binary representation is a single byte with 0 for false and 1 for true
+
+##### TIME
+The time data type. The format is yyyy-MM-dd hh:mm:ss, with both the date and time parts maintained. 
+
+Mapped to java.sql.Time. The binary representation is an 8 byte long (the number of milliseconds from the epoch), making it possible (although not necessarily recommended) to store more information within a TIME column than what is provided by java.sql.Time. Note that the internal representation is based on a number of milliseconds since the epoch (which is based on a time in GMT), while java.sql.Time will format times based on the client's local time zone. 
+
+Please note that this TIME type is different than the TIME type as defined by the SQL 92 standard in that it includes year, month, and day components. As such, it is not in compliance with the JDBC APIs. As the underlying data is still stored as a long, only the presentation of the value is incorrect.
+
+##### DATE
+The date data type. The format is yyyy-MM-dd hh:mm:ss, with both the date and time parts maintained to a millisecond accuracy. 
+
+Mapped to java.sql.Date. The binary representation is an 8 byte long (the number of milliseconds from the epoch), making it possible (although not necessarily recommended) to store more information within a DATE column than what is provided by java.sql.Date. Note that the internal representation is based on a number of milliseconds since the epoch (which is based on a time in GMT), while java.sql.Date will format dates based on the client's local time zone. 
+
+Please note that this DATE type is different than the DATE type as defined by the SQL 92 standard in that it includes a time component. As such, it is not in compliance with the JDBC APIs. As the underlying data is still stored as a long, only the presentation of the value is incorrect.
+
+##### TIMESTAMP
+The timestamp data type. The format is yyyy-MM-dd hh:mm:ss[.nnnnnnnnn].
+
+Mapped to java.sql.Timestamp with an internal representation of the number of nanos from the epoch. The binary representation is 12 bytes: an 8 byte long for the epoch time plus a 4 byte integer for the nanos. Note that the internal representation is based on a number of milliseconds since the epoch (which is based on a time in GMT), while java.sql.Timestamp will format timestamps based on the client's local time zone.
+
+##### UNSIGNED_TIME
+The unsigned time data type. The format is yyyy-MM-dd hh:mm:ss, with both the date and time parts maintained to the millisecond accuracy. 
+
+Mapped to java.sql.Time. The binary representation is an 8 byte long (the number of milliseconds from the epoch) matching the HBase.toBytes(long) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### UNSIGNED_DATE
+The unsigned date data type. The format is yyyy-MM-dd hh:mm:ss, with both the date and time parts maintained to a millisecond accuracy. 
+
+Mapped to java.sql.Date. The binary representation is an 8 byte long (the number of milliseconds from the epoch) matching the HBase.toBytes(long) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### UNSIGNED_TIMESTAMP
+The timestamp data type. The format is yyyy-MM-dd hh:mm:ss[.nnnnnnnnn]. 
+
+Mapped to java.sql.Timestamp with an internal representation of the number of nanos from the epoch. The binary representation is 12 bytes: an 8 byte long for the epoch time plus a 4 byte integer for the nanos with the long serialized through the HBase.toBytes(long) method. The purpose of this type is to map to existing HBase data that was serialized using this HBase utility method. If that is not the case, use the regular signed type instead.
+
+##### VARCHAR
+VARCHAR ( precisionInt )
+
+A variable length String with an optional max byte length. The binary representation is UTF8 matching the HBase Bytes.toBytes(String) method. When used in a row key, it is terminated with a null byte unless it is the last column.
+
+Mapped to java.lang.String.
+
+##### CHAR
+CHAR ( precisionInt )
+
+A fixed length String with single-byte characters. The binary representation is UTF8 matching the HBase Bytes.toBytes(String) method.
+
+Mapped to java.lang.String.
+
+##### BINARY
+BINARY ( precisionInt )
+
+Raw fixed length byte array.
+
+Mapped to byte[].
+
+##### VARBINARY
+Raw variable length byte array.
+
+Mapped to byte[].
+
+##### ARRAY
+
+ARRAY [ dimensionInt ]
+
+Mapped to java.sql.Array. Every primitive type except for VARBINARY may be declared as an ARRAY. Only single dimensional arrays are supported.
+
+Example:
+
+VARCHAR ARRAY
+CHAR(10) ARRAY [5]
+INTEGER []
+INTEGER [100]
+
+#### 元数据
+
+TENANT_ID 租户ID(这个不用管，租户用的)
+TABLE_SCHEM 表的schema
+TABLE_NAME  表名
+COLUMN_NAME 列名
+COLUMN_FAMIL  hbase底层的列族名
+DATA_TYPE   列的数据类型
+COLUMN_SIZE   列的数据长度(一般指char,varchar和decimal的长度)
+DECIMAL_DIGITS  decimal类型的小数长度
+
+#### 二级索引
+二级索引是从主键访问数据的正交方式。
+
+Hbase中有一个按照字典排序的主键Rowkey作为单一的索引。不按照Rowkey去读取记录都要遍历整张表，然后按照指定的过滤条件过滤。通过二级索引，索引的列或表达式形成一个备用行键，以允许沿着这个新轴进行点查找和范围扫描。
+
+
+##### 覆盖索引（Covered Indexes）
+
+Phoenix特别强大，因为它提供了覆盖索引。一旦找到索引的条目，不需要返回主表。相反，把我们关心的数据绑定到索引行，节省了读取的时间开销。
+
+例如，以下内容将在v1和v2列上创建一个索引，并在索引中包含v3列，以防止从原始数据表中获取该列：
+```sql
+CREATE INDEX my_index ON my_table（v1，v2）INCLUDE（v3）
+```
+##### 功能索引（Functional Indexes）
+
+功能索引（在4.3和更高版本中可用）允许在列上或者在任意表达式上创建索引。然后，当一个查询使用该表达式时，索引可以用来检索结果而不是数据表。例如，可以在UPPER（FIRST_NAME ||''|| LAST_NAME）上创建一个索引，以便可以对组合的名字和姓氏进行不区分大小写的搜索。
+
+例如，下面将创建这个功能索引：
+
+创建索引UPPER_NAME_IDX（UPPER（FIRST_NAME ||''|| LAST_NAME））
+
+有了这个索引，发出下面的查询时，将使用索引而不是数据表来检索结果：
+
+SELECT EMP_ID FROM EMP WHERE UPPER（FIRST_NAME ||''|| LAST_NAME）='JOHN DOE'
+
+##### 全局索引
+
+全局索引适合读操作任务重的用例。使用全局索引，索引的所有性能损失都是在写入时发生的。我们拦截数据表更新写（DELETE，UPSERT VALUES和UPSERT SELECT），建立索引更新，然后发送任何必要的更新到所有感兴趣的索引表。在读的时候，phoenix会选择索引表，然后使用它，这使得查询加快并且直接可想其它表一样scan索引表。默认情况下，除非暗示，否则索引不会用于引用不属于索引的列的查询。
+
+##### 本地索引
+
+本地索引适合写任务繁重，且空间有限的用例。就像全局索引一样，Phoenix会在查询时自动选择是否使用本地索引。使用本地索引，索引数据和表数据共同驻留在同一台服务器上，防止写入期间的任何网络开销。即使查询没有被完全覆盖，也可以使用本地索引（即Phoenix自动检索不在索引中的列，通过与数据表相对应的索引）。与全局索引不同，4.8.0版本之前所有的本地索引都存储在一个单独独立的共享表中。从4.8.0版本开始，所有的本地索引数据都存储于相同数据表的独立列簇里。在读取本地索引时，由于不能确定索引数据的确切区域位置，所以必须检查每个区域的数据。因此在读取时会发生一些开销。
+
+实现上，一个global index表对应着一个hbase 表，local index是在主表上新增一列存储索引数据。
+适用场景上，global index 适用于多读的场景，但存在同步索引时带来网络开销较大的问题。而local由于和原数据存储在一张表中同步索引数据会相对快一点。虽然local index也有一定适用场景，但仍然推荐使用global index，其原因有以下几点：
+
+1. 当前版本的phoneix的local index的实现相对global index不太完善，问题较多，使用存在一定的风险。
+2. local index不太完善，大的改动后，可能会存在不兼容，升级流程比较复杂。
+3. 在大数据量下，原始数据和索引数据放在一起会加剧region分裂，且分裂后索引数据的本地性也会丧失。
+
+
+##### 索引填写
+
+默认情况下，创建索引时，会在CREATE INDEX调用期间同步填充该索引。根据数据表的当前大小，这可能是不可行的。从4.5开始，可以通过在索引创建DDL语句中包含ASYNC关键字来异步完成索引的填充：
+
+CREATE INDEX async_index ON my_schema.my_table（v）ASYNC
+
+必须通过HBase命令行单独启动填充索引表的map reduce作业，如下所示：
+```shell
+$ {HBASE_HOME} / bin / hbase org.apache.phoenix.mapreduce.index.IndexTool
+  --schema MY_SCHEMA --data-table MY_TABLE --index-table ASYNC_IDX
+  - 输出路径ASYNC_IDX_HFILES
+```
+
+只有mapreduce作业完成后，索引才会被激活并开始在查询中使用。这项工作对于退出的客户端是有弹性的。输出路径选项用于指定用于写入HFile的HDFS目录。
+
+##### 索引用法
+
+Phoenix会在查询的时候自动选择高效的索引。但是，除非查询中引用的所有列都包含在索引中，否则不会使用全局索引。
+
+例如，以下查询不会使用索引，因为在查询中引用了v2，但未包含在索引中：
+```sql
+SELECT v2 FROM my_table WHERE v1 ='foo'
+```
+在这种情况下，有三种获取索引的方法：
+
+1. 通过在索引中包含v2来创建一个覆盖索引：
+```sql
+ CREATE INDEX my_index ON my_table（v1）INCLUDE（v2）
+```
+这将导致v2列值被复制到索引中，并随着更改而保持同步。这显然会增加索引的大小。
+
+2. 提示查询强制它使用索引：
+```sql
+ SELECT / * + INDEX（my_table my_index）* / v2 FROM my_table WHERE v1 ='foo'
+```
+这将导致在遍历索引时找到每个数据行以找到缺少的v2列值。这个提示只有在你知道索引有很好的选择性的时候才可以使用（例如，在这个例子中有少数量行的值是'foo'），否则你可以通过默认的行为来获得更好的性能全表扫描。
+
+3. 创建一个本地索引：
+```sql
+CREATE LOCAL INDEX my_index ON my_table（v1）
+```
+与全局索引不同，即使查询中引用的所有列都不包含在索引中，本地索引也将使用索引。这是默认为本地索引完成的，因为我们知道在同一个区域服务器上的表和索引数据coreside确保查找是本地的。
+
+##### 索引删除
+
+要删除索引，使用以下语句：
+```sql
+DROP INDEX my_index ON my_table
+```
+如果索引列在数据表上被删除，索引会被自动删除。另外，如果一个覆盖的列在数据表中被删除，它也会被从索引表中本删除。
+
+##### 索引属性
+
+就像使用CREATE TABLE语句一样，CREATE INDEX语句可以通过属性应用到底层的HBase表，包括对其进行限制的能力：
+
+CREATE INDEX my_index ON my_table（v2 DESC，v1）INCLUDE（v3）
+
+    SALT_BUCKETS = 10，DATA_BLOCK_ENCODING ='NONE'
+
+请注意，如果主表是salted，则对于全局索引，索引将以相同的方式自动被salted。另外，相对于主索引表与索引表的大小，索引的MAX_FILESIZE向下调整。另一方面，使用本地索引时，不允许指定SALT_BUCKETS。
+
+##### 一致性保证
+
+在提交后成功返回给客户端，所有数据保证写入所有感兴趣的索引和主表。换句话说，索引更新与HBase提供的相同强一致性保证是同步的。
+
+然而，由于索引存储在与数据表不同的表中，取决于表的属性和索引类型，当服务器崩溃时提交失败时，表和索引之间的一致性会有所不同。这是一个由您的需求和用例驱动的重要设计考虑。
+
+1. 事务表
+
+通过将您的表声明为事务性的，您可以实现表和索引之间最高级别的一致性保证。在这种情况下，您的表突变和相关索引更新的提交是具有强ACID保证的原子。如果提交失败，那么您的数据（表或索引）都不会更新，从而确保您的表和索引始终保持同步。
+
+为什么不总是把你的表声明为事务性的？这可能很好，特别是如果你的表被声明为不可变的，因为在这种情况下事务开销非常小。但是，如果您的数据是可变的，请确保与事务性表发生冲突检测相关的开销和运行事务管理器的运行开销是可以接受的。此外，具有二级索引的事务表可能会降低写入数据表的可用性，因为数据表及其辅助索引表必须可用，否则写入将失败。
+
+2. 不变的表
+
+对于其中数据只写入一次而从不更新的表格，可以进行某些优化以减少增量维护的写入时间开销。这是常见的时间序列数据，如日志或事件数据，一旦写入行，它将永远不会被更新。要利用这些优化，通过将IMMUTABLE_ROWS = true属性添加到您的DDL语句中，将您的表声明为不可变：
+
+CREATE TABLE my_table（k VARCHAR PRIMARY KEY，v VARCHAR）IMMUTABLE_ROWS = true
+
+用IMMUTABLE_ROWS = true声明的表上的所有索引都被认为是不可变的（请注意，默认情况下，表被认为是可变的）。对于全局不可变索引，索引完全在客户端维护，索引表是在数据表发生更改时生成的。另一方面，本地不可变索引在服务器端保持不变。请注意，没有任何保护措施可以强制执行，声明为不可变的表格实际上不会改变数据（因为这会否定所达到的性能增益）。如果发生这种情况，指数将不再与表格同步。
+
+如果您有一个现有的表，您想从不可变索引切换到可变索引，请使用ALTER TABLE命令，如下所示：
+
+ALTER TABLE my_table SET IMMUTABLE_ROWS = false
+
+非事务性，不可变表的索引没有自动处理提交失败的机制。保持表和索引之间的一致性留给客户端处理。因为更新是幂等的，所以最简单的解决方案是客户端继续重试一批修改，直到它们成功。
+
+3. 可变表
+
+对于非事务性可变表，我们通过将索引更新添加到主表行的预写日志（WAL）条目来维护索引更新持久性。只有在WAL条目成功同步到磁盘后，我们才会尝试更新索引/主表。phoenix默认并行编写索引更新，从而导致非常高的吞吐量。如果服务器在我们写索引更新的时候崩溃了，我们会重做所有索引更新到WAL恢复过程中的索引表，并依赖更新的幂等性来确保正确性。因此，非事务性可变表上的索引只是主表的一批编辑。
+
+重要注意几点：
+
+对于非事务性表，可能看到索引表与主表不同步。
+如上所述，由于我们只是有一小部分落后并且仅仅一小段时间不同步所以这是ok的。
+每个数据行及其索引行保证被写入或丢失 - 从来没有看到部分更新，因为这是HBase原子性保证的一部分。
+首先将数据写入表中，然后写入索引表（如果禁用WAL，则相反）。
+
+3.1 单个写入路径
+
+有一个保证失败属性的写入路径。所有写入HRegion的内容都被我们的协处理器拦截。然后，我们根据挂起更新（或更新，如果是批处理）构建索引更新。然后这些更新被附加到原始更新的WAL条目。
+
+在此之前如果有任何失败，将会返回失败给客户端，并且没有数据会被持久化，客户端也看不到任何数据。
+
+一旦WAL被写入，我们确保即使在失败的情况下，索引和主表数据也将变得可见。
+
+如果服务崩溃，phoenix会使用WAL重复机制去重新构建索引更新。
+如果服务器没有崩溃，我们只是将索引更新插入到它们各自的表中。
+如果索引更新失败，下面概述了保持一致性的各种方法。
+如果Phoenix系统目录表在发生故障时无法到达，phoenix强制服务器立即中止并失败，在JVM上调用System.exit，强制服务器死机。通过杀死服务器，我们确保WAL将在恢复时重新使用，将索引更新重新生成到相应的表中。这确保了二级索引在知道无效状态时不会继续使用。
+
+3.2 禁止表写入，直到可变的索引是一致的
+
+在非事务性表和索引之间保持一致性的最高级别是声明在更新索引失败的情况下应暂时禁止写入数据表。在此一致性模式下，表和索引将保留在发生故障之前的时间戳，写入数据表将被禁止，直到索引重新联机并与数据表同步。该索引将保持活动状态，并像往常一样继续使用查询。
+
+以下服务器端配置控制此行为：
+
+phoenix.index.failure.block.write必须为true，以便在发生提交失败时写入数据表失败，直到索引可以追上数据表。
+phoenix.index.failure.handling.rebuild必须为true（缺省值），以便在发生提交失败的情况下在后台重建可变索引。
+
+3.3 写入失败时禁用可变索引，直到一致性恢复
+
+在写入的时候提交失败，可变索引的默认行为是将index标记为禁止，并且在后台部分构建它们，然后当写入一致性被重新保证的时候将索引标记为可用状态。在这种一致性模式下，在重建二级索引时，写入数据表不会被阻塞。但是，在重建过程中，二级索引不会被查询使用。
+
+以下服务器端配置控制此行为：
+
+phoenix.index.failure.handling.rebuild必须为true（缺省值），以便在发生提交失败的情况下在后台重建可变索引。
+phoenix.index.failure.handling.rebuild.interval控制服务器检查是否需要部分重建可变索引以赶上数据表更新的毫秒频率。默认值是10000或10秒。
+phoenix.index.failure.handling.rebuild.overlap.time控制执行部分重建时从发生故障的时间戳开始返回的毫秒数。默认值是1。
+
+3.4 写入失败时禁用可变索引，手动重建
+
+这是可变二级索引的最低一致性水平。在这种情况下，当写入二级索引失败时，索引将被标记为禁用，并且手动重建所需的索引以使其再次被查询使用。
+
+以下服务器端配置控制此行为：
+
+如果提交失败，phoenix.index.failure.handling.rebuild必须设置为false，以禁止在后台重建可变索引。
+
+**配置**
+
+非事务，可变索引需要在regionserver和master上运行特殊的配置=phoenix保证在你使能可变索引的时候这些配置正确设置。如果未设置正确的属性，则将无法使用二级索引。将这些设置添加到您的hbase-site.xml后，您需要执行集群的滚动重新启动。
+
+您将需要将以下参数添加到每个regionserver上的hbase-site.xml：
+
+```xml
+<property>
+  <name>hbase.regionserver.wal.codec</name>
+  <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
+</property>
+<!--上面的配置使能自定义WAL预写日志被写入，确保index的更新正确的写入或者重建。-->
+
+<property>
+  <name>hbase.region.server.rpc.scheduler.factory.class</name>
+  <value>org.apache.hadoop.hbase.ipc.PhoenixRpcSchedulerFactory</value>
+  <description>Factory to create the Phoenix RPC Scheduler that uses separate queues for index and metadata updates</description>
+</property>
+<property>
+  <name>hbase.rpc.controllerfactory.class</name>
+  <value>org.apache.hadoop.hbase.ipc.controller.ServerRpcControllerFactory</value>
+  <description>Factory to create the Phoenix RPC Scheduler that uses separate queues for index and metadata updates</description>
+</property>
+```
+通过确保索引更新的优先级高于数据更新，上述属性可防止在全局索引（HBase 0.98.4+和Phoenix 4.3.1+）的索引维护过程中发生死锁。它还通过确保元数据rpc调用比数据rpc调用具有更高的优先级来防止死锁。
+
+从Phoenix 4.8.0开始，不需要更改配置就可以使用本地索引。在Phoenix 4.7及更低版本中，主服务器节点和区域服务器节点上的服务器端hbase-site.xml需要进行以下配置更改：
+```xml
+<property>
+  <name>hbase.master.loadbalancer.class</name>
+  <value>org.apache.phoenix.hbase.index.balancer.IndexLoadBalancer</value>
+</property>
+<property>
+  <name>hbase.coprocessor.master.classes</name>
+  <value>org.apache.phoenix.hbase.index.master.IndexMasterObserver</value>
+</property>
+<property>
+  <name>hbase.coprocessor.regionserver.classes</name>
+  <value>org.apache.hadoop.hbase.regionserver.LocalIndexMerger</value>
+</property>
+```
+升级4.8.0之前创建的本地索引
+
+在服务器上将Phoenix升级到4.8.0以上版本时，如果存在，请从hbase-site.xml中除去以上三个与本地索引相关的配置。从客户端，我们支持在线（在初始化来自4.8.0+版本的phoenix客户端的连接时）和离线（使用psql工具）在4.8.0之前创建的本地索引的升级。作为升级的一部分，我们在ASYNC模式下重新创建本地索引。升级后用户需要使用IndexTool建立索引。
+
+在升级之后使用客户端配置。
+
+phoenix.client.localIndexUpgrade
+它的值是true，意味着在线升级，false意味着离线升级。
+默认值：true
+命令使用psql工具$ psql [zookeeper] -l运行离线升级
+
+##### 索引调优
+
+索引是相当快的。不过，为了优化您的特定环境和工作负载，您可以调整几个属性。以下所有参数必须在hbase-site.xml中设置- 对于整个集群和所有索引表，以及在同一台服务器上的所有区域上都是如此（例如，一台服务器也不会一次写入许多不同的索引表）。
+
+1. index.builder.threads.max
+
+用于从主表更新构建索引更新的线程数
+
+增加此值克服了从底层HRegion读取当前行状态的瓶颈。调整这个值太高，只会导致HRegion瓶颈，因为它将无法处理太多的并发扫描请求，以及引入线程切换的问题。
+
+默认：10
+
+2. index.builder.threads.keepalivetime
+
+在构建器线程池中的线程过期后的的时间（以秒为单位）。
+
+在这段时间之后，未使用的线程立即被释放，而不是保留核心线程（尽管这是最后一个小问题，因为表预计将保持相当恒定的写负载），但同时允许我们在没有看到预期负载的情况下删除线程。
+
+默认：60
+
+3. index.writer.threads.max
+
+写入目标索引表时使用的线程数。
+
+并行化的第一级，基于每个表 - 它应该大致对应于索引表的数量
+
+默认：10
+
+4. index.writer.threads.keepalivetime
+
+写入程序线程池中线程过期后的时间（以秒为单位）。
+
+无用的线程会在这段时间后立即释放，而不会保留核心线程（尽管这最后一个小问题是因为表预计会承受相当恒定的写入负载），但同时允许我们在没有看到预期负载的情况下删除线程。
+
+默认：60
+
+5. hbase.htable.threads.max
+
+HTable可用于写入的每个索引的线程数。
+
+增加这个允许更多的并发索引更新（例如跨批次），从而使得整体吞吐量较高。
+
+默认：2,147,483,647
+
+6. hbase.htable.threads.keepalivetime
+
+在HTable的线程池中使线程过期之后的时间（以秒为单位）。
+
+使用“直接切换”方法，只有必要时才会创建新线程，并且将会无限增长。这可能是坏的，但HTables只能创建与区域服务器一样多的Runnables。因此，在添加新的regionserver时也会进行缩放。
+
+默认：60
+
+7. index.tablefactory.cache.size
+
+我们应该保留在缓存中的索引HTable的数量。
+
+增加这个数字可以确保我们不需要为每次尝试写入索引表而重新创建一个HTable。相反，如果此值设置得太高，则可能会看到内存压力。
+
+默认：10
+
+8. org.apache.phoenix.regionserver.index.priority.min
+
+指定索引优先级的范围的最小（包含）值。
+
+默认值：1000
+
+9. org.apache.phoenix.regionserver.index.priority.max
+
+用于指定索引优先级可能位于的范围的最大（不包括）值。
+
+索引最小/最大范围内的更高优先级不意味着更新被更早地处理。
+
+默认：1050
+
+10. org.apache.phoenix.regionserver.index.handler.count
+
+为全局索引维护提供索引写请求时要使用的线程数。
+
+尽管线程的实际数量是由Max（调用队列数，处理器数）决定的，其中调用队列数由标准HBase配置决定。为了进一步调整队列，你可以调整标准的rpc队列长度参数（目前，没有特别的索引队列的旋钮），具体是ipc.server.max.callqueue.length和ipc.server.callqueue.handler.factor。有关更多详细信息，请参阅HBase参考指南。
+
+默认：30
+
+##### 索引审查工具
+
+使用Phoenix 4.12，现在有一个工具可以运行MapReduce作业来验证索引表是否对数据表有效。在表中查找孤行的唯一方法是扫描表中的所有行，并在另一个表中查找相应的行。因此，该工具可以使用数据表或索引表作为“源”表，而另一个作为“目标”表运行。该工具将所有无效行写入文件或输出表PHOENIX_INDEX_SCRUTINY。无效行是在目标表中没有相应行或在目标表中具有不正确值的源行（即覆盖的列值）。无效行是在目标表中没有相应行或在目标表中具有不正确值的源行（即覆盖的列值）。
+
+该工具具有跟踪其状态的工作计数器。VALID_ROW_COUNT，INVALID_ROW_COUNT，BAD_COVERED_COL_VAL_COUNT。请注意，无效的行 - 坏的行数=孤行的数量。这些计数器连同其他作业元数据一起被写入表PHOENIX_INDEX_SCRUTINY_METADATA。这些计数器连同其他作业元数据一起被写入表PHOENIX_INDEX_SCRUTINY_METADATA。
+
+索引审查工具可以通过hbase命令（以hbase / bin）启动，如下所示：
+```shell
+hbase org.apache.phoenix.mapreduce.index.IndexScrutinyTool -dt my_table -it my_index -o
+```
+也可以使用phoenix-core或phoenix-server jar从Hadoop运行，如下所示：
+```shell
+HADOOP_CLASSPATH = $（hbase mapredcp）hadoop jar phoenix- <version> -server.jar org.apache.phoenix.mapreduce.index.IndexScrutinyTool -dt my_table -it my_index -o
+```
+默认情况下，启动两个mapreduce作业，一个以数据表作为源表，另一个以索引表作为源表。
+
+索引检查工具可以使用以下参数：
+
+| 参数              | 描述                                                         |
+| ----------------- | ------------------------------------------------------------ |
+| -dt,–data-table   | 数据表名(必填)                                               |
+| -it,–index-table  | 索引表名称(必填                                              |
+| -s,–schem         | Phoenix表schema名(可选                                       |
+| -src,–sourc       | DATA_TABLE_SOURCE，INDEX_TABLE_SOURCE或BOTH。默认为BOT       |
+| -o,–outpu         | 是否输出无效的行。默认关                                     |
+| -of,–output-forma | TABLE或FILE输出格式。默认为TABL                              |
+| -om,–output-ma    | 每个mapper输出的最大无效行数。默认为1                        |
+| -op,–output-pat   | 对于FILE输出格式，写入文件的HDFS目                           |
+| -t,–tim           | 以millis为单位的时间戳进行审查。这一点很重要，这样一来正在写入的数据不会被审查了。默认为当前时间减去60 |
+| -b,–batch-siz     | 一次比较的行数                                               |
+
+**限制**
+
+如果在执行审查时正在更新或删除行，则该工具可能会给出不一致的误报（PHOENIX-4277）。
+
+审查工具（PHOENIX-4270）不支持快照读取。
+
+#### 性能
+
+Phoenix性能测试结果：https://phoenix-bin.github.io/client/performance/latest.htm。
+
+这是基于默认值的一般性能测试 - 结果将根据硬件规格和个人配置而变化。
+
+
+#### 最佳实践
+
+##### 二级索引使用指南
+
+1. 是否需要使用覆盖索引？
+
+覆盖索引需要将查询返回字段加入到索引表中，这样在命中索引时，只需要查询一次索引表即可，非覆盖索引，要想拿到完整结果则需要回查主表。不难理解，覆盖索引查询性能更好，但是会浪费一定存储空间，影响一定写性能。非覆盖索引使用时，有时执行计划并不能默认命中索引，此时需要加索引Hint。
+
+2. 应该使用local Index还是global Index？
+
+实现上，一个global index表对应着一个hbase 表，local index是在主表上新增一列存储索引数据。适用场景上，global index 适用于多读的场景，但存在同步索引时带来网络开销较大的问题。而local由于和原数据存储在一张表中同步索引数据会相对快一点。虽然local index也有一定适用场景，但仍然推荐使用global index，其原因有以下几点：
+
+- 当前版本的phoneix的local index的实现相对global index不太完善，问题较多，使用存在一定的风险。
+- local index不太完善，大的改动后，可能会存在不兼容，升级流程比较复杂。
+- 在大数据量下，原始数据和索引数据放在一起会加剧region分裂，且分裂后索引数据的本地性也会丧失。
+
+3. 索引表最多可以创建多少个？
+
+索引会保证实时同步，也会引来写放大问题，一般建议不超过10个，如果超过建议使用HBase全文索引功能。
+
+4. 构建索引需要注意哪些事项？
+
+使用创建索引语句（CREATE INDEX）时，如果指定async参数，则为异步构建，语句完成时，会在SYSTEM.CATALOG表中建立索引表的元信息，并建立跟主表的关系，但是状态是building，索引表中没有数据，也不可查，需要后续用REBUILD语句。
+
+##### 加盐
+加盐通常用来解决数据热点和范围查询同时存在的场景。
+
+加盐有较强的适用场景要求，场景不合适将会达不到预期期望：
+
+- 写热点或写不均衡：比如以时间作为第一列主键，永远写表头或者表尾。
+- 需要范围查询：要按第一列主键进行范围查询，不能使用hash打散。
+
+有热点就要打散，但打散就难以做范围查询。因此，要同时满足这对相互矛盾的需求，必须有一种折中的方案：既能在一定程度上打散数据，又能保证有序。这个解决方案就是加盐，亦称分桶（salt buckets）。数据在桶内保序，桶之间随机。写入时按桶个数取模，数据随机落在某个桶里，保证写请求在桶之间是均衡的。查询时读取所有的桶来保证结果集的有序和完备。
+
+一般来说，严格满足上述条件的业务场景并不常见。大多数场景都可以找到其他的业务字段来协助散列。考虑到其严重的副作用，不建议使用这个特性。
+
+副作用：
+
+- 写瓶颈：一般全表只有buckets个region用于承担写。当业务体量不断增长时，因为无法调整bucket数量，不能有更多的region帮助分担写，会导致写入吞吐无法随集群扩容而线性增加。导致写瓶颈，从而限制业务发展。
+- 读扩散：select会按buckets数量进行拆分和并发，每个并发都会在执行时占用一个线程。select本身一旦并发过多会导致线程池迅速耗尽或导致QueryServer因过高的并发而FGC。同时，本应一个RPC完成的简单查询，现在也会拆分成多个，使得查询RT大大增加。
+
+以上副作用会制约业务的发展，尤其对于大体量的、发展快速的业务。因为桶个数不能修改，写瓶颈会影响业务的扩张。读扩散带来的RT增加也大大降低了资源使用效率。
+
+##### 常见的使用误区
+
+1. 预分区：用分桶来实现建表的预分区最常见的误用。这是因为Phoenix提供的split on预分区语法很难使用。目前可用hbase shell的建表，指定预分区，之后关联为Phoenix表。在海量数据场景，合理的预分区是一个很有挑战的事情。
+2. 伪热点：写入热点或不均衡大多数情况都是假象，通常还有其他字段可用于打散数据。比如监控数据场景，以metric名字的hash值做首列主键可有效解决写入均衡的问题。
+
+一定不要为了预分区而使用加盐特性，要结合业务的读写模式来进行表设计。
+
+3. Buckets个数跟机型配置和数据量有关系，可以参考下列方式计算，其中N为 Core/RS 节点数量：
+单节点内存 8G: 2\*N
+单节点内存 16G: 3\*N
+单节点内存 32G: 4\*N
+单节点内存 64G: 5\*N
+单节点内存 128G: 6\*N
+
+说明 索引表默认会继承主表的盐值；bucket的数目不能超过256；一个空的Region在内存中的数据结构大概2MB，用户可以评估下单个RegionServer承载的总Region数目，有用户发生过在低配置节点上，建大量加盐表直接把集群内存耗光的问题。
+
+4. 慎用扫全表、OR、Join和子查询
+
+虽然Phoenix支持各种Join操作，但是Phoenix主要还是定位为在线数据库，复杂Join，比如子查询返回数据量特别大或者大表Join大表，在实际计算过程中十分消耗系统资源，会严重影响在线业务，甚至导致OutOfMemory异常。对在线稳定性和实时性要求高的用户，建议只使用Phoenix的简单查询，且查询都命中主表或者索引表的主键。另外，建议在运行SQL前都执行下explain，确认是否命中索引，或者主键。
+
+5. Phoenix不支持复杂查询
+
+Phoenix的二级索引本质还是前缀匹配，用户可以建多个二级索引来增加对数据的查询模式，二级索引的一致性是通过协处理器实现的，索引数据可以实时可见，但也会影响写性能，特别是建多个索引的情况下。对于复杂查询，比如任意条件的and/or组合，模糊查找，分词检索等Phoenix不支持。
+
+6. Phoenix不支持复杂分析
+
+Phoenix定位为操作型分析（operational analytics），对于复杂分析，比如前面提到的复杂join则不适合，这种建议用Spark这种专门的大数据计算引擎来实现。
+
+7. Phoenix是否支持映射已经存在的HBase表？
+
+支持。可以通过Phoenix创建视图或者表映射已经存在的HBase表，如果使用表的方式映射HBase表，在Phoenix中执行DROP TABLE语句同样也会删除HBase表。另外，由于column family和列名是大小写敏感的，必须一一对应才能映射成功。Phoenix的字段编码方式大部分跟HBase的Bytes工具类不同，一般建议如果只有varchar类型，才进行映射，包含其他类型字段时不要使用映射。
+
 ### MapReduce
 
 Hbase 只是一个单纯的数据存储框架，没有任何的分析能力。我们可以让 Hbase 和 MapReduce 结合起来，就扩展出来了数据分析功能。
@@ -716,5 +1780,6 @@ Hive诞生于FaceBook，它最初就是为方便FaceBook的数据分析人员而
 2. 往 Hive 中的表插入数据，数据会同步更新到 HBase 对应的表中。
 3. HBase 对应的列簇值变更，也会在 Hive 中对应的表中变更。
 
-Hive 和 HBase 通信主要是依靠 $HIVE_HOME/lib 目录下的hive-hbase-handler-1.2.2.jar 来实现.
+Hive 和 HBase 通信主要是依靠 $HIVE_HOME/lib 目录下的hive-hbase-handler-x.x.x.jar 来实现.
+
 

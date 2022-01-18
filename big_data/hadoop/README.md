@@ -7,10 +7,6 @@ Hadoop 是一个由 Apache 基金会所开发的分布式系统基础架构，�
 广义上讲，Hadoop 通常是指一个更广泛的概念--Hadoop 生态圈。
 
 
-##### MapReduce 跑的慢的原因
-MapReduce 优化方法主要从六个方面考虑：数据输入、Map 阶段、Reduce 阶段、IO 传输、数据倾斜问题和常用的调优参数。
-
-
 ### 概述
 
 单一节点的服务器计算能力已经达到瓶颈。
@@ -73,7 +69,9 @@ Amr Awadallah从中看到了商机，并于2008年最终与几个志同道合的
 
 转眼到了2011年，作为Hadoop的发祥地，雅虎公司将整个Hadoop团队全体的拆分出去，正式成立一家名字叫做Hortonworks的公司。
 
-2013年，Mike Olson信心十足的写下了《The Cloudera Model》，表示Cloudera已经找到了Hadoop上成功的商业模式。那时的Cloudera，可以说是大数据领域最耀眼的星。2014年，Cloudera正式进入中国。
+2013年，Mike Olson信心十足的写下了《The Cloudera Model》，表示Cloudera已经找到了Hadoop上成功的商业模式。那时的Cloudera，可以说是大数据领域最耀眼的星。
+
+2014年，Cloudera正式进入中国。
 
 2014年Hortonworks上市，是企业级全球数据管理平台，同时也是服务和解决方案的领先供应商，为100强企业中的一多半提供“任何类型数据”的可操作信息，已经成为世界第二大数据服务商。
 
@@ -84,6 +82,7 @@ Amr Awadallah从中看到了商机，并于2008年最终与几个志同道合的
 2018年，在怒斥云厂商为吸血鬼而收效甚微之后，Redis和Mongo两家公司直接修改了开源协议，不再允许云厂商提供托管服务。
 
 2018年，同为开源平台的Cloudera与Hortonworks公司宣布以52亿美元的价格合并。
+
 2018年10月Cloudera合并Hortonworks，表示新的公司将成为行业领导者，为客户提供更好的平台，创建世界首个企业数据云，并将在云计算、物联网和容器技术等领域继续发力。这对Hadoop的发展方向是一个打击，但也意味着Hadoop的标准将更加统一，将有更多资金投入新技术的研究。
 
 Cloudera 2019 年宣布，从2019年11月开始，所有新版本，包括当前软件的更新和维护版本，现有客户均需有效产品订阅才能访问获取。从2021年1月31日开始，所有Cloudera软件都需要有效的订阅进行访问。这包括以下产品的所有先前版本：包含Apache Hadoop的 Cloudera 发行版 (CDH)，Hortonworks Data Platform (HDP)，Data Flow (HDF / CDF) 和Cloudera Data Science Workbench (CDSW) 。
@@ -356,8 +355,7 @@ Hadoop 运行模式包括：本地模式、伪分布式模式以及完全分布�
 
 本地运行模式不需要额外的设置，只需要执行相应的jar包就可以了。不需要任何的集群配置，本地运行模式其实也是一种单节点模式。
 
-伪分布模式可以把MapReduce程序直接运行在HDFS上，
-也可以选择运行在Yarn上。
+伪分布模式可以把MapReduce程序直接运行在HDFS上，也可以选择运行在Yarn上。
 
 #### 配置文件说明
 Hadoop 配置文件分两类：默认配置文件和自定义配置文件，只有用户想修改某一默认
@@ -373,7 +371,7 @@ Hadoop 配置文件分两类：默认配置文件和自定义配置文件，只�
 core-site.xml、hdfs-site.xml、yarn-site.xml、mapred-site.xml四个配置文件存放在$HADOOP_HOME/etc/hadoop这个路径上，可以根据项目需求重新进行修改配置。<br>
 
 #### 本地运行模式-官方 Grep 案例
-```bash
+```shell
 # 在hadoop-2.7.2文件下面创建一个input文件夹
 cd $HADOOP_HOME
 mkdir input
@@ -387,25 +385,25 @@ cat output/*
 ```
 
 #### 本地运行模式-官方 WordCount 案例
-```
-在hadoop-2.7.2文件下面创建一个wcinput文件夹
+```shell
+# 在hadoop-2.7.2文件下面创建一个wcinput文件夹
 cd $HADOOP_HOME
 mkdir wcinput
-在wcinput文件下创建一个wc.input文件
+# 在wcinput文件下创建一个wc.input文件
 cd wcinput
 touch wc.input
-编辑wc.input文件
+# 编辑wc.input文件
 vi wc.input
-在文件中输入如下内容
-hadoop yarn
-hadoop mapreduce
-atguigu
-atguigu
-保存退出：：wq
-回到Hadoop目录，执行share目录下的MapReduce程序
+# 在文件中输入如下内容
+# hadoop yarn
+# hadoop mapreduce
+# atguigu
+# atguigu
+# 保存退出：：wq
+# 回到Hadoop目录，执行share目录下的MapReduce程序
 bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar
 wordcount wcinput wcoutput
-查看输出结果
+# 查看输出结果
 cat wcoutput/part-r-00000
 ```
 
@@ -448,20 +446,20 @@ http://hadoop101:50070/dfshealth.html#tab-overview
 注意：格式化NameNode，会产生新的集群id,导致NameNode和DataNode的集群id不一致，集群找不到已往数据。所以，格式NameNode时，一定要先删除data数据和log日志，然后再格式化NameNode。
 （4）操作集群
 （a）在HDFS文件系统上创建一个input文件夹
-bin/hdfs dfs -mkdir -p /user/input
+bin/hdfs dfs -mkdir -p /user/hadoop/input
 （b）将测试文件内容上传到文件系统上
-bin/hdfs dfs -put wcinput/wc.input /user/input/
+bin/hdfs dfs -put wcinput/wc.input /user/hadoop/input/
 （c）查看上传的文件是否正确
-bin/hdfs dfs -ls /user/input/
-bin/hdfs dfs -cat /user/input/wc.input
+bin/hdfs dfs -ls /user/hadoop/input/
+bin/hdfs dfs -cat /user/hadoop/input/wc.input
 （d）运行MapReduce程序
-bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/input/ /user/output
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/hadoop/input/ /user/hadoop/output
 （e）查看输出结果
-bin/hdfs dfs -cat /user/output/*
+bin/hdfs dfs -cat /user/hadoop/output/*
 （f）将测试文件内容下载到本地
-hdfs dfs -get /user/output/part-r-00000./wcoutput/
+hdfs dfs -get /user/hadoop/output/part-r-00000./wcoutput/
 （g）删除输出结果
-hdfs dfs -rm -r /user/output
+hdfs dfs -rm -r /user/hadoop/output
 ```
 
 #### 伪分布式运行模式-启动 YARN 并运行 MapReduce 程序
@@ -498,11 +496,11 @@ sbin/yarn-daemon.sh start nodemanager
 （3）集群操作
 （a）YARN的浏览器页面查看http://hadoop101:8088/cluster
 （b）删除文件系统上的output文件
-bin/hdfs dfs -rm -R /user/output
+bin/hdfs dfs -rm -R /user/hadoop/output
 （c）执行MapReduce程序
-bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/input /user/output
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/hadoop/input /user/hadoop/output
 （d）查看运行结果
-bin/hdfs dfs -cat /user/output/*
+bin/hdfs dfs -cat /user/hadoop/output/*
 ```
 
 #### 伪分布式运行模式-配置历史服务器
@@ -627,7 +625,6 @@ mvn package -Pdist,native -DskipTests -Dtar
 ```
 
 ### Hadoop 原理
-#### Hadoop 架构
 Hadoop 主要有两个层次，即：
 
 - 加工/计算层(MapReduce)
@@ -661,6 +658,169 @@ Hadoop 运行整个计算机集群代码。这个过程包括以下核心任务�
 - 发送排序的数据到某一计算机。
 - 为每个作业编写的调试日志。
 
+#### Hadoop 1.x
+
+- 客户端（Client）：编写mapreduce程序，配置作业，提交作业，这就是程序员完成的工作；
+- JobTracker：JobTracker是一个后台服务进程，启动之后，会一直监听并接收来自各个TaskTracker发送的心跳信息，包括资源使用情况和任务运行情况等信息。
+    + 作业控制：在hadoop中每个应用程序被表示成一个作业，每个作业又被分成多个任务，JobTracker的作业控制模块则负责作业的分解和状态监控。
+    + 状态监控：主要包括TaskTracker状态监控、作业状态监控和任务状态监控。主要作用：容错和为任务调度提供决策依据。
+    + JobTracker只有一个，他负责了任务的信息采集整理，你就把它当做包工头把，这个和采用Master/Slave结构中的Master保持一致
+    + JobTracker 对应于 NameNode
+    + 一般情况应该把JobTracker部署在单独的机器上
+- TaskTracker：TaskTracker是JobTracker和Task之间的桥梁。TaskTracker与JobTracker和Task之间采用了RPC协议进行通信。
+    + 从JobTracker接收并执行各种命令：运行任务、提交任务、杀死任务等
+    + 将本地节点上各个任务的状态通过心跳周期性汇报给JobTracker，节点健康情况、资源使用情况，任务执行进度、任务运行状态等，比如说map task我做完啦，你什么时候让reduce task过来拉数据啊
+    + TaskTracker是运行在多个节点上的slaver服务。TaskTracker主动与JobTracker通信，接收作业，并负责直接执行每一个任务。
+    + TaskTracker都需要运行在HDFS的DataNode上
+- HDFS：保存作业的数据、配置信息等等，最后的结果也是保存在hdfs上面
+    + NameNode： 管理文件目录结构，接受用户的操作请求，管理数据节点(DataNode)
+    + DataNode：是HDFS中真正存储数据的
+    + Block：是hdfs读写数据的基本单位，默认64MB大小，就是说如果你有130MB数据，那就要分成三个block，两个存放64MB，最后一个存放2MB数据，虽然最后一个block块是64MB，但实际上占用空间为2MB
+    + Sencondary NameNode：它的目的是帮助 NameNode 合并编辑日志，减少 NameNode 启动时间，在文件系统中设置一个检查点来帮助NameNode更好的工作。它不是要取代掉NameNode也不是NameNode的备份。
+
+##### 流程
+
+1. 在客户端启动一个作业。拿个比方说，提交了一个hive程序
+    1. 客户端（Client）：编写mapreduce程序，配置作业，提交作业，这就是程序员完成的工作；
+2. 向JobTracker请求一个Job ID，就像你排队买车一样，你不得摇个号啊，没有这个号你就不能买车(执行任务)。
+    1. JobTracker：JobTracker是一个后台服务进程，启动之后，会一直监听并接收来自各个TaskTracker发送的心跳信息，包括资源使用情况和任务运行情况等信息。
+        1. 作业控制：在hadoop中每个应用程序被表示成一个作业，每个作业又被分成多个任务，JobTracker的作业控制模块则负责作业的分解和状态监控。
+        2. 状态监控：主要包括TaskTracker状态监控、作业状态监控和任务状态监控。主要作用：容错和为任务调度提供决策依据。
+        3. JobTracker只有一个，他负责了任务的信息采集整理，你就把它当做包工头把，这个和采用Master/Slave结构中的Master保持一致
+        4. JobTracker 对应于 NameNode
+        5. 一般情况应该把JobTracker部署在单独的机器上
+3. 将运行作业所需要的资源文件复制到HDFS上，包括MapReduce程序打包的JAR文件、配置文件和客户端计算所得的输入划分信息。这些文件都存放在JobTracker专门为该作业创建的文件夹中。文件夹名为该作业的Job ID。JAR文件默认会有10个副本（mapred.submit.replication属性控制）；输入划分信息(Split)告诉了JobTracker应该为这个作业启动多少个map任务等信息。
+    1. HDFS：保存作业的数据、配置信息等等，最后的结果也是保存在hdfs上面
+        1. NameNode： 管理文件目录结构，接受用户的操作请求,管理数据节点(DataNode)
+        2. DataNode：是HDFS中真正存储数据的
+            1. Block：是hdfs读写数据的基本单位，默认64MB大小，就是说如果你有130MB数据，那就要分成三个block，两个存放64MB，最后一个存放2MB数据，虽然最后一个block块是64MB，但实际上占用空间为2MB
+        3. Sencondary NameNode：它的目的是帮助 NameNode 合并编辑日志，减少 NameNode 启动时间，在文件系统中设置一个检查点来帮助NameNode更好的工作。它不是要取代掉NameNode也不是NameNode的备份。可参考[Secondary NameNode:它究竟有什么作用？
+4. JobTracker接收到作业后，将其放在一个作业队列里(一般来说，公司部门都与自己的队列，默认的调度方法是FIFO，也就是first in first out-队列)，等待作业调度器对其进行调度，当作业调度器根据自己的调度算法调度到该作业时，会根据输入划分信息(Split)为每个划分创建一个map任务，并将map任务分配给TaskTracker执行。对于map和reduce任务，TaskTracker根据主机核的数量和内存的大小有固定数量的map槽和reduce槽。这里需要强调的是：map任务不是随随便便地分配给某个TaskTracker的，这里有个概念叫：数据本地化（Data-Local）。意思是：将map任务分配给含有该map处理的数据块的TaskTracker上，同时将程序JAR包复制到该TaskTracker上来运行，这叫“运算移动，数据不移动”。而分配reduce任务时并不考虑数据本地化。
+    1. TaskTracker：TaskTracker是JobTracker和Task之间的桥梁。TaskTracker与JobTracker和Task之间采用了RPC协议进行通信。
+        1. 从JobTracker接收并执行各种命令：运行任务、提交任务、杀死任务等
+        2. 将本地节点上各个任务的状态通过心跳周期性汇报给JobTracker，节点健康情况、资源使用情况，任务执行进度、任务运行状态等，比如说map task我做完啦，你什么时候让reduce task过来拉数据啊
+        3. TaskTracker是运行在多个节点上的slaver服务。TaskTracker主动与JobTracker通信，接收作业，并负责直接执行每一个任务。
+        4. TaskTracker都需要运行在HDFS的DataNode上
+5. TaskTracker每隔一段时间会给JobTracker发送一个心跳，告诉JobTracker它依然在运行，同时心跳中还携带着很多的信息，比如当前map任务完成的进度等信息。当JobTracker收到作业的最后一个任务完成信息时，便把该作业设置成“成功”。当JobClient查询状态时，它将得知任务已完成，便显示一条消息给用户。
+
+##### Hadoop 1.x 弊端
+
+1. 扩展性差：JobTracker同时兼备了资源管理和作业控制两个功能，这是整个系统的最大瓶颈，它严重制约了整个集群的扩展性。
+2. 可靠性差：JobTracker存在单点故障，JobTracker出现问题将导致整个集群不可用。
+3. 资源利用率低：资源无法在多个任务间共享或合理分配，导致无法有效利用各种资源。
+4. 无法支持多种计算框架：Hadoop 1.0只支持MapReduce这种离线批处理计算模式，而无法支持内存计算、流式计算、迭代式计算等。
+
+#### Hadoop 2.x
+Yarn作为了资源管理器，可以使不同的计算框架运行与同一个资源调度器下，而且也解决了1.x版本中JobTracker压力过大，无法扩展及NameNode单点故障等问题。
+
+- 通过YARN实现资源的调度与管理，从而使Hadoop 2.0可以运行更多种类的计算框架，如Spark等。
+- 实现了NameNode的HA方案，即同时有2个NameNode（一个Active另一个Standby），如果ActiveNameNode挂掉的话，另一个NameNode会转入Active状态提供服务，保证了整个集群的高可用。
+- 实现了HDFS federation，由于元数据放在NameNode的内存当中，内存限制了整个集群的规模，通过HDFS federation使多个NameNode组成一个联邦共同管理DataNode，这样就可以扩大集群规模。
+- Hadoop RPC序列化扩展性好，通过将数据类型模块从RPC中独立出来，成为一个独立的可插拔模块。
+
+##### YARN
+
+1. ResouceManager<br>
+    包含主要的组件：定时调用器(Scheduler)以及应用管理器(ApplicationManager)。
+    - 定时调度器(Scheduler)：从本质上来说，定时调度器就是一种策略，或者说一种算法。当 Client 提交一个任务的时候，它会根据所需要的资源以及当前集群的资源状况进行分配。注意，它只负责向应用程序分配资源，并不做监控以及应用程序的状态跟踪。
+    - 应用管理器(ApplicationManager)：同样，听名字就能大概知道它是干嘛的。应用管理器就是负责管理 Client 用户提交的应用。上面不是说到定时调度器（Scheduler）不对用户提交的程序监控嘛，其实啊，监控应用的工作正是由应用管理器（ApplicationManager）完成的。
+2. ApplicationMaster<br>
+    每当 Client 提交一个 Application 时候，就会新建一个 ApplicationMaster 。由这个 ApplicationMaster 去与 ResourceManager 申请容器资源，获得资源后会将要运行的程序发送到容器上启动，然后进行分布式计算。
+3. NodeManager<br>
+    NodeManager 是 ResourceManager 在每台机器的上代理，负责容器的管理，并监控他们的资源使用情况（cpu，内存，磁盘及网络等），以及向 ResourceManager/Scheduler 提供这些资源使用报告。
+
+##### Hadoop 序列化
+
+一般来说，“活的”对象只生存在内存里，关机断电就没有了。而且“活的”对象只能由本地的进程使用，不能被发送到网络上的另外一台计算机。 然而序列化可以存储“活的”对象，可以将“活的”对象发送到远程计算机。
+
+序列化就是把内存中的对象，转换成字节序列（或其他数据传输协议）以便于存储（持久化）和网络传输。反序列化就是将收到字节序列（或其他数据传输协议）或者是硬盘的持久化数据，转换成内存中的对象。
+
+Java的序列化是一个重量级序列化框架（Serializable），一个对象被序列化后，会附带很多额外的信息（各种校验信息，header，继承体系等），不便于在网络中高效传输。所以，hadoop自己开发了一套序列化机制（Writable），精简、高效。
+
+因为Hadoop在集群之间进行通讯或者RPC调用的时候，需要序列化，而且要求序列化要快，且体积要小，占用带宽要小。所以必须理解Hadoop的序列化机制。序列化和反序列化在分布式数据处理领域经常出现：进程通信和永久存储。然而Hadoop中各个节点的通信是通过远程调用（RPC）实现的，那么 RPC序列化要求具有以下特点：
+
+1. 紧凑：紧凑的格式能让我们能充分利用网络带宽，而带宽是数据中心最稀缺的资
+2. 快速：进程通信形成了分布式系统的骨架，所以需要尽量减少序列化和反序列化的性能开销，这是基本的；
+3. 可扩展：协议为了满足新的需求变化，所以控制客户端和服务器过程中，需要直接引进相应的协议，这些是新协议，原序列化方式能支持新的协议报文；
+4. 互操作：能支持不同语言写的客户端和服务端进行交互；
+
+**自定义bean对象实现序列化接口**
+
+1. 必须实现Writable接口
+2. 反序列化时，需要反射调用空参构造函数，所以必须有空参构造
+3. 重写序列化方法
+4. 重写反序列化方法
+5. 注意反序列化的顺序和序列化的顺序完全一致
+6. 要想把结果显示在文件中，需要重写toString()，且用”\t”分开，方便后续用
+7. 如果需要将自定义的bean放在key中传输，则还需要实现comparable接口，因为mapreduce框中的shuffle过程一定会对key进行排序
+
+```java
+// 1 必须实现Writable接口
+public class FlowBean implements Writable {
+private long upFlow;
+private long downFlow;
+private long sumFlow;
+//2 反序列化时，需要反射调用空参构造函数，所以必须有
+public FlowBean() {
+     super();
+   }
+/**
+* 3重写序列化方法
+* @param out
+* @throws IOException
+*/
+
+@Override
+public void write(DataOutput out) throws IOException {
+                 out.writeLong(upFlow);
+                 out.writeLong(downFlow);
+                 out.writeLong(sumFlow);
+}
+
+/**
+* 4 重写反序列化方法
+* 5 注意反序列化的顺序和序列化的顺序完全一致
+* @param in
+* @throws IOException
+*/
+@Override
+public void readFields(DataInput in) throws IOException {
+      upFlow = in.readLong();
+      downFlow = in.readLong();
+      sumFlow = in.readLong();
+}
+// 6要想把结果显示在文件中，需要重写toString()，且用”\t”分开，方便后续用
+@Override
+public String toString() {
+       return upFlow + "\t" + downFlow + "\t" + sumFlow;
+
+}
+//7 如果需要将自定义的bean放在key中传输，则还需要实现comparable接口，因为mapreduce框中的shuffle过程一定会对key进行排序
+@Override
+public int compareTo(FlowBean o) {
+// 倒序排列，从大到小
+     return this.sumFlow > o.getSumFlow() ? -1 : 1;
+     }
+}
+```
+
+##### 流程
+首先Client向ResourceManager (RM)提交一个Application，RM找了下下资源比较丰富的NodeManager(NM)，要求他开辟一个container来启动ApplicationMaster(AM), AM收集到启动任务需要用到的资源量(如申请的map的个数依赖于Input Split的大小)，将所需要的资源量向RM提交，RM通过一个资源列表的方式选择一些资源相对丰富的NM返回，告诉AM哪一些节点NM可用启动任务，AM开始和NM进行通信，告知启动对应的map/reduce任务；NM开辟一些列的container来执行这些任务，和AM保持通信。一旦所有任务执行结束，AM向Client输出结果并向RM注销自己。
+
+1. 通过submit或者waitForCompletion提交作业，waitForCompletion()方法通过每秒循环轮转作业进度如果发现与上次报告有改变，则将进度报告发送到控制台。
+2. 向ResourceManager申请Application ID，RM检查输入输出说明、计算输入分片。
+3. 复制作业的资源文件，将作业信息(jar、配置文件、分片信息)复制到HDFS上用户的应用缓存目录中。
+4. 通过submitApplication()方法提交作业到资源管理器。
+5. 资源管理器在收到submitApplication()消息后，将请求传递给调度器(Scheduler)。调度器为其分配一个容器Container,然后RM在NM的管理下在container中启动程序的ApplicationMaster进程。
+6. ApplicationMaster对作业进行初始化，创建过个薄记对象以跟踪作业进度。这是一个java应用程序，他的主类是MRAppmaster。
+7. ApplicationMaster接受来自HDFS在客户端计算的输入分片。对每一个分片创建一个map任务，任务对象，由mapreduce.job.reduces属性设置reduce个数。
+    - uber模式：当任务小的时候就会启动一个JVM运行MapReduce作业，这在MapReduce1中是不允许的；这样的作业在YARN中成为uber作业，通过设置mapreduce.job.ubertask.enable设置为false使用；那什么是小任务呢?当小于10个mapper且只有1个reducer且输入大小小于一个HDFS块的任务。
+8. 如果作业不适合uber任务运行，ApplicationMaster就会为所有的map任务和reduce任务向资源管理器申请容器。请求为任务指定内存需求，map任务和reduce任务的默认都会申请1024MB的内存。
+9. 资源管理器为任务分配了容器，ApplicationMaster就通过节点管理器启动容器。该任务由主类YarnChild的java应用程序执行。
+10. 运行任务之前，首先将资源本地化，包括作业配置、jar文件和所有来自分布式缓存的文件
+11. 最后执行map任务和reduce任务
+
+
 #### Hadoop 特点
 
 - Hadoop框架允许用户快速地编写和测试的分布式系统。有效并在整个机器和反过来自动分配数据和工作，利用CPU内核的基本平行度。 
@@ -670,7 +830,7 @@ Hadoop 运行整个计算机集群代码。这个过程包括以下核心任务�
 
 #### Hadoop CLI
 
-```bash
+```shell
 hadoop namenode --format
 hadoop-daemon.sh start namenode
 hadoop-daemon.sh start datanode
@@ -763,172 +923,6 @@ command [genericOptions] [commandOptions]
 ```
 
 ### 最佳实践
-
-#### Web UI
-
-| 软件     | 服务                 | 访问地址                                                  |
-| -------- | -------------------- | --------------------------------------------------------- |
-| Hadoop   | yarn resourcemanager | masternode1_private_ip:8088,masternode2_private_ip:8088   |
-| Hadoop   | jobhistory           | masternode1_private_ip:19888                              |
-| Hadoop   | timeline             | server masternode1_private_ip:8188                        |
-| Hadoop   | hdfs                 | masternode1_private_ip:50070,masternode2_private_ip:50070 |
-| Spark    | spark ui             | masternode1_private_ip:4040                               |
-| Spark    | history              | masternode1_private_ip:18080                              |
-| Tez      | tez-ui               | masternode1_private_ip:8090/tez-ui2                       |
-| Hue      | hue                  | masternode1_private_ip:8888                               |
-| Zeppelin | zeppelin             | masternode1_private_ip:8080                               |
-| Hbase    | hbase                | masternode1_private_ip:16010                              |
-| Presto   | presto               | masternode1_private_ip:9090                               |
-| Oozie    | oozie                | masternode1_private_ip:11000                              |
-| Ganglia  | ganglia              | masternode1_private_ip:9292/ganglia                       |
-
-#### 集群类型
-
-- Hadoop集群
-- Druid集群
-- Dataflow-Kafka集群
-- Flink集群
-- ZooKeeper集群
-- Data Science集群
-- ClickHouse集群
-- Data Development集群
-
-##### Hadoop集群
-
-以EMR-3.29.0版本为例，Hadoop集群服务组件的具体部署信息如下。
-
-| 服务名          | 主实例节点                                                   | 核心实例节点                                               |
-| --------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| HDFS            | KMS<br>SecondaryNameNode<br>HttpFS<br>HDFS Client<br>NameNode | DataNode<br>HDFS Client                                    |
-| YARN            | ResourceManager<br>App Timeline Server<br>JobHistory<br>WebAppProxyServer<br>Yarn Client | Yarn Client<br>NodeManager                                 |
-| Hive            | Hive MetaStore<br>HiveServer2<br>Hive Client                 | Hive Client                                                |
-| Spark           | Spark Client                                                 | SparkHistory<br>ThriftServer                               |
-| Knox            | Knox                                                         | 无                                                         |
-| Tez             | Tomcat<br>Tez Client                                         | Tez Client                                                 |
-| Ganglia         | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client                   | Gmond<br>Ganglia Client                                    |
-| Sqoop           | Sqoop Client                                                 | Sqoop Client                                               |
-| Bigboot         | Bigboot Client<br>Bigboot Monitor                            | Bigboot Client<br>Bigboot Monitor                          |
-| OpenLDAP        | OpenLDAP                                                     | 无                                                         |
-| Hue             | Hue                                                          | 无                                                         |
-| SmartData       | Jindo Namespace Service<br>Jindo Storage Service<br>Jindo Client | Jindo Storage Service<br>Jindo Client                      |
-| LIVY(可选)      | Livy                                                         | 无                                                         |
-| Superset(可选)  | Superset                                                     | 无                                                         |
-| Flink(可选)     | FlinkHistoryServer<br>Flink Client                           | Flink Client                                               |
-| RANGER(可选)    | RangerPlugin/RangerAdmin<br>RangerUserSync<br>Solr           | RangerPlugin                                               |
-| Storm(可选)     | Storm Client<br>UI<br>Nimbus<br>Logviewer                    | Storm Client<br>Supervisor                                 |
-| Phoenix(可选)   | Phoenix Client                                               | Phoenix Client                                             |
-| Kudu(可选)      | Kudu Master<br>Kudu Client                                   | Kudu Tserver<br>Kudu Master<br>Kudu Client                 |
-| HBase(可选)     | HMaster<br>HBase Client<br>ThriftServer                      | HBase Client<br>HRegionServer                              |
-| ZooKeeper(可选) | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
-| Oozie(可选)     | Oozie                                                        | 无                                                         |
-| Presto(可选)    | Presto Client<br>PrestoMaster                                | Presto Client<br>PrestoWorker                              |
-| Impala(可选)    | Impala Runtime and Shell<br>Impala Catalog Server<br>Impala StateStore Server | Impala Runtime and Shell<br>Impala Daemon Server           |
-| Pig(可选)       | Pig Client                                                   | Pig Client                                                 |
-| Zeppelin(可选)  | Zeppelin                                                     | 无                                                         |
-| FLUME(可选)     | Flume Agent<br>Flume Client                                  | Flume Agent<br>Flume Client                                |
-
-
-##### Druid集群
-
-| 服务名         | 主实例节点                                                   | 核心实例节点                                               |
-| -------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| Druid          | Druid Client<br>Coordinator<br>Overlord<br>Broker<br>Router  | MiddleManager<br>Historical<br>Druid Client                |
-| HDFS           | KMS<br>SecondaryNameNode<br>HttpFS<br>HDFS Client<br>NameNode | DataNode<br>HDFS Client                                    |
-| Ganglia        | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client                   | Gmond<br>Ganglia Client                                    |
-| ZooKeeper      | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
-| OpenLDAP       | OpenLDAP                                                     | 无                                                         |
-| Bigboot        | Bigboot Client<br>Bigboot Monitor                            | Bigboot Client<br>Bigboot Monitor                          |
-| SmartData      | Jindo Namespace Service<br>Jindo Storage Service<br>Jindo Client | Jindo Storage Service<br>Jindo Client                      |
-| YARN(可选)     | ResourceManager<br>App Timeline Server<br>JobHistory<br>WebAppProxyServer<br>Yarn Client | Yarn Client<br>NodeManager                                 |
-| Superset(可选) | Superset                                                     | 无                                                         |
-
-##### Dataflow-Kafka集群
-
-以EMR-3.29.0版本为例，Dataflow-Kafka集群服务组件的具体部署信息如下。
-
-| 服务名        | 主实例节点                                                   | 核心实例节点                                               |
-| ------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| Kafka-Manager | Kafka Manager                                                | 无                                                         |
-| Kafka         | Kafka Client<br>KafkaMetadataMonitor<br>Kafka Rest Proxy<br>Kafka Broker broker<br>Kafka Schema Registry | Kafka Broker broker<br>Kafka Client                        |
-| Ganglia       | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client                   | Gmond<br>Ganglia Client                                    |
-| ZooKeeper     | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
-| OpenLDAP      | OpenLDAP                                                     | 无                                                         |
-| RANGER(可选)  | RangerPlugin/RangerAdmin<br>RangerUserSync<br>Solr           | RangerPlugin                                               |
-| Knox(可选)    | Knox                                                         | 无                                                         |
-
-##### Flink集群
-
-以EMR-3.30.0版本为例，Flink集群服务组件的具体部署信息如下。
-
-| 服务名          | 主实例节点                                                   | 核心实例节点                                               |
-| --------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| HDFS            | KMS<br>SecondaryNameNode<br>HttpFS<br>HDFS Client<br>NameNode | DataNode<br>HDFS Client                                    |
-| YARN            | ResourceManager<br>App Timeline Server<br>JobHistory<br>WebAppProxyServer<br>Yarn Client | Yarn Client<br>NodeManager                                 |
-| Ganglia         | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client                   | Gmond<br>Ganglia Client                                    |
-| ZooKeeper       | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
-| Knox            | Knox                                                         | 无                                                         |
-| Flink-Vvp       | Flink-Vvp                                                    | 无                                                         |
-| OpenLDAP        | OpenLDAP                                                     | 无                                                         |
-| PAI-Alink(可选) | Alink                                                        | 无                                                         |
-
-##### ZooKeeper集群
-
-以EMR-3.29.0版本为例，ZooKeeper集群服务组件的具体部署信息如下。
-
-| 服务名    | 主实例节点                                 | 核心实例节点                                               |
-| --------- | ------------------------------------------ | ---------------------------------------------------------- |
-| Ganglia   | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client | Gmond<br>Ganglia Client                                    |
-| ZooKeeper | ZooKeeper follower<br>ZooKeeper Client     | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
-
-##### Data Science集群
-
-以EMR-3.29.1版本为例，Data Science集群服务组件的具体部署信息如下。
-
-| 服务名             | 主实例节点                                                   | 核心实例节点                                               |
-| ------------------ | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| HDFS               | KMS<br>SecondaryNameNode<br>HttpFS<br>HDFS Client<br>NameNode | DataNode<br>HDFS Client                                    |
-| YARN               | ResourceManager<br>App Timeline Server<br>JobHistory<br>WebAppProxyServer<br>Yarn Client | Yarn Client<br>NodeManager                                 |
-| ZooKeeper          | ZooKeeper follower<br>ZooKeeper Client                       | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
-| Knox               | Knox                                                         | 无                                                         |
-| Tensorflow on YARN | TensorFlow-On-YARN-Gateway<br>TensorFlow-On-YARN-History-Server<br>TensorFlow-On-YARN | TensorFlow-On-YARN-Client<br>TensorFlow-On-YARN-Gateway    |
-| SmartData          | Jindo Namespace Service<br>Jindo Storage Service<br>Jindo Client | Jindo Storage Service<br>Jindo Client                      |
-| Bigboot            | Bigboot Client<br>Bigboot Monitor                            | Bigboot Client<br>Bigboot Monitor                          |
-| PAI-EASYREC        | Easyrec                                                      | Easyrec                                                    |
-| PAI-EAS            | PAIEAS                                                       | PAIEAS                                                     |
-| PAI-Faiss          | Faiss                                                        | Faiss                                                      |
-| PAI-Redis          | Redis                                                        | Redis                                                      |
-| PAI-Alink          | Alink                                                        | 无                                                         |
-| Flink-Vvp          | Flink-Vvp                                                    | 无                                                         |
-| OpenLDAP           | OpenLDAP                                                     | 无                                                         |
-| Jindo SDK          | Jindo SDK                                                    | Jindo SDK                                                  |
-| Zeppelin(可选)     | Zeppelin                                                     | 无                                                         |
-| PAI-REC(可选)      | Rec                                                          | 无                                                         |
-| AUTOML(可选)       | AUTOML                                                       | AUTOML                                                     |
-| TensorFlow(可选)   | TensorFlow                                                   | TensorFlow                                                 |
-
-##### ClickHouse集群
-
-以EMR-3.35.0版本为例，ClickHouse集群服务组件的具体部署信息如下。
-
-| 服务名     | 主实例节点                                 | 核心实例节点                                               |
-| ---------- | ------------------------------------------ | ---------------------------------------------------------- |
-| Ganglia    | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client | Gmond<br>Ganglia Client                                    |
-| ZooKeeper  | ZooKeeper follower<br>ZooKeeper Client     | ZooKeeper follower<br>ZooKeeper leader<br>ZooKeeper Client |
-| ClickHouse | ClickHouse Server<br>ClickHouse Client     | ClickHouse Server<br>ClickHouse Client                     |
-
-##### Data Development集群
-
-以EMR-3.33.102版本为例，Data Development集群服务组件的具体部署信息如下。
-
-| 服务名                  | 主实例节点                                               | 核心实例节点                     |
-| ----------------------- | -------------------------------------------------------- | -------------------------------- |
-| Ganglia                 | Gmond<br>Httpd<br>Gmetad<br>Ganglia Client               | Gmond<br>Ganglia Client          |
-| Zeppelin                | ZooKeeper Master                                         | ZooKeeper Worker                 |
-| JupyterHub              | JupyterHub                                               | 无                               |
-| RabbitMQ                | RabbitMQ                                                 | 无                               |
-| Mysql                   | MySQL                                                    | 无                               |
-| Data Development Center | Data Development Center                                  | 无                               |
-| Airflow                 | Airflow Client<br>Airflow Scheduler<br>Airflow WebServer | Airflow Client<br>Airflow Worker |
 
 #### 健康检查
 ##### HOST
@@ -1037,7 +1031,9 @@ command [genericOptions] [commandOptions]
 
 #### 状态检查
 
-##### Hadoop
+##### HDFS
+
+HDFS服务核心指标、最近的告警信息、异常信息、概览信息、NameNode状态列表和DataNode状态列表。
 
 - Configured Capacity: This displays the total capacity (storage space) of HDFS.配置容量：显示 HDFS 的总容量（存储空间）。
 - DFS Used: This displays the total space used in HDFS.显示在 HDFS 中使用的总空间。
@@ -1053,258 +1049,157 @@ command [genericOptions] [commandOptions]
 - Decommissioning Nodes: This link lists all the datanodes that are being decommissioned.此链接列出了所有正在退役的数据节点。
 - Number of Under-Replicated Blocks: This represents the number of blocks that have not replicated as per the replication factor configured in the hdfs-site.xml file.这表示根据 hdfs-site.xml 文件中配置的复制因子尚未复制的块数。
 
-#### 作业类型
-
-MR作业，hive作业，hive sql作业，spark作业，spark sql作业，spark streaming作业，spark shell作业，shell作业
-
-sqoop作业，pig作业，Flink作业，Presto SQL作业，Impala SQL作业
-
-##### MapReduce 作业
-hadoop jar xxx.jar [MainClass] -D xxx ....
-
-作业内容：/path/to/hadoop-mapreduce-client-jobclient-2.6.0-tests.jar sleep -m 3 -r 3 -mt 100 -rt 100
-
-##### hive 作业
-hive [user provided parameters]
-
-作业内容：-f ossref://path/to/uservisits_aggre_hdfs.hive
-```hive
-USE DEFAULT;
-DROP TABLE uservisits;
-CREATE EXTERNAL TABLE IF NOT EXISTS uservisits (sourceIP STRING,destURL STRING,visitDate STRING,adRevenue DOUBLE,userAgent STRING,countryCode STRING,languageCode STRING,searchWord STRING,duration INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS SEQUENCEFILE LOCATION '/HiBench/Aggregation/Input/uservisits';
-DROP TABLE uservisits_aggre;
-CREATE EXTERNAL TABLE IF NOT EXISTS uservisits_aggre (sourceIP STRING, sumAdRevenue DOUBLE) STORED AS SEQUENCEFILE LOCATION '/HiBench/Aggregation/Output/uservisits_aggre';
-INSERT OVERWRITE TABLE uservisits_aggre SELECT sourceIP, SUM(adRevenue) FROM uservisits GROUP BY sourceIP;
 ```
+# HDFS    
+TotalDFSUsedPercent DFS总的空间使用百分比。
+MaxDFSUsedPercent   所有DataNode的DFS最大使用百分比。
+DataNodeDfsUsedPercent  单个DataNode的DFS使用百分比。
 
-##### hive sql 作业
-hive -e {SQL CONTENT}
 
-作业内容：
-```sql
--- SQL语句最大不能超过64 KB。
-show databases;
-show tables;
--- 系统会自动为SELECT语句加上'limit 2000'的限制。
-select * from test1;
+# HDFS容量、块数量、文件总数、数据块CheckSum操作平均时间、数据块汇报操作平均时间、NameNode主备状态和NameNode是否进入安全模式。
+# 当前NameNode的主备状态，HA集群会有Active和Standby的区分，非HA集群正常都是Active状态。
+# 当前NameNode进程的CPU使用率
+# 当前NameNode进程的内存使用情况，包括Heap Committed、Heap Init、Heap Max、Heap Used、NonHeap Committed、NonHeap Init和NonHeap Used。
+# 当前NameNode java进程的GC统计数据
+# DataNode最近一次心跳时间
+# DataNode节点状态，取值为In Service、Decommission In Progress、Decommissioned、Entering Maintenance和In Maintenance。
+# 当前DataNode配置的HDFS容量。
+# 当前DataNode已经使用的HDFS容量。
+# 当前DataNode已经使用的Non DFS容量。
+# 当前DataNode剩余的HDFS容量。
+# 当前DataNode上block数量。
+# 当前DataNode上block pool的使用量。
+# 当前DataNode上failed volume数量。
+
+
+# ZooKeeper
+ZkOutstandingRequests   排队请求的数量，当ZooKeeper超过了其处理能力时，这个值会增大。
+
 ```
+##### YARN
 
-##### pig 作业
-pig [user provided parameters]
+YARN服务的基础指标、最近的告警和异常信息、ResourceManager状态列表、NodeManager状态列表、JobHistory状态列表和Queue Capacity Scheduler使用情况。
 
-作业内容：-x mapreduce ossref://emr/checklist/jars/chengtao/pig/script1-hadoop-oss.pig
-
-```pig
- -- Query Phrase Popularity (Hadoop cluster)
- -- This script processes a search query log file from the Excite search engine and finds search phrases that occur with particular high frequency during certain times of the day. 
- -- Register the tutorial JAR file so that the included UDFs can be called in the script.
- REGISTER oss://emr/checklist/jars/chengtao/pig/tutorial.jar;
- -- Use the  PigStorage function to load the excite log file into the “raw” bag as an array of records.
- -- Input: (user,time,query) 
- raw = LOAD 'oss://emr/checklist/data/chengtao/pig/excite.log.bz2' USING PigStorage('\t') AS (user, time, query);
- -- Call the NonURLDetector UDF to remove records if the query field is empty or a URL. 
- clean1 = FILTER raw BY org.apache.pig.tutorial.NonURLDetector(query);
- -- Call the ToLower UDF to change the query field to lowercase. 
- clean2 = FOREACH clean1 GENERATE user, time, org.apache.pig.tutorial.ToLower(query) as query;
- -- Because the log file only contains queries for a single day, we are only interested in the hour.
- -- The excite query log timestamp format is YYMMDDHHMMSS.
- -- Call the ExtractHour UDF to extract the hour (HH) from the time field.
- houred = FOREACH clean2 GENERATE user, org.apache.pig.tutorial.ExtractHour(time) as hour, query;
- -- Call the NGramGenerator UDF to compose the n-grams of the query.
- ngramed1 = FOREACH houred GENERATE user, hour, flatten(org.apache.pig.tutorial.NGramGenerator(query)) as ngram;
- -- Use the  DISTINCT command to get the unique n-grams for all records.
- ngramed2 = DISTINCT ngramed1;
- -- Use the  GROUP command to group records by n-gram and hour. 
- hour_frequency1 = GROUP ngramed2 BY (ngram, hour);
- -- Use the  COUNT function to get the count (occurrences) of each n-gram. 
- hour_frequency2 = FOREACH hour_frequency1 GENERATE flatten($0), COUNT($1) as count;
- -- Use the  GROUP command to group records by n-gram only. 
- -- Each group now corresponds to a distinct n-gram and has the count for each hour.
- uniq_frequency1 = GROUP hour_frequency2 BY group::ngram;
- -- For each group, identify the hour in which this n-gram is used with a particularly high frequency.
- -- Call the ScoreGenerator UDF to calculate a "popularity" score for the n-gram.
- uniq_frequency2 = FOREACH uniq_frequency1 GENERATE flatten($0), flatten(org.apache.pig.tutorial.ScoreGenerator($1));
- -- Use the  FOREACH-GENERATE command to assign names to the fields. 
- uniq_frequency3 = FOREACH uniq_frequency2 GENERATE $1 as hour, $0 as ngram, $2 as score, $3 as count, $4 as mean;
- -- Use the  FILTER command to move all records with a score less than or equal to 2.0.
- filtered_uniq_frequency = FILTER uniq_frequency3 BY score > 2.0;
- -- Use the  ORDER command to sort the remaining records by hour and score. 
- ordered_uniq_frequency = ORDER filtered_uniq_frequency BY hour, score;
- -- Use the  PigStorage function to store the results. 
- -- Output: (hour, n-gram, score, count, average_counts_among_all_hours)
- STORE ordered_uniq_frequency INTO 'oss://emr/checklist/data/chengtao/pig/script1-hadoop-results' USING PigStorage();
 ```
+# VCores、Memory、NodeManager分布数据统计、等待中的资源信息、应用数目、容器数目和ResourceManager主备状态。
+# 当前ResourceManager的主备状态，HA集群会有Active和Standby区分，非HA集群正常都是Active状态。
+# 当前ResourceManager进程的CPU使用率。
+# 当前ResourceManager进程的内存使用情况，包括Heap Committed、Heap Init、Heap Max、Heap Used、NonHeap Committed、NonHeap Init和NonHeap Used。
+# 当前ResourceManager java进程的GC统计数据
+# 当前ResourceManager RPC端口上的RPC调用队列长度，可以反应RPC的请求处理的堆积情况
+# RPC请求的处理时间
+# RPC请求的排队时间。
 
-##### Presto SQL 作业
-presto <options> -f {SQL_SCRIPT}
+# NodeManager当前状态，包括LOST、RUNNING和UNHEALTHY。
+# 最后一次心跳时间。
+# 当前NodeManager上容器的数目。
+# 当前NodeManager上使用内存的情况。
+# 当前NodeManager上可以使用的内存情况。
+# 当前NodeManager上使用的VCore数目。
+# 当前NodeManager上可用的VCore数目。
 
-SQL_SCRIPT中保存作业编辑器中填写的SQL语句。如：SELECT * from table1;
-
-默认情况下，Presto查询catalog=hive，schema=default下的数据表，可以通过设置Presto Cli参数来指定不同的Catalog和Schema。Presto SQL作业支持如下两种方式设置Presto Cli参数：
-
-1. 通过环境变量设置<br>
-设置密码：如果Presto服务开启了密码认证，可以通过添加名为PRESTO_PASSWORD的环境变量来传入密码。<br>
-设置其他参数：可以将参数设置到名为PRESTO_CLI_PARAMS的环境变量中，如PRESTO_CLI_PARAMS="--catalog mysql --schema db1 "。<br>
-
-2. 通过自定义变量<br>
-设置密码：在作业自定义变量中添加名为presto.password的变量，即可设置Presto认证密码。<br>
-设置其他参数：在作业自定义变量中添加如_presto.xxx的变量，都会被添加到Presto Cli参数列表中，对应的选项为--xxx。<br>
-
-支持如下自定义变量。
-```
-## 基本参数
-* _presto.schema <schema>
-* _presto.catalog <catalog>
-
-## 控制/调试参数
-* _presto.trace-token <trace token>
-* _presto.session <session>...
-* _presto.source <source>
-* _presto.resource-estimate <resource-estimate>...
-* _presto.log-levels-file <log levels file>
-
-## 连接参数
-* _presto.server <server>
-* _presto.http-proxy <http-proxy>  * ignore-errors
-* _presto.socks-proxy <socks-proxy>
-
-## 认证相关参数
-* _presto.user <user>
-* _presto.password <password>
-
-* _presto.client-info <client-info>
-* _presto.client-request-timeout <client request timeout>
-* _presto.client-tags <client tags>
-
-* _presto.access-token <access token>
-* _presto.truststore-password <truststore password>
-* _presto.truststore-path <truststore path>
-* _presto.keystore-password <keystore password>
-* _presto.keystore-path <keystore path>
-* _presto.extra-credential <extra-credential>...
-
-## 高安全相关参数
-* _presto.krb5-config-path <krb5 config path>
-* _presto.krb5-credential-cache-path <krb5 credential cache path>
-* _presto.krb5-disable-remote-service-hostname-canonicalization
-* _presto.krb5-keytab-path <krb5 keytab path>
-* _presto.krb5-principal <krb5 principal>
-* _presto.krb5-remote-service-name <krb5 remote service name>
-* _presto.krb5-service-principal-pattern <krb5 remote service principal pattern>
-```
-
-##### Impala SQL 作业
-impala-shell -f {SQL_CONTENT} [options];
-
-SQL_CONTENT 填写的SQL语句。
-
-options 添加环境变量IMPALA_CLI_PARAMS，例如IMAPAL_CLI_PARAMS="-u hive"。
-
-##### sqoop 作业
-sqoop [args]
-
-##### Spark 作业
-spark-submit [options] --class [MainClass] xxx.jar args
-
-作业内容： --master yarn-client --driver-memory 7G --executor-memory 5G --executor-cores 1 --num-executors 32 --class com.aliyun.emr.checklist.benchmark.SparkWordCount emr-checklist_2.10-0.1.0.jar oss://emr/checklist/data/wc oss://emr/checklist/data/wc-counts 32
-
-##### Spark Shell 作业
-spark-shell
-
-作业内容：
-```shell
-val count = sc.parallelize(1 to 100).filter { _ =>
-  val x = math.random
-  val y = math.random
-  x*x + y*y < 1
-}.count();
-println("Pi is roughly ${4.0 * count / 100}")
-```
-
-##### Spark Streaming 作业
-spark-submit [options] --class [MainClass] xxx.jar args
-
-作业内容：--master yarn-client --driver-memory 7G --executor-memory 5G --executor-cores 1 --num-executors 32 --class com.aliyun.emr.checklist.benchmark.SlsStreaming emr-checklist_2.10-0.1.0.jar <project> <logstore> <accessKey> <secretKey>
-
-##### Spark SQL 作业
-spark-sql [options] [cli options] {SQL_CONTENT}        
-       
-options 添加环境变量SPARK_CLI_PARAMS，例如SPARK_CLI_PARAMS="--executor-memory 1g --executor-cores"
-
-cli options 示例如下：<br>
- -e <quoted-query-string> ：表示运行引号内的SQL查询语句。<br>
--f <filename>：表示运行文件中的SQL语句。<br>
-
-SQL_CONTENT 填写的SQL语句。
-
-##### streaming sql 作业
-streaming-sql -f {sql_script}
-
-sql_script中保存着作业编辑器中填写的SQL语句。
-```sql
-
---- 创建SLS数据表。 
-CREATE TABLE IF NOT EXISTS ${slsTableName} 
-   USING loghub 
-   OPTIONS ( 
-        sls.project = '${logProjectName}', 
-        sls.store = '${logStoreName}', 
-        access.key.id = '${accessKeyId}', 
-        access.key.secret = '${accessKeySecret}', 
-        endpoint = '${endpoint}'
-   ); 
---- 导入数据至HDFS。
-INSERT INTO 
-    ${hdfsTableName} 
-SELECT 
-    col1, col2 
-FROM  ${slsTableName} 
-WHERE ${condition}
+# 当前JobHistory进程的CPU使用率。
+# 当前JobHistory进程的内存使用情况统计，包括Heap Used、Heap Committed、Heap Max和Heap Init。
+# 当前JobHistory进程的非堆内存使用情况统计，包括NonHeap Used、NonHeap Committed和NonHeap Init。
+# 当前JobHistory java进程的GC统计数据
 
 ```
 
-##### Flink 作业
+##### Hive
 
-run -m yarn-cluster -yjm 1024 -ytm 2048 ossref://path/to/oss/of/WordCount.jar --input oss://path/to/oss/to/data --output oss://path/to/oss/to/result
+Hive服务的基础指标图表、最近的告警和异常信息、MetaStore状态列表和HiveServer2状态列表。
 
-**PyFlink作业**
+```
+# 当前MetaStore进程的CPU使用率。
+# 当前MetaStore进程的内存使用情况统计，包括Heap Used、Heap Committed、Heap Max、Heap Init。
+# 当前MetaStore进程的非堆内存使用情况统计，包括NonHeap Used、NonHeap Committed、NonHeap Init。
+# 当前MetaStore java进程的GC统计数据
+```
 
-run -m yarn-cluster -yjm 1024 -ytm 2048 -py ossref://path/to/oss/of/word_count.py
+##### Zookeeper
 
-#### 作业配置
-在作业编辑的过程中，支持在作业参数中设置时间变量通配符。
+Zookeeper核心指标
 
-##### 变量通配符格式
-阿里云 E-MapReduce 所支持的变量通配符的格式为${dateexpr-1d}或者${dateexpr-1h}。其中dateexpr表示标准的时间格式表达式，对应的规则如下。
+```
+# Zookeeper节点上CPU使用情况。
+# Zookeeper节点上内存使用情况。
 
-注意 请注意时间格式的大小写。
+# Latency：包括最大延时、最小延时和平均延时。
+# Packets：包括收到的数据包数目和发送的数据包数目。
+# Alive Connections：活跃的连接数。
+# Outstanding Connections：堆积的请求数。
+# Max file descriptor：Zookeeper进程最大能使用的文件描述符数目。
+# Open file descriptor：Zookeeper进程已经使用的文件描述符数目。
+```
 
-| 格式 | 描述 |
-| ---|--- |
-| yyyy | 表示4位的年份。 |
-| MM | 表示月份。 |
-| dd | 表示天。 |
-| HH | 表示24小时制，12小时制使用hh。 |
-| mm | 表示分钟。 |
-| ss | 表示秒。 |
+#### 常用日志
 
-时间变量可以是包含yyyy年份的任意时间组合，同时支持用加号（+）和减号（-）来分别表示延后和提前。例如，变量${yyyy-MM-dd}表示当前日期，则：
-后1年的表示方式：${yyyy+1y}或者${yyyy-MM-dd hh:mm:ss+1y}。
-后3月的表示方式：${yyyyMM+3m}或者${yyyy-MM-dd hh:mm:ss+3m}。
-前5天的表示方式：${yyyyMMdd-5d}或者${yyyy-MM-dd hh:mm:ss-5d}。
+```
+# HOST
+var-log-messages
 
+# HDFS
+namenode-gc
+hdfs-audit-log
+datanode-log
+datanode-out
+zkfc-out
+zkfc-log
+journalnode-out
+journalnode-log
+namenode-out
+namenode-log
 
-阿里云 E-MapReduce 仅支持小时和天维度的加减，即只支持在dateexpr后面+Nd、-Nd、+Nh、-Nh的形式（dateexpr为时间格式表达式，N为整数）。
+# YARN
+yarn-container-log
+proxyserver-out
+proxyserver-log
+resourcemanager-out
+resourcemanager-log
+timelineserver-out
+timelineserver-log
+historyserver-out
+historyserver-log
+nodemanager-out
+nodemanager-log
 
-时间变量参数必须以yyyy开始，如${yyyy-MM}。如果希望单独获取月份等特定时间区域的值，可以在作业内容中使用如下两个函数提取：
+# PRESTO
+presto-server-log
+presto-launcher-log
+presto-http-request-log
 
-- parseDate(<参数名称>, <时间格式>)：将给定参数转换为Date对象。其中，参数名称为上述配置参数中设置的一个变量名，时间格式为设置该变量时所使用的时间格式。如设置一个变量current_time = ${yyyyMMddHHmmss-1d}，则此处时间格式应设置为yyyyMMddHHmmss。
+# FLUME
+flume-gc
+flume-log
 
-- formatDate(<Date对象>, <时间格式>)：将给定Date对象转换为给定格式的时间字符串。
+# SPARK
+spark-history-gc
+spark-thriftserver-out
+sparkhistory-out
 
-函数使用示例：<br>
-获取current_time变量的小时字面值：${formatDate(parseDate(current_time, 'yyyyMMddHHmmss'), 'HH')}<br>
-获取current_time变量的年字面值：${formatDate(parseDate(current_time, 'yyyyMMddHHmmss'), 'yyyy')}<br>
+# HIVE
+hiveserver2-err
+metastore-log
+hiveserver2-log
+hive-log
+
+# HBASE
+thi
+
+# ZEPPELIN
+zeppelin-log
+zeppelin-out
+
+# HUE
+hue-supervisor-log
+hue-runcpserver-log
+hue-access-log
+hue-error-log
+
+# ZOOKEEPER
+zookeeper-gc
+zookeeper-out
+```
 
 #### 参数配置
 
@@ -2195,6 +2090,32 @@ hplsql.conn.hive1conn org.apache.hadoop.hive.jdbc.HiveDriver;jdbc:hive://
 hplsql.conn.hiveconn org.apache.hive.jdbc.HiveDriver;jdbc:hive2://
 ```
 
+##### TEZ
+
+```tez-site
+tez.runtime.pipelined.sorter.lazy-allocate.memory true
+tez.lib.uris.classpath ./tez/tez-0.9.2-1.2.5/*,./tez/tez-0.9.2-1.2.5/lib/*
+tez.task.launch.env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/hadoop-current/lib/native
+tez.use.cluster.hadoop-libs true
+tez.runtime.convert.user-payload.to.history-text true
+tez.am.view-acls *
+tez.runtime.unordered.output.buffer.size-mb 579
+tez.vertex.failures.maxpercent 0.0f
+tez.container.max.java.heap.fraction 0.8
+tez.staging-dir /tmp/tez/staging
+tez.history.logging.service.class org.apache.tez.dag.history.logging.ats.ATSHistoryLoggingService
+tez.am.speculation.enabled true
+tez.runtime.compress true
+tez.am.resource.memory.mb 2048
+tez.tez-ui.history-url.base http://emr-header-1:8090/tez-ui2/
+tez.am.maxtaskfailures.per.node 3
+tez.lib.uris hdfs://emr-header-1:9000/apps/tez-0.9.2-1.2.5/tez-0.9.2-1.2.5.tar.gz#tez
+tez.runtime.io.sort.mb 1158
+tez.am.java.opts -XX:ParallelGCThreads=2 -XX:CICompilerCount=2
+tez.am.launch.env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/hadoop-current/lib/native
+tez.runtime.compress.codec org.apache.hadoop.io.compress.SnappyCodec
+```
+
 ##### ZOOKEEPER
 
 ```zookeeper-env
@@ -2419,6 +2340,23 @@ zookeeper.znode.parent /hbase
 zookeeper.znode.rootserver root-region-server
 ```
 
+##### FLINK
+
+```flink-conf
+historyserver.web.tmpdir /mnt/disk1/flink/history-server/tmp
+historyserver.web.port 8082
+historyserver.archive.fs.refresh-interval 10000
+
+jobmanager.archive.fs.dir hdfs://emr-header-1.cluster-247301:9000/flink/flink-jobs/
+
+state.backend.fs.checkpointdir hdfs://emr-header-1.cluster-247301:9000/flink/flink-checkpoints/
+state.backend com.alibaba.flink.statebackend.GeminiStateBackendFactory
+
+taskmanager.network.memory.max 1gb
+taskmanager.network.memory.fraction 0.1
+taskmanager.network.memory.min 64mb
+```
+
 #### 参数调优
 
 ##### Java 内存设置
@@ -2522,7 +2460,7 @@ off 默认配置;summary 只收集汇总信息;detail 收集每次调用的信�
 
 采用如下命令重启项目：
 
-```bash
+```shell
 java -Xmx8g -Xms8g - -XX:+UseG1GC -XX:NativeMemoryTracking=detail -jar /home/pgcp/pgcp-0.0.1-SNAPSHOT.jar
 ```
 
@@ -2599,7 +2537,7 @@ Max Memory = eden + survivor + old + String Constant Pool + Code cache + compres
 如果您在Worker节点提交任务，则需要同步修改Worker节点相关配置。
 
 6. sqoop 导入RDS数据至hdfs时，时间字段显示延迟8小时如何处理？
-```bash
+```shell
 sqoop import \
 --connect jdbc:mysql://rm-2ze****341.mysql.rds.aliyuncs.com:3306/s***o_sqoopp_db \
 --username s***o \

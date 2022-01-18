@@ -122,6 +122,8 @@ git config [--global] -l
 git config [--global] core.quotepath false // 解决git status 中文乱码的问题
 git config [--global] core.ignorecase false
 
+git config --global core.longpaths true git有可以创建4096长度的文件名，然而在windows最多是260，因为git用了旧版本的windows api。
+
 
 
 
@@ -174,8 +176,6 @@ git config [--global] core.autocrlf true|false|input
 
 
 CRLF 与 LF 混合的文本文件不受此配置控制。
-
-
 
 
 

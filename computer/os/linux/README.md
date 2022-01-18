@@ -180,6 +180,7 @@ SHR：shared memory 共享内存
 3. 计算某个进程所占的物理内存大小公式：RES – SHR
 4. swap out后，它将会降下来
 
+
 ##### wc
 
 Linux wc命令用于计算字数。
@@ -268,6 +269,21 @@ crontab [ -u user ] { -l | -r | -e }
 # *  *  *  *  * user-name command to be executed
   17 *  *  *  *   root    cd / && run-parts --report /etc/cron.hourly
 ```
+
+#### 文件权限
+
+在Linux系统下，使用权限来保护资源的安全将是一种不错的选择。系统中每个文件的权限都有可读（r）、可写（w）和可执行（x）这三种权限，它们分别对应权限数值4、2 和1。系统为每个文件和目录都设有默认的权限，每个文件中可分有拥有者（u）、同群组的用户（g）和其他组用户（o）。
+
+##### umask的缺省默认权限
+Linux有缺省默认文件、文件夹权限umask。默认 777 -xxx（文件夹）  666 - xxx(文件)
+
+预设权限（权限掩码），当我们建立一个目录或档案时，它都会带一个默认的权限:
+
+若使用者建立为 '档案' 则预设 '没有可执行 ( x ) 项目'，亦即只有 rw 这两个项目，用数字表示就是666或字母 –rw-rw-rw-
+
+若使用者建立为 '目录'，则由于 x 与是否可以进入此目录有关，因此预设为所有权限均开放，亦即为777 或字母 d-rwx-rwx-rwx
+
+umask就与这个默认权限有关。umask 就是指定 '目前用户在建立档案或目录时候的权限默认值'。
 
 #### grep、sed、awk 文本三剑客
 
@@ -444,141 +460,174 @@ awk [options] 'BEGIN{ action;… } pattern{ action;… } END{ action;… }' file
 
 #### 其他
 
-lsb_release -a，即可列出所有版本信息
+```shell
+# 【附】系统信息查询大全
 
-getconf LONG_BIT  （Linux查看版本说明当前CPU运行在32bit模式下，但不代表CPU不支持64bit）
+cat /proc/cpuinfo # 查看CPU信息
+cat /etc/hosts # 查看当前主机的/etc/hosts文件配置信息
+cat /proc/loadavg # 查看系统负载磁盘和分区
+cat /proc/uptime # 计算系统启动时间，区分 uptime
+
+chkconfig –list # 列出所有系统服务
+chkconfig –list | grep on # 列出所有启动的系统服务程序
+crontab -l # 查看当前用户的计划任务服务
+cut -d: -f1 /etc/group # 查看系统所有组
+cut -d: -f1 /etc/passwd # 查看系统所有用户
+df -h # 查看各分区使用情况 Disk Space Usage
+
+dmesg -dT | tail -n 25 # 查看主机最近的dmesg输出信息
+dmesg | grep IDE # 查看启动时IDE设备检测状况网络
+
+du -sh <目录名> # 查看指定目录的大小
+env # 查看环境变量资源
+
+ethtool eth0 # 查看网络接口eth0的详细参数和指标
+
+fdisk -l # 查看所有分区详情
+free -m # 查看内存使用量和交换区使用量 Memory Usage
+
+getconf LONG_BIT #（Linux查看版本说明当前CPU运行在32bit模式下，但不代表CPU不支持64bit）
+
+grep MemFree /proc/meminfo # 查看空闲内存量
+grep MemTotal /proc/meminfo # 查看内存总量
+hdparm -i /dev/hda # 查看磁盘参数(仅适用于IDE设备)
+head -n 1 /etc/issue # 查看操作系统版本
+hostname # 查看计算机名
+id <用户名> # 查看指定用户信息
+ifconfig # 查看所有网络接口的属性
+iostat -x 1 5 # 查看主机I/O统计数据
+iptables -L # 查看防火墙设置
+
+last # 查看用户登录日志
+last -w -n 25 # 查看最后登录用户列表信息 Last Logged in Users 
+
+
+lsb_release -a # 即可列出所有版本信息
+lsblk # 查看硬盘和分区分布 列出所有可用块设备的信息，而且还能显示他们之间的依赖关系，但是它不会列出RAM盘的信息
+lsmod # 列出加载的内核模块
+
+lspci # 查看pci信息，即主板所有硬件槽信息
+lspci -v # 详细的信息
+lspci -vv # 更详细的信息
+lspci -t # 设备树
+lspci -tv # 列出所有PCI设备 
+lspci | grep -i 'eth' # 查看网卡硬件信息
+
+lsusb -tv # 列出所有USB设备
+mount | column -t # 查看挂接的分区状态
+netstat -antp # 查看所有已经建立的连接
+netstat -lntp # 查看所有监听端口
+netstat -ap # 查看主机当前网络链接信息 Network Connections
+netstat -s # 查看网络统计信息进程
+netstat -s -e # 查看主机网络统计信息 Network Statistics
+
+ps -ef # 查看所有进程
+ps auxwwwf # 查看当前主机的进程列表信息（全量）Process List
+
+route -n # 查看路由表
+swapon -s # 查看所有交换分区
+
+top # 实时显示进程状态用户
+top -b -w 20480 -c -o %CPU -n 1 | head -20 # 查看主机上最占用CPU的进程列表 Top CPU Processes
+top -b -w 20480 -c -o %MEM -n 1 | head -20 # 查看主机上最占用内存的进程列表 Top Memory Processes
+
+uname -a # 查看内核/操作系统/CPU信息
+uptime # 查看系统运行时间、用户数、负载
+vmstat 1 5 # 查看主机vmstat输出
+w # 查看活动用户
+
+
+rpm -qa # 查看所有安装的软件包
+
 
 ```
-【附】系统信息查询大全
-# uname -a # 查看内核/操作系统/CPU信息 
-# head -n 1 /etc/issue # 查看操作系统版本 
-# cat /proc/cpuinfo # 查看CPU信息 
-# hostname # 查看计算机名 
-# lspci -tv # 列出所有PCI设备 
-# lsusb -tv # 列出所有USB设备 
-# lsmod # 列出加载的内核模块 
-# env # 查看环境变量资源 
-# free -m # 查看内存使用量和交换区使用量 
-# df -h # 查看各分区使用情况 
-# du -sh <目录名> # 查看指定目录的大小 
-# grep MemTotal /proc/meminfo # 查看内存总量 
-# grep MemFree /proc/meminfo # 查看空闲内存量 
-# uptime # 查看系统运行时间、用户数、负载 
-# cat /proc/loadavg # 查看系统负载磁盘和分区 
-# mount | column -t # 查看挂接的分区状态 
-# fdisk -l # 查看所有分区 
-# swapon -s # 查看所有交换分区 
-# hdparm -i /dev/hda # 查看磁盘参数(仅适用于IDE设备) 
-# dmesg | grep IDE # 查看启动时IDE设备检测状况网络 
-# ifconfig # 查看所有网络接口的属性 
-# iptables -L # 查看防火墙设置 
-# route -n # 查看路由表 
-# netstat -lntp # 查看所有监听端口 
-# netstat -antp # 查看所有已经建立的连接 
-# netstat -s # 查看网络统计信息进程 
-# ps -ef # 查看所有进程 
-# top # 实时显示进程状态用户 
-# w # 查看活动用户 
-# id <用户名> # 查看指定用户信息 
-# last # 查看用户登录日志 
-# cut -d: -f1 /etc/passwd # 查看系统所有用户 
-# cut -d: -f1 /etc/group # 查看系统所有组 
-# crontab -l # 查看当前用户的计划任务服务 
-# chkconfig –list # 列出所有系统服务 
-# chkconfig –list | grep on # 列出所有启动的系统服务程序 
 
-# rpm -qa # 查看所有安装的软件包
+##### CPU
 
-查看/proc/uptime文件计算系统启动时间：
-cat /proc/uptime
-输出: 5113396.94 575949.85
+物理CPU
 
-第一数字即是系统已运行的时间5113396.94秒，运用系统工具date即可算出系统启动时间
+实际Server中插槽上的CPU个数
+物理cpu数量，可以数不重复的physical id有几个
 
-date -d "$(awk -F. '{print $1}' /proc/uptime) second ago" +"%Y-%m-%d %H:%M:%S"
+逻辑CPU 
 
-输出: 2018-01-02 06:50:52
+/proc/cpuinfo用来存储cpu硬件信息的
 
-查看/proc/uptime文件计算系统运行时间
+信息内容分别列出了processor 0 –processor n 的规格。这里需要注意，n+1是逻辑cpu数
 
-cat /proc/uptime| awk -F. '{run_days=$1 / 86400;run_hour=($1 % 86400)/3600;run_minute=($1 % 3600)/60;run_second=$1 % 60;printf("系统已运行：%d天%d时%d分%d秒",run_days,run_hour,run_minute,run_second)}'
+一般情况，我们认为一颗cpu可以有多核，加上intel的超线程技术(HT), 可以在逻辑上再分一倍数量的cpu core出来
 
-输出:系统已运行：1天1时36分13秒
+逻辑CPU数量=物理cpu数量 x cpu cores 这个规格值 x 2(如果支持并开启ht)    
 
-Linux查看物理CPU个数、核数、逻辑CPU个数
+注：Linux下top查看的CPU也是逻辑CPU个数
+
+CPU核数
+
+一块CPU上面能处理数据的芯片组的数量、比如现在的i5 760,是双核心四线程的CPU、而 i5 2250 是四核心四线程的CPU
+
+一般来说，物理CPU个数×每颗核数就应该等于逻辑CPU的个数，如果不相等的话，则表示服务器的CPU支持超线程技术
+
+lscpu命令，查看的是cpu的统计信息，包括型号、主频、内核信息等
+
+```shell
+# Linux查看物理CPU个数、核数、逻辑CPU个数
 # 总核数 = 物理CPU个数 X 每颗物理CPU的核数 
 # 总逻辑CPU数 = 物理CPU个数 X 每颗物理CPU的核数 X 超线程数
 
 # 查看物理CPU个数
 cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
-2
+# 2
 
 # 查看每个物理CPU中core的个数(即核数)
 cat /proc/cpuinfo| grep "cpu cores"| uniq
-cpu cores       : 2
+# cpu cores       : 2
 
 # 查看逻辑CPU的个数
 cat /proc/cpuinfo| grep "processor"| wc -l
 
-
 # 查看CPU信息（型号）
 cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
-      4  Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz
+#      4  Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz
 
-输入命令cat /proc/cpuinfo 查看physical id有几个就有几个物理cpu；查看processor有几个就有几个逻辑cpu。
-(一)概念
-① 物理CPU
-实际Server中插槽上的CPU个数
-物理cpu数量，可以数不重复的physical id有几个
-② 逻辑CPU 
-/proc/cpuinfo用来存储cpu硬件信息的
-信息内容分别列出了processor 0 –processor n 的规格。这里需要注意，n+1是逻辑cpu数
-一般情况，我们认为一颗cpu可以有多核，加上intel的超线程技术(HT), 可以在逻辑上再分一倍数量的cpu core出来
-逻辑CPU数量=物理cpu数量 x cpu cores 这个规格值 x 2(如果支持并开启ht)    
-备注一下：Linux下top查看的CPU也是逻辑CPU个数
- ③ CPU核数
-一块CPU上面能处理数据的芯片组的数量、比如现在的i5 760,是双核心四线程的CPU、而 i5 2250 是四核心四线程的CPU
-一般来说，物理CPU个数×每颗核数就应该等于逻辑CPU的个数，如果不相等的话，则表示服务器的CPU支持超线程技术
+cat /proc/cpuinfo
+# 查看physical id有几个就有几个物理cpu；查看processor有几个就有几个逻辑cpu。
 
-lscpu命令，查看的是cpu的统计信息，包括型号、主频、内核信息等
+lscpu
+```
 
+##### uptime
 
-内存
+```shell
+# 查看/proc/uptime文件计算系统启动时间：
+cat /proc/uptime # 区分 uptime
+# 输出: 5113396.94 575949.85
 
-概要查看内存情况  free  -m    详细情况：cat /proc/meminfo
+# 第一数字即是系统已运行的时间5113396.94秒，运用系统工具date即可算出系统启动时间
 
-查看硬盘和分区分布： lsblk
-列出所有可用块设备的信息，而且还能显示他们之间的依赖关系，但是它不会列出RAM盘的信息
+date -d "$(awk -F. '{print $1}' /proc/uptime) second ago" +"%Y-%m-%d %H:%M:%S"
 
-如果要看硬盘和分区的详细信息：fdisk -l
+# 输出: 2018-01-02 06:50:52
 
-使用“df -k”命令，以KB为单位显示磁盘使用量和占用率，-m则是以M为单位显示磁盘使用量和占用率
+# 查看/proc/uptime文件计算系统运行时间
 
-网卡
+cat /proc/uptime| awk -F. '{run_days=$1 / 86400;run_hour=($1 % 86400)/3600;run_minute=($1 % 3600)/60;run_second=$1 % 60;printf("系统已运行：%d天%d时%d分%d秒",run_days,run_hour,run_minute,run_second)}'
 
-查看网卡硬件信息
-# lspci | grep -i 'eth'
-02:00.0 Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI Express Gigabit Ethernet controller (rev 06)
+# 输出:系统已运行：1天1时36分13秒
 
-查看系统的所有网络接口：ifconfig -a
+```
 
-如果要查看某个网络接口的详细信息，例如eth0的详细参数和指标：ethtool eth0
-
-查看pci信息，即主板所有硬件槽信息：lspci
-
-如果要更详细的信息:lspci -v 或者 lspci -vv
-
-如果要看设备树:lspci -t
-
-
- Linux /proc目录详解
+##### Linux /proc目录详解
 
 1. /proc目录
+
 Linux 内核提供了一种通过 /proc 文件系统，在运行时访问内核内部数据结构、改变内核设置的机制。proc文件系统是一个伪文件系统，它只存在内存当中，而不占用外存空间。它以文件系统的方式为访问系统内核数据的操作提供接口。
+
 用户和应用程序可以通过proc得到系统的信息，并可以改变内核的某些参数。由于系统的信息，如进程，是动态改变的，所以用户或应用程序读取proc文件时，proc文件系统是动态从系统内核读出所需信息并提交的。下面列出的这些文件或子文件夹，并不是都是在你的系统中存在，这取决于你的内核配置和装载的模块。另外，在/proc下还有三个很重要的目录：net，scsi和sys。 Sys目录是可写的，可以通过它来访问或修改内核的参数，而net和scsi则依赖于内核配置。例如，如果系统不支持scsi，则scsi 目录不存在。
-除了以上介绍的这些，还有的是一些以数字命名的目录，它们是进程目录。系统中当前运行的每一个进程都有对应的一个目录在/proc下，以进程的 PID号为目录名，它们是读取进程信息的接口。而self目录则是读取进程本身的信息接口，是一个link。
+
+还有的是一些以数字命名的目录，它们是进程目录。系统中当前运行的每一个进程都有对应的一个目录在/proc下，以进程的 PID号为目录名，它们是读取进程信息的接口。而self目录则是读取进程本身的信息接口，是一个link。
 
 2. 子文件或子文件夹
+```
 /proc/buddyinfo 每个内存区中的每个order有多少块可用，和内存碎片问题有关
 /proc/cmdline 启动时传递给kernel的参数信息
 /proc/cpuinfo cpu的信息
@@ -623,8 +672,10 @@ Linux 内核提供了一种通过 /proc 文件系统，在运行时访问内核�
 /proc/diskstats 取得磁盘信息
 /proc/schedstat kernel调度器的统计信息
 /proc/zoneinfo 显示内存空间的统计信息，对分析虚拟内存行为很有用
+```
 
 以下是/proc目录中进程N的信息
+```
 /proc/N pid为N的进程信息
 /proc/N/cmdline 进程启动命令
 /proc/N/cwd 链接到进程当前工作目录
@@ -639,7 +690,6 @@ Linux 内核提供了一种通过 /proc 文件系统，在运行时访问内核�
 /proc/N/status 进程状态信息，比stat/statm更具可读性
 /proc/self 链接到当前正在运行的进程
 ```
-
 
 
 

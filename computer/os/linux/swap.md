@@ -1,4 +1,4 @@
-## swap 
+## swap
 
 windows：虚拟内存
 linux：swap分区

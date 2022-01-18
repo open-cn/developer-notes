@@ -1,5 +1,4 @@
 ## Flink
-
 Apache Flink
 
 ### Flink 概述
@@ -65,9 +64,9 @@ Flink 旨在任意规模上运行有状态流式应用。因此，应用程序�
 
 Flink 用户报告了其生产环境中一些令人印象深刻的扩展性数字
 
-- 处理每天处理数万亿的事件,
-- 应用维护几TB大小的状态, 和
-- 应用在数千个内核上运行。
+- 处理每天处理数万亿的事件
+- 应用维护几TB大小的状态
+- 应用在数千个内核上运行
 
 #### 利用内存性能
 有状态的 Flink 程序针对本地状态访问进行了优化。任务的状态始终保留在内存中，如果状态大小超过可用内存，则会保存在能高效访问的磁盘数据结构中。任务通过访问本地（通常在内存中）状态来进行所有的计算，从而产生非常低的处理延迟。Flink 通过定期和异步地对本地状态进行持久化存储来保证故障场景下精确一次的状态一致性。
@@ -512,18 +511,25 @@ Lambda 架构用定期运行的批处理作业来实现应用程序的持续性�
 
 ##### Kappa架构
 
-用来解决lambda架构的不足，即更多的开发和运维工作
-lambda架构背景是流处理引擎还不完善，流处理的结果只作为临时的、近似的值提供参考
-Flink流处理引擎出现后，为了解决两套代码的问题，Kappa架构出现
+用来解决lambda架构的不足，即更多的开发和运维工作。
+
+lambda架构背景是流处理引擎还不完善，流处理的结果只作为临时的、近似的值提供参考。
+
+Flink流处理引擎出现后，为了解决两套代码的问题，Kappa架构出现。
 
 Kappa架构介绍：
-    Kappa 架构可以认为是 Lambda 架构的简化版（只要移除 lambda 架构中的批处理部分即可）
-    在 Kappa 架构中，需求修改或历史数据重新处理都通过上游重放完成。
-    Kappa 架构最大的问题是流式重新处理历史的吞吐能力会低于批处理，但这个可以通过增加计算资源来弥补。
+    
+- Kappa 架构可以认为是 Lambda 架构的简化版（只要移除 lambda 架构中的批处理部分即可）
+- 在 Kappa 架构中，需求修改或历史数据重新处理都通过上游重放完成。
+- Kappa 架构最大的问题是流式重新处理历史的吞吐能力会低于批处理，但这个可以通过增加计算资源来弥补。
 
-调研：flink可以保证计算的准确性，但是有一个前提是数据时准时到达的。
-    卡口过车数据 设备会因为网络延迟迟到几个小时，所以 Kappa架构不适合我们
-    建议次日凌晨使用离线计算统计前天数据，替换实时表数据
+调研：
+
+flink可以保证计算的准确性，但是有一个前提是数据时准时到达的。
+    
+卡口过车数据 设备会因为网络延迟迟到几个小时，所以 Kappa架构不适合我们。
+
+建议次日凌晨使用离线计算统计前天数据，替换实时表数据。
 
 
 #### Flink 通信模型（Akka）
@@ -1147,13 +1153,7 @@ bin/flink run -s hdfs：///flink/savepoint/savepoint-8b08d3-c077f4bd59b0  -m yar
 
 nohup bin/flink run -s hdfs：///flink/savepoint/savepoint-8b08d3-c077f4bd59b0  -m yarn-cluster -yn 2 -yjm 1024 -ytm 2048 -yt test/ --class com.xxx.xxx.xxx.Kafka2Phoenix /opt/xxx/xxx/xxx/xxx-1.0.jar >/opt/xxx/xxx/xxx/xxx-1.0.log &
 
-### Flink 部署
-
-Flink 是一个多功能框架，以混搭方式支持许多不同的部署场景。
-
-如果你只是想在本地启动 Flink，我们建议设置一个 Standalone Cluster。
-
-#### flink cli
+### Flink CLI
 ```bash
 flink --help
 ```
@@ -1608,6 +1608,594 @@ Action "savepoint" triggers savepoints for a running job or disposes existing on
                                      
 ```
 
+### Flink 部署
+Flink 是一个多功能框架，以混搭方式支持许多不同的部署场景。
+
+如果你只是想在本地启动 Flink，建议设置一个 Standalone Cluster。
+
+#### 配置
+```yaml conf/flink-conf.yaml
+#==============================================================================
+# Hosts and Ports
+#==============================================================================
+
+# 自动发现功能： Yarn, Mesos, Kubernetes 
+# jobmanager.rpc.address: localhost
+#jobmanager.rpc.port: 6123
+#rest.port: 8081
+# rest.address: 0.0.0.0
+#rest.bind-port: "8081"
+# rest.bind-address: 0.0.0.0
+#taskmanager.data.port: 0
+# taskmanager.host:
+#taskmanager.rpc.port: "0"
+#metrics.internal.query-service.port: "0"
+
+#==============================================================================
+# Others
+#==============================================================================
+
+# 每台机器的可用 CPU 数
+taskmanager.numberOfTaskSlots: 1
+
+# 集群中所有 CPU 数
+parallelism.default: 1
+
+
+
+#==============================================================================
+# Jobmanager
+#==============================================================================
+
+jobmanager.archive.fs.dir: (none)
+jobmanager.execution.attempts-history-size: 16
+jobmanager.execution.failover-strategy: "region"
+# 'full': Restarts all tasks to recover the job.
+# 'region': Restarts all tasks that could be affected by the task failure.
+jobmanager.retrieve-taskmanager-hostname: true
+jobmanager.rpc.address: (none)
+jobmanager.rpc.port: 6123
+
+jobmanager.memory.enable-jvm-direct-memory-limit: false 
+jobmanager.memory.flink.size: (none)
+jobmanager.memory.heap.size: (none)  
+jobmanager.memory.jvm-metaspace.size: 
+jobmanager.memory.jvm-overhead.fraction: 0.1
+jobmanager.memory.jvm-overhead.max: 1 gb
+jobmanager.memory.jvm-overhead.min: 192 mb
+jobmanager.memory.off-heap.size: 128 mb
+#jobmanager.memory.process.size: (none)
+# 每个 JobManager 的可用内存值，单位是 MB
+# JobManager (JobMaster / ResourceManager / Dispatcher)
+jobmanager.memory.process.size: 1600m
+
+jobstore.cache-size: 52428800
+jobstore.expiration-time: 3600
+jobstore.max-capacity: 2147483647
+
+blob.client.connect.timeout: 0
+blob.client.socket.timeout: 300000
+blob.fetch.backlog: 1000
+blob.fetch.num-concurrent: 50
+blob.fetch.retries: 5
+blob.offload.minsize: 1048576
+blob.server.port: "0"
+blob.service.cleanup.interval: 3600
+blob.service.ssl.enabled: true
+blob.storage.directory: (none)
+
+resourcemanager.job.timeout: "5 minutes"
+resourcemanager.rpc.port: 0
+resourcemanager.standalone.start-up-time: -1
+resourcemanager.taskmanager-timeout: 30000
+
+slotmanager.number-of-slots.max: 2147483647
+slotmanager.redundant-taskmanager-num: 0
+
+#==============================================================================
+# TaskManager
+#==============================================================================
+
+#taskmanager.memory.flink.size: (none)
+#taskmanager.memory.framework.heap.size: 128 mb
+#taskmanager.memory.framework.off-heap.size: 128 mb
+#taskmanager.memory.jvm-metaspace.size: 256 mb
+#taskmanager.memory.jvm-overhead.fraction: 0.1
+#taskmanager.memory.jvm-overhead.max: 1 gb
+#taskmanager.memory.jvm-overhead.min: 192 mb
+#taskmanager.memory.managed.consumer-weights: DATAPROC:70,PYTHON:30
+#taskmanager.memory.managed.fraction: 0.4
+#taskmanager.memory.managed.size: (none)
+#taskmanager.memory.network.fraction: 0.1
+#taskmanager.memory.network.max: 1 gb
+#taskmanager.memory.network.min: 64 mb
+#taskmanager.memory.process.size: (none)
+# 每个 TaskManager 的可用内存值，单位是 MB
+# TaskManager ()
+taskmanager.memory.process.size: 1728m
+# taskmanager.memory.flink.size: 1280m
+#taskmanager.memory.task.heap.size: (none)
+#taskmanager.memory.task.off-heap.size: 0 bytes
+
+task.cancellation.interval: 30000
+task.cancellation.timeout: 180000
+task.cancellation.timers.timeout: 7500
+taskmanager.data.port: 0
+taskmanager.data.ssl.enabled: true
+taskmanager.debug.memory.log: false
+taskmanager.debug.memory.log-interval: 5000
+taskmanager.host: (none)
+taskmanager.jvm-exit-on-oom: false
+taskmanager.memory.segment-size: 32 kb
+taskmanager.network.bind-policy: "ip"
+# "name" - uses hostname as binding address
+# "ip" - uses host's ip address as binding address
+taskmanager.numberOfTaskSlots: 1
+taskmanager.registration.timeout: 5 min
+taskmanager.resource-id: (none)
+taskmanager.rpc.port: "0"
+
+taskmanager.network.blocking-shuffle.compression.enabled: false
+taskmanager.network.blocking-shuffle.type: "file"
+taskmanager.network.detailed-metrics: false
+taskmanager.network.memory.buffers-per-channel: 2
+taskmanager.network.memory.floating-buffers-per-gate: 8
+taskmanager.network.memory.max-buffers-per-channel: 10
+taskmanager.network.netty.client.connectTimeoutSec: 120
+taskmanager.network.netty.client.numThreads: -1
+taskmanager.network.netty.num-arenas: -1
+taskmanager.network.netty.sendReceiveBufferSize: 0
+taskmanager.network.netty.server.backlog: 0
+taskmanager.network.netty.server.numThreads: -1
+taskmanager.network.netty.transport: "auto"
+taskmanager.network.request-backoff.initial: 100
+taskmanager.network.request-backoff.max: 10000
+taskmanager.network.retries: 0
+taskmanager.network.sort-shuffle.min-buffers: 64
+taskmanager.network.sort-shuffle.min-parallelism: 2147483647  
+
+#==============================================================================
+# RPC / Akka
+#==============================================================================
+
+akka.ask.callstack: true
+akka.ask.timeout: "10 s"
+akka.client-socket-worker-pool.pool-size-factor: 1.0
+akka.client-socket-worker-pool.pool-size-max: 2
+akka.client-socket-worker-pool.pool-size-min: 1
+akka.fork-join-executor.parallelism-factor: 2.0
+akka.fork-join-executor.parallelism-max: 64
+akka.fork-join-executor.parallelism-min: 8
+akka.framesize: "10485760b"
+akka.jvm-exit-on-fatal-error: true
+akka.log.lifecycle.events: false
+akka.lookup.timeout: "10 s"
+akka.retry-gate-closed-for: 50
+akka.server-socket-worker-pool.pool-size-factor: 1.0
+akka.server-socket-worker-pool.pool-size-max: 2
+akka.server-socket-worker-pool.pool-size-min: 1
+akka.ssl.enabled: true
+akka.startup-timeout: (none)
+akka.tcp.timeout: "20 s"
+akka.throughput: 15
+akka.transport.heartbeat.interval: "1000 s"
+akka.transport.heartbeat.pause: "6000 s"
+akka.transport.threshold: 300.0
+
+#==============================================================================
+# Metrics
+#==============================================================================
+
+#metrics.fetcher.update-interval: 10000
+#metrics.internal.query-service.port: "0"
+#metrics.internal.query-service.thread-priority: 1
+#metrics.latency.granularity: "operator"
+# Accepted values are:
+# single - Track latency without differentiating between sources and subtasks.
+# operator - Track latency while differentiating between sources, but not subtasks.
+# subtask - Track latency while differentiating between sources and subtasks.
+
+#metrics.latency.history-size: 128
+#metrics.latency.interval: 0
+#metrics.reporter.<name>.<parameter>: (none)
+#metrics.reporter.<name>.class: (none)
+metrics.reporter.prom.class: org.apache.flink.metrics.prometheus.PrometheusReporter
+#metrics.reporter.<name>.interval: 10 s
+#metrics.reporters: (none)
+#metrics.scope.delimiter: "."
+#metrics.scope.jm: "<host>.jobmanager"
+#metrics.scope.jm.job: "<host>.jobmanager.<job_name>"
+#metrics.scope.operator: "<host>.taskmanager.<tm_id>.<job_name>.<operator_name>.<subtask_index>"
+#metrics.scope.task: "<host>.taskmanager.<tm_id>.<job_name>.<task_name>.<subtask_index>"
+#metrics.scope.tm: "<host>.taskmanager.<tm_id>"
+#metrics.scope.tm.job: "<host>.taskmanager.<tm_id>.<job_name>"
+#metrics.system-resource: false
+#metrics.system-resource-probing-interval: 5000
+
+#==============================================================================
+# High Availability
+#==============================================================================
+
+#high-availability: none
+#high-availability.cluster-id: "/default"
+#high-availability.storageDir:
+#high-availability.jobmanager.port: "0"
+
+# high-availability: zookeeper
+# high-availability.storageDir: hdfs:///flink/ha/
+# high-availability.zookeeper.quorum: localhost:2181
+# high-availability.zookeeper.client.acl: open
+# high-availability.zookeeper.path.root: "/flink"
+#high-availability.zookeeper.client.connection-timeout: 15000
+#high-availability.zookeeper.client.max-retry-attempts: 3
+#high-availability.zookeeper.client.retry-wait: 5000
+#high-availability.zookeeper.client.session-timeout: 60000
+#high-availability.zookeeper.path.checkpoint-counter: "/checkpoint-counter"
+#high-availability.zookeeper.path.checkpoints: "/checkpoints"
+#high-availability.zookeeper.path.jobgraphs: "/jobgraphs"
+#high-availability.zookeeper.path.latch: "/leaderlatch"
+#high-availability.zookeeper.path.leader: "/leader"
+#high-availability.zookeeper.path.mesos-workers: "/mesos-workers"
+#high-availability.zookeeper.path.running-registry: "/running_job_registry/"
+
+#high-availability.kubernetes.leader-election.lease-duration: 15 s
+#high-availability.kubernetes.leader-election.renew-deadline: 15 s
+#high-availability.kubernetes.leader-election.retry-period: 5 s
+
+#==============================================================================
+# Fault tolerance
+#==============================================================================
+
+cluster.io-pool.size: (none)
+cluster.registration.error-delay: 10000
+cluster.registration.initial-timeout: 100
+cluster.registration.max-timeout: 30000
+cluster.registration.refused-registration-delay: 30000
+cluster.services.shutdown-timeout: 30000
+heartbeat.interval: 10000
+heartbeat.timeout: 50000
+jobmanager.execution.failover-strategy: region
+
+# none, off, disable: No restart strategy.
+# fixeddelay, fixed-delay: Fixed delay restart strategy.
+# failurerate, failure-rate: Failure rate restart strategy.
+#restart-strategy: none
+restart-strategy.fixed-delay.attempts: 1
+restart-strategy.fixed-delay.delay: 1 s
+restart-strategy.failure-rate.delay: 1 s
+restart-strategy.failure-rate.failure-rate-interval: 1 min
+restart-strategy.failure-rate.max-failures-per-interval: 1
+
+#==============================================================================
+# Checkpoints and State Backends
+#==============================================================================
+
+#state.backend: filesystem # 'jobmanager', 'filesystem', 'rocksdb', or the <class-name-of-factory>.
+state.backend: com.alibaba.flink.statebackend.GeminiStateBackendFactory
+#state.checkpoints.dir: hdfs://namenode-host:port/flink-checkpoints
+state.checkpoints.dir: hdfs://emr-header-1.cluster-247301:9000/flink/flink-checkpoints/
+#state.savepoints.dir: hdfs://namenode-host:port/flink-savepoints
+#state.backend.incremental: false
+#state.backend.local-recovery: false
+#state.checkpoints.num-retained: 1
+#taskmanager.state.local.root-dirs: 
+
+#state.backend.async: true
+#state.backend.fs.memory-threshold: 20 kb
+#state.backend.fs.write-buffer-size: 4096
+state.backend.fs.checkpointdir: hdfs://emr-header-1.cluster-247301:9000/flink/flink-checkpoints/
+
+#state.backend.rocksdb.memory.fixed-per-slot: (none)
+#state.backend.rocksdb.memory.high-prio-pool-ratio: 0.1
+#state.backend.rocksdb.memory.managed: true
+#state.backend.rocksdb.memory.write-buffer-ratio: 0.5
+#state.backend.rocksdb.timer-service.factory: ROCKSDB # [HEAP, ROCKSDB]
+#state.backend.rocksdb.checkpoint.transfer.thread.num: 1
+#state.backend.rocksdb.localdir: (none)
+#state.backend.rocksdb.options-factory: "org.apache.flink.contrib.streaming.state.DefaultConfigurableOptionsFactory"
+#state.backend.rocksdb.predefined-options: "DEFAULT"
+
+#state.backend.rocksdb.block.blocksize: (none)
+#state.backend.rocksdb.block.cache-size: (none)
+#state.backend.rocksdb.compaction.level.max-size-level-base: (none)
+#state.backend.rocksdb.compaction.level.target-file-size-base: (none)
+#state.backend.rocksdb.compaction.level.use-dynamic-size: (none)
+#state.backend.rocksdb.compaction.style: (none) # Possible values: [LEVEL, UNIVERSAL, FIFO]
+#state.backend.rocksdb.files.open: (none)
+#state.backend.rocksdb.thread.num: (none)
+#state.backend.rocksdb.write-batch-size: 2 mb
+#state.backend.rocksdb.writebuffer.count: (none)
+#state.backend.rocksdb.writebuffer.number-to-merge: (none)
+#state.backend.rocksdb.writebuffer.size: (none)
+
+#state.backend.rocksdb.metrics.actual-delayed-write-rate: false
+#state.backend.rocksdb.metrics.background-errors: false
+#state.backend.rocksdb.metrics.block-cache-capacity: false
+#state.backend.rocksdb.metrics.block-cache-pinned-usage: false
+#state.backend.rocksdb.metrics.block-cache-usage: false
+#state.backend.rocksdb.metrics.column-family-as-variable: false
+#state.backend.rocksdb.metrics.compaction-pending: false
+#state.backend.rocksdb.metrics.cur-size-active-mem-table: false
+#state.backend.rocksdb.metrics.cur-size-all-mem-tables: false
+#state.backend.rocksdb.metrics.estimate-live-data-size: false
+#state.backend.rocksdb.metrics.estimate-num-keys: false
+#state.backend.rocksdb.metrics.estimate-pending-compaction-bytes: false
+#state.backend.rocksdb.metrics.estimate-table-readers-mem: false
+#state.backend.rocksdb.metrics.is-write-stopped: false
+#state.backend.rocksdb.metrics.mem-table-flush-pending: false
+#state.backend.rocksdb.metrics.num-deletes-active-mem-table: false
+#state.backend.rocksdb.metrics.num-deletes-imm-mem-tables: false
+#state.backend.rocksdb.metrics.num-entries-active-mem-table: false
+#state.backend.rocksdb.metrics.num-entries-imm-mem-tables: false
+#state.backend.rocksdb.metrics.num-immutable-mem-table: false
+#state.backend.rocksdb.metrics.num-live-versions: false
+#state.backend.rocksdb.metrics.num-running-compactions: false
+#state.backend.rocksdb.metrics.num-running-flushes: false
+#state.backend.rocksdb.metrics.num-snapshots: false
+#state.backend.rocksdb.metrics.size-all-mem-tables: false
+#state.backend.rocksdb.metrics.total-sst-files-size: false
+
+#==============================================================================
+# Rest & web frontend
+#==============================================================================
+
+#rest.port: 8081
+# rest.address: 0.0.0.0
+# rest.bind-port: 8080-8090
+# rest.bind-address: 0.0.0.0
+
+#rest.await-leader-timeout: 30000
+#rest.client.max-content-length: 104857600
+#rest.connection-timeout: 15000
+#rest.idleness-timeout: 300000
+#rest.retry.delay: 3000
+#rest.retry.max-attempts: 20
+#rest.server.max-content-length: 104857600
+#rest.server.numThreads: 4
+#rest.server.thread-priority: 5
+
+#web.access-control-allow-origin: "*"
+#web.backpressure.cleanup-interval: 600000
+#web.backpressure.delay-between-samples: 50
+#web.backpressure.num-samples: 100
+#web.backpressure.refresh-interval: 60000
+#web.checkpoints.history: 10
+#web.history: 5
+#web.log.path: (none)
+#web.refresh-interval: 3000
+#web.submit.enable: true
+#web.timeout: 600000
+#web.tmpdir: System.getProperty("java.io.tmpdir")
+#web.upload.dir: (none)
+
+#==============================================================================
+# Advanced
+#==============================================================================
+
+fs.allowed-fallback-filesystems: (none)
+fs.default-scheme: (none)
+# 临时目录 'LOCAL_DIRS' on Yarn. '_FLINK_TMP_DIR' on Mesos. System.getProperty("java.io.tmpdir") in standalone.
+# io.tmp.dirs: /tmp
+
+#classloader.check-leaked-classloader: true
+#classloader.fail-on-metaspace-oom-error: true
+#classloader.parent-first-patterns.additional: (none)
+#classloader.parent-first-patterns.default: "java.;scala.;org.apache.flink.;com.esotericsoftware.kryo;org.apache.hadoop.;javax.annotation.;org.slf4j;org.apache.log4j;org.apache.logging;org.apache.commons.logging;ch.qos.logback;org.xml;javax.xml;org.apache.xerces;org.w3c"
+#classloader.resolve-order: "child-first"
+
+# taskmanager.memory.network.fraction: 0.1
+# taskmanager.memory.network.min: 64mb
+# taskmanager.memory.network.max: 1gb
+
+cluster.processes.halt-on-fatal-error: false
+
+cluster.evenly-spread-out-slots: false
+slot.idle.timeout: 50000
+slot.request.timeout: 300000
+slotmanager.number-of-slots.max: 2147483647
+
+#jmx.server.port: (none)
+
+#==============================================================================
+# JVM and Logging Options
+#==============================================================================
+
+env.hadoop.conf.dir: (none)
+env.hbase.conf.dir: (none)
+env.java.opts: (none)
+env.java.opts.client: (none)
+env.java.opts.historyserver: (none)
+env.java.opts.jobmanager: (none)
+env.java.opts.taskmanager: (none)
+env.log.dir: (none)
+env.log.max: 5
+env.ssh.opts: (none)
+env.yarn.conf.dir: (none)
+
+#==============================================================================
+# Flink Cluster Security Configuration
+#==============================================================================
+
+#security.kerberos.login.use-ticket-cache: true
+# security.kerberos.login.keytab: /path/to/kerberos/keytab
+# security.kerberos.login.principal: flink-user
+# security.kerberos.login.contexts: Client,KafkaClient
+
+#security.ssl.algorithms: "TLS_RSA_WITH_AES_128_CBC_SHA"
+
+#security.ssl.internal.cert.fingerprint: (none)
+#security.ssl.internal.enabled: false
+#security.ssl.internal.key-password: (none)
+#security.ssl.internal.keystore: (none)
+#security.ssl.internal.keystore-password: (none)
+#security.ssl.internal.truststore: (none)
+#security.ssl.internal.truststore-password: (none)
+
+#security.ssl.internal.close-notify-flush-timeout: -1
+#security.ssl.internal.handshake-timeout: -1
+#security.ssl.internal.session-cache-size: -1
+#security.ssl.internal.session-timeout: -1
+
+#security.ssl.provider: "JDK"
+#security.ssl.protocol: "TLSv1.2"
+
+#security.ssl.rest.authentication-enabled: false
+#security.ssl.rest.cert.fingerprint: (none)
+#security.ssl.rest.enabled: false
+#security.ssl.rest.key-password: (none)
+#security.ssl.rest.keystore: (none)
+#security.ssl.rest.keystore-password: (none)
+#security.ssl.rest.truststore: (none)
+#security.ssl.rest.truststore-password: (none)
+
+#security.ssl.verify-hostname: true
+
+#==============================================================================
+# ZK Security Configuration
+#==============================================================================
+
+#zookeeper.sasl.disable: false
+# zookeeper.sasl.service-name: zookeeper
+# zookeeper.sasl.login-context-name: Client
+
+#==============================================================================
+# HistoryServer
+#==============================================================================
+
+#jobmanager.archive.fs.dir: hdfs:///completed-jobs/
+jobmanager.archive.fs.dir: hdfs://emr-header-1.cluster-247301:9000/flink/flink-jobs/
+
+#historyserver.archive.fs.dir: hdfs:///completed-jobs/
+#historyserver.archive.fs.refresh-interval: 10000
+#historyserver.archive.clean-expired-jobs: false
+#historyserver.archive.retained-jobs: -1
+
+# historyserver.web.address: 0.0.0.0
+#historyserver.web.port: 8082
+#historyserver.web.refresh-interval: 10000
+#historyserver.web.ssl.enabled: false
+#historyserver.web.tmpdir: (none)
+historyserver.web.tmpdir: /mnt/disk1/flink/history-server/tmp
+
+#==============================================================================
+# Queryable State
+#==============================================================================
+
+#queryable-state.client.network-threads: 0
+#queryable-state.enable: false
+#queryable-state.proxy.network-threads: 0
+#queryable-state.proxy.ports: "9069"
+#queryable-state.proxy.query-threads: 0
+#queryable-state.server.network-threads: 0
+#queryable-state.server.ports: "9067"
+#queryable-state.server.query-threads: 0
+
+```
+
+##### YARN 相关配置
+```yaml
+external-resource.<resource_name>.yarn.config-key: (none)
+yarn.application-attempt-failures-validity-interval: 10000
+yarn.application-attempts: (none)
+yarn.application-master.port: "0"
+yarn.application.id: (none)
+yarn.application.name: (none)
+yarn.application.node-label: (none)
+yarn.application.priority: -1
+yarn.application.queue: (none)
+yarn.application.type: (none)
+yarn.appmaster.vcores: 1
+yarn.containers.vcores: -1
+yarn.file-replication: -1
+yarn.flink-dist-jar: (none)
+yarn.heartbeat.container-request-interval: 500
+yarn.heartbeat.interval: 5
+yarn.per-job-cluster.include-user-jar: "ORDER"
+yarn.properties-file.location: (none)
+yarn.provided.lib.dirs: (none)
+yarn.security.kerberos.additionalFileSystems: (none)
+yarn.security.kerberos.localized-keytab-path: "krb5.keytab"
+yarn.security.kerberos.ship-local-keytab: true
+yarn.ship-archives: (none) # ".tar.gz", ".tar", ".tgz", ".dst", ".jar", ".zip".
+yarn.ship-files: (none)
+yarn.staging-directory: (none)
+yarn.tags: (none)
+```
+
+##### K8S 相关配置
+```yaml
+external-resource.<resource_name>.kubernetes.config-key: (none)
+kubernetes.client.io-pool.size: 4
+kubernetes.cluster-id: (none)
+kubernetes.config.file: (none)
+kubernetes.container-start-command-template: "%java% %classpath% %jvmmem% %jvmopts% %logging% %class% %args%"
+kubernetes.container.image: # The default value depends on the actually running version. In general it looks like "flink:<FLINK_VERSION>-scala_<SCALA_VERSION>"
+kubernetes.container.image.pull-policy: IfNotPresent # Possible values: [IfNotPresent, Always, Never]
+kubernetes.container.image.pull-secrets: (none)
+kubernetes.context: (none)
+kubernetes.entry.path: "/docker-entrypoint.sh"
+kubernetes.env.secretKeyRef: (none)
+kubernetes.flink.conf.dir: "/opt/flink/conf"
+kubernetes.flink.log.dir: "/opt/flink/log"
+kubernetes.hadoop.conf.config-map.name: (none)
+kubernetes.jobmanager.annotations: (none)
+kubernetes.jobmanager.cpu: 1.0
+kubernetes.jobmanager.labels: (none)
+kubernetes.jobmanager.node-selector: (none)
+kubernetes.jobmanager.owner.reference: (none)
+kubernetes.jobmanager.service-account: (none)
+kubernetes.jobmanager.tolerations: (none)
+kubernetes.namespace: "default"
+kubernetes.rest-service.annotations: (none)
+kubernetes.rest-service.exposed.type: LoadBalancer # Possible values: [ClusterIP, NodePort, LoadBalancer]
+kubernetes.secrets: (none)
+kubernetes.service-account: "default"
+kubernetes.taskmanager.annotations: (none)
+kubernetes.taskmanager.cpu: -1.0
+kubernetes.taskmanager.labels: (none)
+kubernetes.taskmanager.node-selector: (none)
+kubernetes.taskmanager.service-account: (none)
+kubernetes.taskmanager.tolerations: (none)
+kubernetes.transactional-operation.max-retries: 5
+```
+
+##### mesos 相关配置
+```yaml
+mesos.failover-timeout: 604800
+mesos.master: (none)
+host:port: zk://host1:port1,host2:port2,.../path
+# zk://username:password@host1:port1,host2:port2,.../path
+# file:///path/to/file
+mesos.resourcemanager.artifactserver.port: 0
+mesos.resourcemanager.artifactserver.ssl.enabled: true
+mesos.resourcemanager.declined-offer-refuse-duration: 5000
+mesos.resourcemanager.framework.name: "Flink"
+mesos.resourcemanager.framework.principal: (none)
+mesos.resourcemanager.framework.role: "*"
+mesos.resourcemanager.framework.secret: (none)
+mesos.resourcemanager.framework.user: (none)
+mesos.resourcemanager.tasks.port-assignments: (none)
+mesos.resourcemanager.unused-offer-expiration: 120000
+
+# Mesos TaskManager
+
+mesos.constraints.hard.hostattribute: (none)
+mesos.resourcemanager.network.resource.name: "network"
+mesos.resourcemanager.tasks.bootstrap-cmd: (none)
+mesos.resourcemanager.tasks.container.docker.force-pull-image: false
+mesos.resourcemanager.tasks.container.docker.parameters: (none)
+mesos.resourcemanager.tasks.container.image.name: (none)
+mesos.resourcemanager.tasks.container.type: "mesos"
+mesos.resourcemanager.tasks.container.volumes: (none)
+mesos.resourcemanager.tasks.cpus: 0.0
+mesos.resourcemanager.tasks.disk: 0
+mesos.resourcemanager.tasks.gpus: 0
+mesos.resourcemanager.tasks.hostname: (none)
+mesos.resourcemanager.tasks.network.bandwidth: 0
+mesos.resourcemanager.tasks.taskmanager-cmd: "$FLINK_HOME/bin/mesos-taskmanager.sh"  
+mesos.resourcemanager.tasks.uris: (none)
+```
+
 #### 部署模式
 
 Flink 可以通过以下三种方式之一执行应用程序：应用模式（Application Mode）、单任务模式（Per-Job Mode）、会话模式（Session Mode）。
@@ -1617,7 +2205,7 @@ Flink 可以通过以下三种方式之一执行应用程序：应用模式（Ap
 - 集群生命周期和资源隔离保证。
 - 应用程序的main()方法是在客户端还是在集群上执行。
 
-在会话模式下，集群生命周期独立于集群上运行的任何作业的生命周期，并且资源在所有作业之间共享。在每个作业方式支付旋转起来为每个提交的作业集群的价格，但这种带有更好的隔离保证的资源不能跨岗位共享。在这种情况下，集群的生命周期与作业的生命周期绑定。最后， Application Mode为每个应用程序创建一个会话集群，并main() 在集群上执行应用程序的方法。
+在会话模式下，集群生命周期独立于集群上运行的任何作业的生命周期，并且资源在所有作业之间共享。在每个作业方式支付旋转起来为每个提交的作业集群的价格，但这种带有更好的隔离保证的资源不能跨岗位共享。在这种情况下，集群的生命周期与作业的生命周期绑定。最后，Application Mode为每个应用程序创建一个会话集群，并main() 在集群上执行应用程序的方法。
 
 ##### 应用模式
 
@@ -1647,15 +2235,23 @@ Per-Job模式旨在提供更好的资源隔离保证，使用可用的资源提�
 - Flink 目录必须放在所有 worker 节点的相同目录下。你可以使用共享的 NFS 目录，或将 Flink 目录复制到每个 worker 节点上。
 
 ```yaml conf/flink-conf.yaml
-env.java.home # 配置JAVA_HOME
+# 配置JAVA_HOME
+env.java.home
 
-jobmanager.memory.process.size # 每个 JobManager 的可用内存值，单位是 MB
+jobmanager.rpc.address: localhost
+jobmanager.rpc.port: 6123
 
-taskmanager.memory.process.size # 每个 TaskManager 的可用内存值，单位是 MB
-taskmanager.numberOfTaskSlots # 每台机器的可用 CPU 数
+jobmanager.memory.process.size: 1600m
+taskmanager.memory.process.size: 1728m
 
-parallelism.default # 集群中所有 CPU 数
-io.tmp.dirs # 临时目录
+taskmanager.numberOfTaskSlots: 1
+
+parallelism.default: 1
+
+jobmanager.execution.failover-strategy: region
+
+# io.tmp.dirs: /tmp
+# web.upload.dir: /data/flink/jars
 ```
 
 ```bash
@@ -1678,6 +2274,7 @@ high-availability.zookeeper.path.root: /flink
 high-availability.cluster-id: /cluster_one # important: customize per cluster
 high-availability.storageDir: hdfs:///flink/recovery
 ```
+
 ```txt conf/masters
 # jobManagerAddress:webUIPort
 localhost:8081
@@ -1719,6 +2316,93 @@ flink发布命令并没有指定yarn 怎么就在yarn上运行了？
 配置一个容器 yarn-session，再发布一个flink程序会自动找到 JobManager address（如果创建容器的时间和程序发布的时间间隔太久 会抛找不到 jobManager address 的异常）使用 -yid 可以指定 flink 程序发布到 yarn cluster 集群上运行。
 
 flink on yarn  运行方式 1：Session 模式  2：Per-job Cluster 模式 3：Application 模式
+
+##### 配置
+
+```yaml conf/flink-conf.yaml
+#==============================================================================
+# Common
+#==============================================================================
+
+
+#==============================================================================
+# High Availability
+#==============================================================================
+# high-availability: zookeeper
+# high-availability.storageDir: hdfs:///flink/ha/
+# high-availability.zookeeper.quorum: localhost:2181
+# high-availability.zookeeper.client.acl: open
+
+#==============================================================================
+# Fault tolerance and checkpointing
+#==============================================================================
+
+#state.backend: filesystem
+#state.checkpoints.dir: hdfs://namenode-host:port/flink-checkpoints
+#state.savepoints.dir: hdfs://namenode-host:port/flink-savepoints
+#state.backend.incremental: false
+
+state.backend.fs.checkpointdir: hdfs://emr-header-1.cluster-247301:9000/flink/flink-checkpoints/
+state.backend: com.alibaba.flink.statebackend.GeminiStateBackendFactory
+
+#==============================================================================
+# Rest & web frontend
+#==============================================================================
+
+#rest.port: 8081
+#rest.address: 0.0.0.0
+#rest.bind-port: 8080-8090
+#rest.bind-address: 0.0.0.0
+#web.submit.enable: false
+
+#==============================================================================
+# Advanced
+#==============================================================================
+
+# 临时目录
+# io.tmp.dirs: /tmp
+# classloader.resolve-order: child-first
+# classloader.resolve-order: parent-first
+# taskmanager.memory.network.fraction: 0.1
+# taskmanager.memory.network.min: 64mb
+# taskmanager.memory.network.max: 1gb
+taskmanager.network.memory.max: 1gb
+taskmanager.network.memory.fraction: 0.1
+taskmanager.network.memory.min: 64mb
+
+
+#==============================================================================
+# Flink Cluster Security Configuration
+#==============================================================================
+
+# security.kerberos.login.use-ticket-cache: true
+# security.kerberos.login.keytab: /path/to/kerberos/keytab
+# security.kerberos.login.principal: flink-user
+# security.kerberos.login.contexts: Client,KafkaClient
+
+#==============================================================================
+# ZK Security Configuration
+#==============================================================================
+
+# zookeeper.sasl.service-name: zookeeper
+# zookeeper.sasl.login-context-name: Client
+
+#==============================================================================
+# HistoryServer
+#==============================================================================
+
+#jobmanager.archive.fs.dir: hdfs:///completed-jobs/
+#historyserver.web.address: 0.0.0.0
+#historyserver.web.port: 8082
+#historyserver.archive.fs.dir: hdfs:///completed-jobs/
+#historyserver.archive.fs.refresh-interval: 10000
+historyserver.web.tmpdir: /mnt/disk1/flink/history-server/tmp
+historyserver.web.port: 8082
+historyserver.archive.fs.refresh-interval: 10000
+
+jobmanager.archive.fs.dir: hdfs://emr-header-1.cluster-247301:9000/flink/flink-jobs/
+
+```
 
 ##### Session 模式
 
@@ -1862,141 +2546,6 @@ Usage:
   hdfs://myhdfs/jars/my-application.jar
 ```
 由于所需的 Flink jar 和应用程序 jar 将由指定的远程位置获取，而不是由客户端运送到集群，因此上述将允许作业提交更加轻量级。
-
-
-##### YARN 使用
-```bash
-yarn --help
-
-yarn application -help
-yarn application -list -appStates ALL -appTypes <Types>
-yarn application -appId <Application ID>
-yarn application -kill <Application ID>
-yarn application -status <Application ID>
-
-yarn logs
-yarn logs -applicationId <application ID> -containerId  <Container ID>
-
-yarn cluster -h
-yarn cluster -lnl
-```
-``` help
-Usage: yarn [--config confdir] [COMMAND | CLASSNAME]
-  CLASSNAME                             run the class named CLASSNAME
- or
-  where COMMAND is one of:
-  resourcemanager                       run the ResourceManager
-                                        Use -format-state-store for deleting the RMStateStore.
-                                        Use -remove-application-from-state-store <appId> for
-                                            removing application from RMStateStore.
-  nodemanager                           run a nodemanager on each slave
-  timelineserver                        run the timeline server
-  rmadmin                               admin tools
-  sharedcachemanager                    run the SharedCacheManager daemon
-  scmadmin                              SharedCacheManager admin tools
-  version                               print the version
-  jar <jar>                             run a jar file
-  application                           prints application(s)
-                                        report/kill application
-  applicationattempt                    prints applicationattempt(s)
-                                        report
-  container                             prints container(s) report
-  node                                  prints node report(s)
-  queue                                 prints queue information
-  logs                                  dump container logs
-  classpath                             prints the class path needed to
-                                        get the Hadoop jar and the
-                                        required libraries
-  cluster                               prints cluster information
-  daemonlog                             get/set the log level for each
-                                        daemon
-  top                                   run cluster usage tool
-
-Most commands print help when invoked w/o parameters.
-
-
-usage: application
- -appId <Application ID>         Specify Application Id to be operated
- -appStates <States>             Works with -list to filter applications
-                                 based on input comma-separated list of
-                                 application states. The valid application
-                                 state can be one of the following:
-                                 ALL,NEW,NEW_SAVING,SUBMITTED,ACCEPTED,RUN
-                                 NING,FINISHED,FAILED,KILLED
- -appTypes <Types>               Works with -list to filter applications
-                                 based on input comma-separated list of
-                                 application types.
- -help                           Displays help for all commands.
- -kill <Application ID>          Kills the application. Set of
-                                 applications can be provided separated
-                                 with space
- -list                           List applications. Supports optional use
-                                 of -appTypes to filter applications based
-                                 on application type, and -appStates to
-                                 filter applications based on application
-                                 state.
- -movetoqueue <Application ID>   Moves the application to a different
-                                 queue.
- -queue <Queue Name>             Works with the movetoqueue command to
-                                 specify which queue to move an
-                                 application to.
- -status <Application ID>        Prints the status of the application.
- -updatePriority <Priority>      update priority of an application.
-                                 ApplicationId can be passed using 'appId'
-                                 option.
-
-
-usage: yarn logs -applicationId <application ID> [OPTIONS]
-general options are:
- -am <AM Containers>             Prints the AM Container logs for this
-                                 application. Specify comma-separated
-                                 value to get logs for related AM
-                                 Container. For example, If we specify -am
-                                 1,2, we will get the logs for the first
-                                 AM Container as well as the second AM
-                                 Container. To get logs for all AM
-                                 Containers, use -am ALL. To get logs for
-                                 the latest AM Container, use -am -1. By
-                                 default, it will only print out syslog.
-                                 Work with -logFiles to get other logs
- -appOwner <Application Owner>   AppOwner (assumed to be current user if
-                                 not specified)
- -containerId <Container ID>     ContainerId. By default, it will only
-                                 print syslog if the application is
-                                 runing. Work with -logFiles to get other
-                                 logs.
- -help                           Displays help for all commands.
- -logFiles <Log File Name>       Work with -am/-containerId and specify
-                                 comma-separated value to get specified
-                                 container log files. Use "ALL" to fetch
-                                 all the log files for the container.
- -nodeAddress <Node Address>     NodeAddress in the format nodename:port
-
-
-usage: yarn cluster
- -dnl,--directly-access-node-label-store   This is DEPRECATED, will be
-                                           removed in future releases.
-                                           Directly access node label
-                                           store, with this option, all
-                                           node label related operations
-                                           will NOT connect RM. Instead,
-                                           they will access/modify stored
-                                           node labels directly. By
-                                           default, it is false (access
-                                           via RM). AND PLEASE NOTE: if
-                                           you configured
-                                           yarn.node-labels.fs-store.root-
-                                           dir to a local directory
-                                           (instead of NFS or HDFS), this
-                                           option will only work when the
-                                           command run on the machine
-                                           where RM is running. Also, this
-                                           option is UNSTABLE, could be
-                                           removed in future releases.
- -h,--help                                 Displays help for all commands.
- -lnl,--list-node-labels                   List cluster node-label
-                                           collection
-```
 
 
 ### Flink 应用
@@ -2767,6 +3316,15 @@ PyFlink Jobs on Kubernetes (FLINK-17480)
 > 从 Flink 1.12 开始，您可以在 PyFlink 作业中定义和使用 Python UDAF 了（FLIP-139）。普通的 UDF（标量函数）每次只能处理一行数据，而 UDAF（聚合函数）则可以处理多行数据，用于计算多行数据的聚合值。您也可以使用 Pandas UDAF（FLIP-137），来进行向量化计算（通常来说，比普通 Python UDAF 快10倍以上）。
 >
 > 注意: 普通 Python UDAF，当前仅支持在 group aggregations 以及流模式下使用。如果需要在批模式或者窗口聚合中使用，建议使用 Pandas UDAF。
+
+#### Flink 1.13 版本
+
+
+#### Flink 1.14 版本
+
+
+#### Flink 1.15 版本
+
 
 ### 程序调优
 

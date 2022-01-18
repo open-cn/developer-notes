@@ -149,6 +149,89 @@ Java Persistence API（JPA）是一项标准技术，可让您将对象映射到
 - Spring ORM  ——  Spring Framework 的核心 ORM 支持
 
 
+##### MybatisPlus 主键策略
+
+**ASSIGN_ID**
+
+IdType.ASSIGN_ID（雪花算法）策略。使用接口IdentifierGenerator的方法nextId（以实现类为DefaultIdentifierGenerator雪花算法）。该策略使用雪花算法自动生成主键ID，主键类型为长或字符串（分别对应的MySQL的表字段为BIGINT和VARCHAR）。
+
+如果不设置类型值，默认则使用IdType.ASSIGN_ID策略（自3.3.0起）。
+
+雪花算法是Twitter开源的分布式ID生成算法其核心思想就是：使用一个64位的长型的数字作为全局唯一ID。在分布式系统中的应用十分广泛，且ID引入了时间戳，基本上保持自增的。
+
+**ASSIGN_UUID**
+
+IdType.ASSIGN_UUID（排除中划线的UUID）策略。使用接口IdentifierGenerator的方法nextUUID。该策略生成排除中划线的UUID作为主键。主键类型为String，对应MySQL的表分段为VARCHAR（32）。
+
+**AUTO**
+
+IdType.AUTO（数据库ID自增）策略。
+
+对于像MySQL这样的支持主键自动递增的数据库，我们可以使用IdType.AUTO策略。
+
+**INPUT**
+
+IdType.INPUT（插入前自行设置主键值）策略。
+
+（1）针对有序列的数据库：Oracle，SQLServer等，当需要建立一个自增序列时，需要用到序列。
+
+提示：
+在Oracle 11g中，设置自增扩，需要先创建序列（SQUENCE）再创建一个触发器（TRIGGER）。
+在Oracle 12c中，只需要使用IDENTITY属性就可以了，和MySQL一样简单。
+ 
+（2）Mybatis -Plus已经定义好了常见的数据库主键序列，我们首先只需要在@Configuration类中定义好@Bean：
+
+Mybatis -Plus内置了如下数据库主键序列（如果内置支持不满足你的需求，可实现IKeyGenerator接口来进行扩展）：
+
+DB2KeyGenerator
+H2KeyGenerator
+KingbaseKeyGenerator
+OracleKeyGenerator
+PostgreKeyGenerator
+
+```java
+@Bean
+public OracleKeyGenerator oracleKeyGenerator(){
+    return new OracleKeyGenerator();
+}
+```
+
+（3）然后实体类配置主键Sequence，指定主键策略为IdType.INPUT即可：
+提示：支持父类定义@KeySequence子类使用，这样就可以几个表共享一个Sequence
+
+```java
+@TableName("TEST_SEQUSER")
+@KeySequence("SEQ_TEST")//类注解
+public class TestSequser{
+  @TableId(value = "ID", type = IdType.INPUT)
+  private Long id;
+
+}
+```
+
+（4）如果主键是String类型的，也可以使用：
+
+如何使用序列作为主键，但是实体主键类型是字符串开头，表的主键是varchar2，但是需要从序列中取值
+
+实体定义@KeySequence注解clazz指定类型String.class
+
+实体定义主键的类型字符串
+注意：oracle的序列返回的是Long类型，如果主键类型是Integer，可能会引起ClassCastException
+
+```java
+@KeySequence(value = "SEQ_ORACLE_STRING_KEY", clazz = String.class)
+public class YourEntity{
+     
+    @TableId(value = "ID_STR", type = IdType.INPUT)
+    private String idStr;
+}
+```
+
+**NONE**
+
+IdType.NONE策略，表示未设置主键类型（注解里等于跟随上下文，约等于INPUT）。
+
+
 #### Spring Data
 
 ##### Spring Data JPA
