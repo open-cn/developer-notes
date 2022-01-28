@@ -358,8 +358,7 @@ Hadoop 运行模式包括：本地模式、伪分布式模式以及完全分布�
 伪分布模式可以把MapReduce程序直接运行在HDFS上，也可以选择运行在Yarn上。
 
 #### 配置文件说明
-Hadoop 配置文件分两类：默认配置文件和自定义配置文件，只有用户想修改某一默认
-配置值时，才需要修改自定义配置文件，更改相应属性值。
+Hadoop 配置文件分两类：默认配置文件和自定义配置文件，只有用户想修改某一默认配置值时，才需要修改自定义配置文件，更改相应属性值。
 
 （1）默认配置文件：<br>
 [core-default.xml] hadoop-common-2.7.2.jar/core-default.xml<br>
@@ -419,9 +418,10 @@ cat wcoutput/part-r-00000
     <value>hdfs://hadoop101:9000</value>
 </property>
 <!--指定Hadoop运行时产生文件的存储目录-->
+<!--  理解为缓存或许是不准确的 -->
 <property>
     <name>hadoop.tmp.dir</name>
-    <value>/opt/hadoop/tmp</value>
+    <value>/opt/hadoop</value>
 </property>
 （c）配置：hdfs-site.xml
 <!--指定HDFS副本的数量-->
@@ -474,7 +474,7 @@ hdfs dfs -rm -r /user/hadoop/output
     <value>mapreduce_shuffle</value>
 </property>
 <!--指定YARN的ResourceManager的地址-->
-<!--wsl2 中需要设置未0.0.0.0，不然无法访问-->
+<!--wsl2 中需要设置为0.0.0.0，不然localhost/hadoop101无法访问-->
 <property>
     <name>yarn.resourcemanager.hostname</name>
     <value>hadoop101</value>
@@ -841,6 +841,16 @@ hadoop fs -ls /
 hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-2.10.1.jar wordcount input out
 
 mr-jobhistory-daemon.sh start historyserver
+
+# start-all.sh
+# stop-all.sh
+# This script is Deprecated. Instead use start-dfs.sh and start-yarn.sh
+# need ssh
+# need set java env
+start-dfs.sh
+start-yarn.sh
+stop-dfs.sh
+stop-yarn.sh
 ```
 
 ```
@@ -1308,6 +1318,7 @@ dfs.datanode.handler.count 30
 dfs.datanode.hdfs-blocks-metadata.enabled true
 dfs.datanode.imbalance.threshold 10
 dfs.datanode.kerberos.principal
+dfs.datanode.keytab.file
 dfs.datanode.lifeline.interval.seconds
 dfs.datanode.max.locked.memory 0
 dfs.datanode.max.transfer.threads 4096
@@ -1443,7 +1454,7 @@ dfs.namenode.replication.max-streams-hard-limit 100
 dfs.namenode.replication.min 1
 dfs.namenode.replication.work.multiplier.per.iteration 100
 dfs.namenode.resource.check.interval 5000
-dfs.namenode.resource.checked.volumes dfs.datanode.keytab.file
+dfs.namenode.resource.checked.volumes
 dfs.namenode.resource.checked.volumes.minimum 1
 dfs.namenode.resource.du.reserved 1073741824
 dfs.namenode.retrycache.expirytime.millis 600000

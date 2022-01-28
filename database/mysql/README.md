@@ -19,6 +19,81 @@ MySQL触发器是存储的程序，它们自动执行以响应与表相关的特
 #### MySQL 函数
 最常用的MySQL函数，包括聚合函数，字符串函数，日期和时间函数以及控制流函数。
 
+##### 聚合函数
+
+常见的聚合函数有：sum() count() average() max() min()
+
+##### 开窗函数
+
+窗口函数的引入是为了解决想要既显示聚集前的数据，又要显示聚集后的数据。 开窗函数对一组值进行操作，不需要使用GROUP BY子句对数据进行分组，能够在同一行中同时返回基础行的列和聚合列。
+
+强调：使用 mysql8.0版本方可实现
+
+语法：函数名() over([partition by 列] [order by 列] [rows between xxx and xxx]) 
+
+默认统计范围是从当前行之前的数据到当前行。
+
+unbounded 无限制的
+
+preceding 分区的当前记录的向前偏移量
+
+current 当前
+
+following 分区的当前记录的向后偏移量
+
+unbounded preceding 当前行之前的所有行
+
+current row 当前行
+
+unbounded following 当前行及其之后的所有行
+
+- 聚合开窗
+
+语法：聚合函数(列) over(partition by 列 order by 列)
+
+- lag(col,n)
+
+用于统计窗口内往上第n行值
+
+- lead(col,n)
+
+用于统计窗口内往下第n行值
+
+- first_value(column)
+
+取分组内排序后，截止到当前行，第一个值
+
+- last_value(column)
+
+取分组内排序后，截止到当前行，最后一个值
+
+- 排序开窗
+
+语法：排序函数() over(partition by 列 order by 列)
+
+row_number() 序号，连续，不可并列排名。如：1、2、3、4...
+
+dense_rank() 可并列排名，连续。如：1、1、2、3、4...
+
+rank() 可并列排名，不连续。如：1、1、3、4...
+
+ntile(n) 分桶排名，先分桶，再排序各个桶，桶内排名序号一致。
+
+```mysql
+row_number() over(partition by ... order by ...)
+rank() over(partition by ... order by ...)
+dense_rank() over(partition by ... order by ...)
+count() over(partition by ... order by ...)
+max() over(partition by ... order by ...)
+min() over(partition by ... order by ...)
+sum() over(partition by ... order by ...)
+avg() over(partition by ... order by ...)
+first_value() over(partition by ... order by ...)
+last_value() over(partition by ... order by ...)
+lag() over(partition by ... order by ...)
+lead() over(partition by ... order by ...）
+```
+
 #### MySQL数据库的管理
 包括MySQL服务器启动和关闭，MySQL服务器安全性，MySQL数据库维护，备份和复制。
 

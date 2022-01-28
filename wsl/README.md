@@ -8,7 +8,22 @@
 dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 ```
 
-`wsl -l -v`
+```
+wsl -l -v
+
+wsl --status
+
+ubuntu config --default-user liuxy # 设置默认用户
+
+# 从系统分区 C 转出到其他分区
+wsl --shutdown
+wsl --export Ubuntu D:\ubuntu\ubuntu.tar # 把ext4.vhdx镜像导出成tar文件
+wsl --unregister Ubuntu
+wsl --import Ubuntu D:\ubuntu D:\ubuntu\ubuntu.tar --version 2 # 把tar文件导入成ext4.vhdx镜像
+```
+
+启动目录改成`//wsl$/Ubuntu/home/liuxy`
+
 
 ### docker desktop
 ```
@@ -59,7 +74,6 @@ wsl --import docker-desktop-data D:\docker-desktop\data D:\docker-desktop\docker
 ```
 
  C:\Users\xxx\AppData\Local\Docker\wsl\distro\ext4.vhdx 这个分区呢？不到150M。
-
 
 
 

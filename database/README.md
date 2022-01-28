@@ -961,6 +961,45 @@ SYSTEM_USER	返回当前的MySQL用户名和主机名
 USER	返回当前的MySQL用户名和主机名
 VERSION	返回MySQL数据库的当前版本
 
+##### 开窗函数
+
+在开窗函数出现之前存在着很多用 SQL 语句很难解决的问题，很多都要通过复杂的相关子查询或者存储过程来完成。
+
+为了解决这些问题，在 2003 年 ISO SQL 标准加入了开窗函数，开窗函数的使用使得这些经典的难题可以被轻松的解决。
+
+目前在 MSSQLServer、Oracle、DB2 等主流数据库中都提供了对开窗函数的支持，MySQL8.0支持。 5.7 --> 8.0
+
+开窗函数简介:与聚合函数一样，开窗函数也是对行集组进行聚合计算，但是它不像普通聚合函数那样每组只返回一个值，开窗函数可以为每组返回多个值，因为开窗函数所执行聚合计算的行集组是窗口。在 ISO SQL 规定了这样的函数为开窗函数，在 Oracle 中则被称为分析函数。
+
+开窗函数语法格式： 函数名(列) OVER(选项)
+
+OVER 关键字表示把函数当成开窗函数。SQL 标准允许将所有聚合函数用做开窗函数，使用 OVER 关键字来区分这两种用法。
+
+如果 OVER 关键字后的括号中的选项为空，则开窗函数会对结果集中的所有行进行聚合运算。
+
+PARTITION BY 子句：
+
+开窗函数的 OVER 关键字后括号中的可以使用 PARTITION BY 子句来定义行的分区来供进行聚合计算。与 GROUP BY 子句不同，PARTITION BY 子句创建的分区是独立于结果集的，创建的分区只是供进行聚合计算的，而且不同的开窗函数所创建的分区也不互相影响。
+
+ORDER BY子句：
+
+开窗函数中可以在OVER关键字后的选项中使用ORDER BY子句来指定排序规则，而且有的开窗函数还要求必须指定排序规则。使用ORDER BY子句可以对结果集按照指定的排序规则进行排序，并且在一个指定的范围内进行聚合运算。
+
+```sql
+row_number() over(partition by ... order by ...)
+rank() over(partition by ... order by ...)
+dense_rank() over(partition by ... order by ...)
+count() over(partition by ... order by ...)
+max() over(partition by ... order by ...)
+min() over(partition by ... order by ...)
+sum() over(partition by ... order by ...)
+avg() over(partition by ... order by ...)
+first_value() over(partition by ... order by ...)
+last_value() over(partition by ... order by ...)
+lag() over(partition by ... order by ...)
+lead() over(partition by ... order by ...）
+```
+
 ### RDBMS
 
 RDBMS代表关系数据库管理系统。

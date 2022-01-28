@@ -405,100 +405,22 @@ ipc.client.kill.max 10
 ### HDFS CLI
 
 ```bash
-hadoop namenode --format
-hadoop-daemon.sh start namenode
-hadoop-daemon.sh start datanode
-hadoop-daemon.sh stop namenode
-hadoop-daemon.sh stop datanode
-
-hadoop fs -ls /
-hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-2.10.1.jar wordcount input out
+# hdfs dfs 同 hadoop fs
+hdsf dfs namenode --format
 
 hdfs dfs -ls /
 hdfs fsck /
 
-mr-jobhistory-daemon.sh start historyserver
+hdfs start namenode
+hdfs start datanode
+
+# need ssh
+# need set java env
+start-dfs.sh
+stop-dfs.sh
 ```
 
 ```
-Usage: hadoop [--config confdir] [COMMAND | CLASSNAME]
-  CLASSNAME            run the class named CLASSNAME
- or
-  where COMMAND is one of:
-  fs                   run a generic filesystem user client
-  version              print the version
-  jar <jar>            run a jar file
-                       note: please use "yarn jar" to launch
-                             YARN applications, not this command.
-  checknative [-a|-h]  check native hadoop and compression libraries availability
-  distcp <srcurl> <desturl> copy file or directories recursively
-  archive -archiveName NAME -p <parent path> <src>* <dest> create a hadoop archive
-  classpath            prints the class path needed to get the
-                       Hadoop jar and the required libraries
-  credential           interact with credential providers
-  daemonlog            get/set the log level for each daemon
-  trace                view and modify Hadoop tracing settings
-
-Most commands print help when invoked w/o parameters.
-
-
-Usage: hadoop fs [generic options]
-        [-appendToFile <localsrc> ... <dst>]
-        [-cat [-ignoreCrc] <src> ...]
-        [-checksum <src> ...]
-        [-chgrp [-R] GROUP PATH...]
-        [-chmod [-R] <MODE[,MODE]... | OCTALMODE> PATH...]
-        [-chown [-R] [OWNER][:[GROUP]] PATH...]
-        [-copyFromLocal [-f] [-p] [-l] [-d] <localsrc> ... <dst>]
-        [-copyToLocal [-f] [-p] [-ignoreCrc] [-crc] <src> ... <localdst>]
-        [-count [-q] [-h] [-v] [-t [<storage type>]] [-u] [-x] <path> ...]
-        [-cp [-f] [-p | -p[topax]] [-d] <src> ... <dst>]
-        [-createSnapshot <snapshotDir> [<snapshotName>]]
-        [-deleteSnapshot <snapshotDir> <snapshotName>]
-        [-df [-h] [<path> ...]]
-        [-du [-s] [-h] [-x] <path> ...]
-        [-expunge]
-        [-find <path> ... <expression> ...]
-        [-get [-f] [-p] [-ignoreCrc] [-crc] <src> ... <localdst>]
-        [-getfacl [-R] <path>]
-        [-getfattr [-R] {-n name | -d} [-e en] <path>]
-        [-getmerge [-nl] [-skip-empty-file] <src> <localdst>]
-        [-help [cmd ...]]
-        [-ls [-C] [-d] [-h] [-q] [-R] [-t] [-S] [-r] [-u] [-e] [<path> ...]]
-        [-ls2 [-C] [-d] [-h] [-q] [-R] [-t] [-S] [-r] [-u] [-e] [<path> ...]]
-        [-mkdir [-p] <path> ...]
-        [-moveFromLocal <localsrc> ... <dst>]
-        [-moveToLocal <src> <localdst>]
-        [-mv <src> ... <dst>]
-        [-put [-f] [-p] [-l] [-d] <localsrc> ... <dst>]
-        [-renameSnapshot <snapshotDir> <oldName> <newName>]
-        [-rm [-f] [-r|-R] [-skipTrash] [-safely] <src> ...]
-        [-rm2 [-f] [-r|-R] [-skipTrash] [-safely] <src> ...]
-        [-rmdir [--ignore-fail-on-non-empty] <dir> ...]
-        [-setfacl [-R] [{-b|-k} {-m|-x <acl_spec>} <path>]|[--set <acl_spec> <path>]]
-        [-setfattr {-n name [-v value] | -x name} <path>]
-        [-setrep [-R] [-w] <rep> <path> ...]
-        [-stat [format] <path> ...]
-        [-tail [-f] <file>]
-        [-test -[defsz] <path>]
-        [-text [-ignoreCrc] <src> ...]
-        [-touchz <path> ...]
-        [-truncate [-w] <length> <path> ...]
-        [-usage [cmd ...]]
-
-Generic options supported are
--conf <configuration file>     specify an application configuration file
--D <property=value>            use value for given property
--fs <file:///|hdfs://namenode:port> specify default filesystem URL to use, overrides 'fs.defaultFS' property from configurations.
--jt <local|resourcemanager:port>    specify a ResourceManager
--files <comma separated list of files>    specify comma separated files to be copied to the map reduce cluster
--libjars <comma separated list of jars>    specify comma separated jar files to include in the classpath.
--archives <comma separated list of archives>    specify comma separated archives to be unarchived on the compute machines.
-
-The general command line syntax is
-command [genericOptions] [commandOptions]
-
-
 Usage: hdfs [--config confdir] [--loglevel loglevel] COMMAND
        where COMMAND is one of:
   dfs                  run a filesystem command on the file systems supported in Hadoop.

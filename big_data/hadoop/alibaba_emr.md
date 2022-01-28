@@ -436,6 +436,7 @@ for i in `seq 1 10`;do ssh emr-worker-$i /usr/lib/hadoop-current/sbin/yarn-daemo
 - Data Science集群
 - ClickHouse集群
 - Data Development集群
+- Presto集群
 
 ##### Hadoop集群
 
@@ -1943,6 +1944,185 @@ zookeeper.znode.acl.parent acl
 zookeeper.znode.parent /hbase
 zookeeper.znode.rootserver root-region-server
 ```
+
+#### 组件版本
+
+##### EMR-5.x
+
+Hadoop	3.2.1
+Knox	1.1.0
+ApacheDS
+Spark	3.1.[1-2]
+Hive	3.1.2
+Tez	0.9.2
+Sqoop	1.4.7
+Flink	1.12 vvr
+Druid	
+HBase	2.3.4
+Phoenix	
+Zookeeper	3.6.[2-3]
+Livy	0.7.1
+Presto	338
+Storm	1.2.2
+Impala	3.4.0
+Flume	1.9.0
+Hue	4.9.0
+Oozie	5.1.0-5.2.1
+Zeppelin	0.9.0-0.10.0
+Ganglia	3.7.2
+Ranger	2.1.0
+Tensorflow
+Tensorflow on Spark
+Kafka	2.4.1
+Kafka-Manager	1.3.3.16
+Superset 0.36.0
+Jupyter
+Analytics Zoo
+Bigboot 3.6.1-3.7.x-3.8.0
+SmartData 3.6.1-3.7.x-3.8.0
+OpenLDAP	2.4.44
+Kudu	1.11.1-1.14.0
+Flink-Vvp	
+PAI-Alink	
+Alluxio	2.5.0
+Hudi	0.8.0-0.9.0
+Clickhouse 21.3.13.9
+DeltaLake 0.8.0-1.0.0
+ESS 1.0.0-1.2.0
+DLF-Auth 1.0.0
+Iceberg 0.12.0
+
+##### EMR-4.x
+
+Hadoop	3.1.3-3.2.1
+Knox	1.1.0
+ApacheDS
+Spark	2.4.[5-7]
+Hive	3.1.[1-2]
+Tez	0.9.2
+~~Pig~~	0.14.0
+Sqoop	1.4.7
+Flink	1.10 vvr
+Druid	
+HBase	2.1.9-2.3.4
+Phoenix	
+Zookeeper	3.5.6-3.6.2
+Livy	0.6.0-0.7.1
+Presto	331-338
+Storm	1.2.2
+Impala	3.2.0-3.4.0
+Flume	1.9.0
+Hue	4.4.0-4.9.0
+Oozie	5.1.0
+Zeppelin	0.8.[1-2]-0.9.0
+Ganglia	3.7.2
+Ranger	2.0.0-2.1.0
+Tensorflow
+Tensorflow on Spark
+Kafka	2.4.1
+Kafka-Manager	1.3.3.16
+Superset 0.28.1-0.36.0
+Jupyter
+Analytics Zoo
+Bigboot 2.6.7-2.7.301-3.1.0-3.2.0-3.4.0-3.5.0
+SmartData 2.6.7-2.7.301-3.1.0-3.2.0-3.4.0-3.5.0
+OpenLDAP	2.4.44
+Kudu	1.11.1
+Flink-Vvp	
+PAI-Alink	
+Alluxio	2.4.1-2.5.0
+Hudi	0.6.0
+Clickhouse
+DeltaLake 0.6.[0-1]
+ESS 1.0.0
+DLF-Auth
+Iceberg 
+
+##### EMR-3.x
+
+Hadoop 2.8.5、Zookeeper 3.6.2、HBase 1.4.9、Phoenix 4.14.1、Hive 2.3.9
+
+Hadoop	2.7.2-2.8.5
+Knox	0.13.0-1.1.0
+ApacheDS	2.0.0
+Has 1.1.0
+Spark	2.2.1-2.3.[1-2]-2.4.[1-2-3-5-7-8]
+Hive	2.3.[2-3-5-7-8-9]-\*3.1.1
+Tez	0.8.4-0.9.[1-2]
+~~Pig~~	0.14.0
+Sqoop	1.4.[6-7]
+Flink	1.4.0-1.6.2-1.7.2-1.8.2-1.9.1-1.10 vvr-1.11 vvr-1.12 vvr-1.13 vvr
+Druid	0.11.0-0.12.x-0.13.0-0.14.2-0.15.1-0.16.0-0.17.1-0.18.[0-1]-0.20.[0-1]
+HBase	1.1.1-1.4.9
+Phoenix	4.10.0-4.14.1
+Zookeeper	3.4.[11-12-13]-3.5.[5-6]-3.6.[2-3]
+Livy	0.5.0-0.6.0-0.7.1
+Presto	0.188-0.208-0.213-0.221-0.228-310-331-338-358
+~~Storm~~	1.0.1-1.1.2-1.2.2
+Impala	2.10.0-2.12.2-3.4.0
+Flume	1.8.0-1.9.0
+Hue	3.12.0-4.1.0-4.4.0-4.9.0
+Oozie	4.2.0-5.1.[0-\*1]-5.2.1
+Zeppelin	0.7.[1-3]-0.8.[0-1]-0.9.0-0.10.0
+Ganglia	3.7.2
+Ranger	0.7.3-1.0.0-1.2.0
+Tensorflow	1.8.0
+Tensorflow on Spark	1.0.[0-1]
+Kafka	2.11-1.0.1-2.11-1.1.[0-1]
+Kafka-Manager	1.3.3.16
+Superset 0.25.6-0.27.0-0.28.1-0.35.2-0.36.0
+Jupyter	4.4.0
+Analytics Zoo	0.2.0-0.5.0
+Bigboot 1.0.0-2.0.x-2.2.x-2.6.x-2.7.x-3.0.0-3.1.0-3.2.0-3.4.0-3.5.0-3.6.1-3.7.x-3.8.0
+SmartData 2.0.x-2.2.x-2.6.x-2.7.x-3.0.0-3.1.0-3.2.0-3.4.0-3.5.0-3.6.1-3.7.x-3.8.0
+OpenLDAP	2.4.44
+Kudu	1.10.0-1.14.0
+Flink-Vvp	1.11-2.2.2
+PAI-Alink	1.1.0
+Alluxio	2.4.[0-1]-2.5.0
+Hudi	0.6.0-0.8.0-0.9.0
+Clickhouse 20.8.12.2
+DeltaLake 0.6.1
+ESS 1.2.0
+DLF-Auth 1.0.0
+Iceberg 0.12.0-1.0.1 
+
+##### EMR-2.x
+
+Hadoop 2.7.2
+Knox 0.13.0
+ApacheDS	2.0.0
+Has 1.0.0-1.1.1
+Zookeeper 3.4.[6-11]
+HBase 1.1.1
+Phoenix 4.10.0
+Hive 2.3.[2-3]
+Spark 1.6.3
+Storm 1.0.1-1.1.2
+Tez 0.8.4-0.9.1
+Pig 0.14.0
+Sqoop 1.4.6
+Hue 3.12.0-4.1.0
+Zeppelin 0.7.[1-3]
+Presto 0.188
+Impala 2.10.0
+Oozie 4.2.0
+Ranger 0.7.[1-3]
+Ganglia 3.7.2
+
+##### EMR-1.x
+
+Hadoop 2.6.0
+Zookeeper 3.4.6
+HBase 1.1.1
+Hive 1.0.1-2.0.0
+Spark 1.4.1-1.6.[0-1]
+Pig 0.14.0
+Sqoop 1.4.6
+Hue 3.9.0
+Zeppelin 0.5.6
+Ganglia 3.7.2
+
 
 #### Hive
 ##### 管理元数据

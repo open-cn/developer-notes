@@ -692,6 +692,58 @@ zookeeper.znode.rootserver root-region-server
 
 ### 最佳实践
 
+"S" = supported
+"X" = not supported
+"NT" = Not tested
+
+| Java Version/HBase Version | 1.3+ | 2.1+ |
+| -------------------------- | ---- | ---- |
+| JDK7                       | S    | X    |
+| JDK8                       | S    | S    |
+| JDK11                      | X    | NT   |
+
+| Hadoop Version/HBase Version | 0.92.x | 0.94.x | 0.96.x | 0.98.x | 1.0.x | 1.1.x |
+| ---------------------------- | ------ | ------ | ------ | ------ | ----- | ----- |
+| Hadoop-0.20.205              | S      | X      | X      | X      | X     | X     |
+| Hadoop-0.22.x                | S      | X      | X      | X      | X     | X     |
+| Hadoop-1.0.x                 | X      | X      | X      | X      | X     | X     |
+| Hadoop-1.1.x                 | NT     | S      | S      | NT     | X     | X     |
+| Hadoop-0.23.x                | X      | S      | NT     | X      | X     | X     |
+| Hadoop-2.0.x-alpha           | X      | NT     | X      | X      | X     | X     |
+| Hadoop-2.1.0-beta            | X      | NT     | S      | X      | X     | X     |
+| Hadoop-2.2.0                 | X      | NT     | S      | S      | NT    | NT    |
+| Hadoop-2.3.x                 | X      | NT     | S      | S      | NT    | NT    |
+| Hadoop-2.4.x                 | X      | NT     | S      | S      | S     | S     |
+| Hadoop-2.5.x                 | X      | NT     | S      | S      | S     | S     |
+| Hadoop-2.6.x                 | X      | NT     | NT     | NT     | S     | S     |
+| Hadoop-2.7.x                 | X      | NT     | NT     | NT     | NT    | NT    |
+
+
+| Hadoop Version/HBase Version | 1.2.x | 1.3.x | 1.4.x | 1.5.x | 1.7.x | 2.0.x | 2.1.x | 2.2.x | 2.3.x | 2.4.x |
+| ---------------------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| Hadoop-2.4.x                 | S     | S     | X     | X     | X     | X     | X     | X     | X     | X     |
+| Hadoop-2.5.x                 | S     | S     | X     | X     | X     | X     | X     | X     | X     | X     |
+| Hadoop-2.6.0                 | X     | X     | X     | X     | X     | X     | X     | X     | X     | X     |
+| Hadoop-2.6.1+                | S     | S     | X     | X     | X     | S     | X     | X     | X     | X     |
+| Hadoop-2.7.0                 | X     | X     | X     | X     | X     | X     | X     | X     | X     | X     |
+| Hadoop-2.7.1+                | S     | S     | S     | X     | X     | S     | S     | X     | X     | X     |
+| Hadoop-2.8.[0-2]             | X     | X     | X     | X     | X     | X     | X     | X     | X     | X     |
+| Hadoop-2.8.[3-4]             | NT    | NT    | NT    | X     | X     | S     | S     | X     | X     | X     |
+| Hadoop-2.8.5+                | NT    | NT    | NT    | S     | S     | S     | S     | S     | X     | X     |
+| Hadoop-2.9.[0-1]             | X     | X     | X     | X     | X     | NT    | X     | X     | X     | X     |
+| Hadoop-2.9.2+                | NT    | NT    | NT    | S     | S     | NT    | NT    | S     | X     | S     |
+| Hadoop-2.10.0                | NT    | NT    | NT    | S     | S     | NT    | NT    | S     | S     | S     |
+| Hadoop-3.0.[0-2]             | X     | X     | X     | X     | X     | X     | X     | X     | X     | X     |
+| Hadoop-3.0.3+                | X     | X     | X     | X     | X     | S     | S     | X     | X     | X     |
+| Hadoop-3.1.0                 | X     | X     | X     | X     | X     | X     | X     | X     | X     | X     |
+| Hadoop-3.1.1+                | X     | X     | X     | X     | X     | S     | S     | S     | S     | S     |
+| Hadoop-3.2.x                 | X     | X     | X     | X     | X     | X     | X     | S     | S     | S     |
+| Hadoop-3.3.x                 | X     | X     | X     | X     | X     | X     | X     | X     | S     | S     |
+
+
+
+
+
 ##### 高可用
 HBase 集群支持对 Hmaster 的高可用配置。
 
@@ -1020,6 +1072,55 @@ Phoenix的系统表有以下五张表：
 4. SYSTEM.SEQUENCE
 5. SYSTEM.STATS
 
+#### 安装
+
+Phoenix 4.x supports HBase 1.x running on Hadoop 2
+
+Phoenix 5.x supports HBase 2.x running on Hadoop 3
+
+**配置**
+
+```xml
+<!-- Phoenix订制的索引负载均衡器 -->
+<property>
+<name>hbase.master.loadbalancer.class</name>
+<value>org.apache.phoenix.hbase.index.balancer.IndexLoadBalancer</value>
+</property>
+<!-- Phoenix订制的索引观察者 -->
+<property>
+<name>hbase.coprocessor.master.classes</name>
+<value>org.apache.phoenix.hbase.index.master.IndexMasterObserver</value>
+</property>
+
+<!-- Enables custom WAL edits to be written, ensuring proper writing/replay of the index updates. This codec supports the usual host of WALEdit options, most notably WALEdit compression. -->
+<!--使自定义WAL预写日志被写入，确保index的更新正确的写入或者重建。-->
+<property>
+ <name>hbase.regionserver.wal.codec</name>
+ <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
+</property>
+
+<!-- Prevent deadlocks from occurring during index maintenance for global indexes (HBase 0.98.4+ and Phoenix 4.3.1+ only) by ensuring index updates are processed with a higher priority than data updates. It also prevents deadlocks by ensuring metadata rpc calls are processed with a higher priority than data rpc calls -->
+<!-- 通过确保索引更新的优先级高于数据更新，上述属性可防止在全局索引（HBase 0.98.4+和Phoenix 4.3.1+）的索引维护过程中发生死锁。它还通过确保元数据rpc调用比数据rpc调用具有更高的优先级来防止死锁。 -->
+<property>
+ <name>hbase.region.server.rpc.scheduler.factory.class</name>
+ <value>org.apache.hadoop.hbase.ipc.PhoenixRpcSchedulerFactory</value>
+<description>Factory to create the Phoenix RPC Scheduler that uses separate queues for index and metadata updates</description>
+</property>
+<property>
+ <name>hbase.rpc.controllerfactory.class</name>
+ <value>org.apache.hadoop.hbase.ipc.controller.ServerRpcControllerFactory</value>
+<description>Factory to create the Phoenix RPC Scheduler that uses separate queues for index and metadata updates</description>
+</property>
+
+<!-- To support local index regions merge on data regions merge you will need to add the following parameter to hbase-site.xml in all the region servers and restart. (It’s applicable for Phoenix 4.3+ versions) -->
+<!-- 在Phoenix 4.3到4.7，主服务器节点和区域服务器节点上的服务器端hbase-site.xml需要进行以下配置更改 -->
+<!-- 从Phoenix 4.8.0开始，不需要更改配置就可以使用本地索引。 -->
+<property>
+ <name>hbase.coprocessor.regionserver.classes</name>
+ <value>org.apache.hadoop.hbase.regionserver.LocalIndexMerger</value>
+</property>
+```
+
 #### shell 操作
 
 https://phoenix.apache.org/language/index.html
@@ -1120,7 +1221,7 @@ drop view if exists my_schema.my_view cascade
 create index my_idx on sales.opportunity(last_updated_date desc)
 create index my_idx on log.event(created_date desc) include (name, payload) salt_buckets=10
 create index if not exists my_comp_idx on server_metrics ( gc_time desc, created_date desc ) data_block_encoding='none',versions=?,max_filesize=2000000 split on (?, ?, ?)
-create index my_idx on sales.opportunity(upper(contact_name))
+create index my_idx on sales.opportunity(upper(contact_name));
 create index test_index on test (host) include (description);
 
 # 删除索引
@@ -1314,6 +1415,15 @@ DECIMAL_DIGITS  decimal类型的小数长度
 
 Hbase中有一个按照字典排序的主键Rowkey作为单一的索引。不按照Rowkey去读取记录都要遍历整张表，然后按照指定的过滤条件过滤。通过二级索引，索引的列或表达式形成一个备用行键，以允许沿着这个新轴进行点查找和范围扫描。
 
+使用二级索引需要将以下参数添加到每个regionserver上的hbase-site.xml：
+
+```xml
+<property>
+  <name>hbase.regionserver.wal.codec</name>
+  <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
+</property>
+```
+添加后需要执行集群的滚动重新启动。如果未设置正确的属性，则将无法使用二级索引。
 
 ##### 覆盖索引（Covered Indexes）
 
@@ -1354,9 +1464,9 @@ SELECT EMP_ID FROM EMP WHERE UPPER（FIRST_NAME ||''|| LAST_NAME）='JOHN DOE'
 ##### 索引填写
 
 默认情况下，创建索引时，会在CREATE INDEX调用期间同步填充该索引。根据数据表的当前大小，这可能是不可行的。从4.5开始，可以通过在索引创建DDL语句中包含ASYNC关键字来异步完成索引的填充：
-
+```sql
 CREATE INDEX async_index ON my_schema.my_table（v）ASYNC
-
+```
 必须通过HBase命令行单独启动填充索引表的map reduce作业，如下所示：
 ```shell
 $ {HBASE_HOME} / bin / hbase org.apache.phoenix.mapreduce.index.IndexTool
@@ -1405,11 +1515,10 @@ DROP INDEX my_index ON my_table
 ##### 索引属性
 
 就像使用CREATE TABLE语句一样，CREATE INDEX语句可以通过属性应用到底层的HBase表，包括对其进行限制的能力：
-
+```sql
 CREATE INDEX my_index ON my_table（v2 DESC，v1）INCLUDE（v3）
-
     SALT_BUCKETS = 10，DATA_BLOCK_ENCODING ='NONE'
-
+```
 请注意，如果主表是salted，则对于全局索引，索引将以相同的方式自动被salted。另外，相对于主索引表与索引表的大小，索引的MAX_FILESIZE向下调整。另一方面，使用本地索引时，不允许指定SALT_BUCKETS。
 
 ##### 一致性保证
@@ -1427,15 +1536,16 @@ CREATE INDEX my_index ON my_table（v2 DESC，v1）INCLUDE（v3）
 2. 不变的表
 
 对于其中数据只写入一次而从不更新的表格，可以进行某些优化以减少增量维护的写入时间开销。这是常见的时间序列数据，如日志或事件数据，一旦写入行，它将永远不会被更新。要利用这些优化，通过将IMMUTABLE_ROWS = true属性添加到您的DDL语句中，将您的表声明为不可变：
-
+```sql
 CREATE TABLE my_table（k VARCHAR PRIMARY KEY，v VARCHAR）IMMUTABLE_ROWS = true
+```
 
-用IMMUTABLE_ROWS = true声明的表上的所有索引都被认为是不可变的（请注意，默认情况下，表被认为是可变的）。对于全局不可变索引，索引完全在客户端维护，索引表是在数据表发生更改时生成的。另一方面，本地不可变索引在服务器端保持不变。请注意，没有任何保护措施可以强制执行，声明为不可变的表格实际上不会改变数据（因为这会否定所达到的性能增益）。如果发生这种情况，指数将不再与表格同步。
+用`IMMUTABLE_ROWS = true`声明的表上的所有索引都被认为是不可变的（请注意，默认情况下，表被认为是可变的）。对于全局不可变索引，索引完全在客户端维护，索引表是在数据表发生更改时生成的。另一方面，本地不可变索引在服务器端保持不变。请注意，没有任何保护措施可以强制执行，声明为不可变的表格实际上不会改变数据（因为这会否定所达到的性能增益）。如果发生这种情况，指数将不再与表格同步。
 
 如果您有一个现有的表，您想从不可变索引切换到可变索引，请使用ALTER TABLE命令，如下所示：
-
+```sql
 ALTER TABLE my_table SET IMMUTABLE_ROWS = false
-
+```
 非事务性，不可变表的索引没有自动处理提交失败的机制。保持表和索引之间的一致性留给客户端处理。因为更新是幂等的，所以最简单的解决方案是客户端继续重试一批修改，直到它们成功。
 
 3. 可变表
@@ -1444,10 +1554,10 @@ ALTER TABLE my_table SET IMMUTABLE_ROWS = false
 
 重要注意几点：
 
-对于非事务性表，可能看到索引表与主表不同步。
-如上所述，由于我们只是有一小部分落后并且仅仅一小段时间不同步所以这是ok的。
-每个数据行及其索引行保证被写入或丢失 - 从来没有看到部分更新，因为这是HBase原子性保证的一部分。
-首先将数据写入表中，然后写入索引表（如果禁用WAL，则相反）。
+- 对于非事务性表，可能看到索引表与主表不同步。
+- 如上所述，由于我们只是有一小部分落后并且仅仅一小段时间不同步所以这是ok的。
+- 每个数据行及其索引行保证被写入或丢失 - 从来没有看到部分更新，因为这是HBase原子性保证的一部分。
+- 首先将数据写入表中，然后写入索引表（如果禁用WAL，则相反）。
 
 3.1 单个写入路径
 
@@ -1457,10 +1567,10 @@ ALTER TABLE my_table SET IMMUTABLE_ROWS = false
 
 一旦WAL被写入，我们确保即使在失败的情况下，索引和主表数据也将变得可见。
 
-如果服务崩溃，phoenix会使用WAL重复机制去重新构建索引更新。
-如果服务器没有崩溃，我们只是将索引更新插入到它们各自的表中。
-如果索引更新失败，下面概述了保持一致性的各种方法。
-如果Phoenix系统目录表在发生故障时无法到达，phoenix强制服务器立即中止并失败，在JVM上调用System.exit，强制服务器死机。通过杀死服务器，我们确保WAL将在恢复时重新使用，将索引更新重新生成到相应的表中。这确保了二级索引在知道无效状态时不会继续使用。
+- 如果服务崩溃，phoenix会使用WAL重复机制去重新构建索引更新。
+- 如果服务器没有崩溃，我们只是将索引更新插入到它们各自的表中。
+- 如果索引更新失败，下面概述了保持一致性的各种方法。
+- 如果Phoenix系统目录表在发生故障时无法到达，phoenix强制服务器立即中止并失败，在JVM上调用System.exit，强制服务器死机。通过杀死服务器，我们确保WAL将在恢复时重新使用，将索引更新重新生成到相应的表中。这确保了二级索引在知道无效状态时不会继续使用。
 
 3.2 禁止表写入，直到可变的索引是一致的
 
@@ -1488,58 +1598,6 @@ phoenix.index.failure.handling.rebuild.overlap.time控制执行部分重建时�
 以下服务器端配置控制此行为：
 
 如果提交失败，phoenix.index.failure.handling.rebuild必须设置为false，以禁止在后台重建可变索引。
-
-**配置**
-
-非事务，可变索引需要在regionserver和master上运行特殊的配置=phoenix保证在你使能可变索引的时候这些配置正确设置。如果未设置正确的属性，则将无法使用二级索引。将这些设置添加到您的hbase-site.xml后，您需要执行集群的滚动重新启动。
-
-您将需要将以下参数添加到每个regionserver上的hbase-site.xml：
-
-```xml
-<property>
-  <name>hbase.regionserver.wal.codec</name>
-  <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
-</property>
-<!--上面的配置使能自定义WAL预写日志被写入，确保index的更新正确的写入或者重建。-->
-
-<property>
-  <name>hbase.region.server.rpc.scheduler.factory.class</name>
-  <value>org.apache.hadoop.hbase.ipc.PhoenixRpcSchedulerFactory</value>
-  <description>Factory to create the Phoenix RPC Scheduler that uses separate queues for index and metadata updates</description>
-</property>
-<property>
-  <name>hbase.rpc.controllerfactory.class</name>
-  <value>org.apache.hadoop.hbase.ipc.controller.ServerRpcControllerFactory</value>
-  <description>Factory to create the Phoenix RPC Scheduler that uses separate queues for index and metadata updates</description>
-</property>
-```
-通过确保索引更新的优先级高于数据更新，上述属性可防止在全局索引（HBase 0.98.4+和Phoenix 4.3.1+）的索引维护过程中发生死锁。它还通过确保元数据rpc调用比数据rpc调用具有更高的优先级来防止死锁。
-
-从Phoenix 4.8.0开始，不需要更改配置就可以使用本地索引。在Phoenix 4.7及更低版本中，主服务器节点和区域服务器节点上的服务器端hbase-site.xml需要进行以下配置更改：
-```xml
-<property>
-  <name>hbase.master.loadbalancer.class</name>
-  <value>org.apache.phoenix.hbase.index.balancer.IndexLoadBalancer</value>
-</property>
-<property>
-  <name>hbase.coprocessor.master.classes</name>
-  <value>org.apache.phoenix.hbase.index.master.IndexMasterObserver</value>
-</property>
-<property>
-  <name>hbase.coprocessor.regionserver.classes</name>
-  <value>org.apache.hadoop.hbase.regionserver.LocalIndexMerger</value>
-</property>
-```
-升级4.8.0之前创建的本地索引
-
-在服务器上将Phoenix升级到4.8.0以上版本时，如果存在，请从hbase-site.xml中除去以上三个与本地索引相关的配置。从客户端，我们支持在线（在初始化来自4.8.0+版本的phoenix客户端的连接时）和离线（使用psql工具）在4.8.0之前创建的本地索引的升级。作为升级的一部分，我们在ASYNC模式下重新创建本地索引。升级后用户需要使用IndexTool建立索引。
-
-在升级之后使用客户端配置。
-
-phoenix.client.localIndexUpgrade
-它的值是true，意味着在线升级，false意味着离线升级。
-默认值：true
-命令使用psql工具$ psql [zookeeper] -l运行离线升级
 
 ##### 索引调优
 
@@ -1748,9 +1806,9 @@ Hbase 只是一个单纯的数据存储框架，没有任何的分析能力。�
 
 
 ### Hive
-Hive是一个构建在Hadoop基础之上的数据仓库，主要解决分布式存储的大数据处理和计算问题，Hive提供了类SQL语句，叫HiveQL
+Hive是一个构建在Hadoop基础之上的数据仓库，主要解决分布式存储的大数据处理和计算问题。
 
-通过它可以使用SQL查询存放在HDFS上的数据，sql语句最终被转化为Map/Reduce任务运行，但是Hive不能够进行交互查询——它只能够在Haoop上批量的执行Map/Reduce任务。
+Hive提供了类SQL语句，叫HiveQL。通过它可以使用SQL查询存放在HDFS上的数据，sql语句最终被转化为Map/Reduce任务运行，但是Hive不能够进行交互查询——它只能够在Haoop上批量的执行Map/Reduce任务。
 
 Hive适合用来对一段时间内的数据进行分析查询，例如，用来计算趋势或者网站的日志。Hive不应该用来进行实时的查询。因为它需要很长时间才可以返回结果。
 
@@ -1759,6 +1817,7 @@ Hive诞生于FaceBook，它最初就是为方便FaceBook的数据分析人员而
 在大数据架构中，Hive和HBase是协作关系，Hive方便地提供了HiveQL的接口来简化MapReduce的使用，而HBase提供了低延迟的数据库访问。如果两者结合，可以利用MapReduce的优势针对HBase存储的大量内容进行离线的计算和分析。
 
 #### Hive 与 Hbase 的区别
+
 **hive**
 
 - 数据仓库：Hive的本质其实就相当于将 HDFS 中已经存储的文件在 Mysql 中做了一个双射关系，以方便使用 HQL 去管理查询。
