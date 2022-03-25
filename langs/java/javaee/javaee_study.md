@@ -1,3 +1,4 @@
+
 1、应用框架（遥望先贤，拜读大师作品，学习源码精髓，拓展程序员编码视野）
 SpringBoot
 根据条件初始化bean              读取配置信息               Spring Event          Spring Aware
@@ -209,7 +210,7 @@ ES搜索                   索引&映射             分布式CRUD           索
 
 
 
-7大数据专题（通向未来的钥匙，人工智能的基石，再不掌握大数据必将out！）
+7大数据专题
 Hadoop
 Hdfs                    MapReduce             Yarn
 

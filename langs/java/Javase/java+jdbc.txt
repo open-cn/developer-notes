@@ -1,6 +1,7 @@
 java学习顺序：javase->sql->jdbc->html,css,javascript,jquery,ajax->servlet->jsp//学到这里也可以
 ->struts2[简化web开发],类似jsf->hibernate->spring->ejb3.0->web service
-作业在moodle上提交http://edu.gemptc.com/ptc/  ptc01_JA011405	Gem1234!	Ptc-1234	刘小勇
+
+作业在moodle上提交http://edu.gemptc.com/ptc/  ptc01_JA011405	Gem1234!	Ptc-1234
 
 
 
@@ -9,15 +10,17 @@ java学习顺序：javase->sql->jdbc->html,css,javascript,jquery,ajax->servlet->
 
 【1、java概述和开发环境搭建】
 Sun公司   后被Oracle收购
+
 搭建开发环境：
-1.下载JDK：选择所在系统对应的平台  window  linux  dos （Mac OS）  Aolari
+
+1. 下载JDK：选择所在系统对应的平台  window  linux  dos （Mac OS）  Aolari
 //bin 工具集 include 本地（native）开发的头文件（C .h）jre java运行环境 src java的一些源码 lib 库文件*.jar
 //JDK包含编译器、工具集和运行环境
-2.配置环境变量(java命令不依赖、javac依赖path、环境变量结尾不能是分号)
+2. 配置环境变量(java命令不依赖、javac依赖path、环境变量结尾不能是分号)
 //java_home=C:\Program Files\Java\jdk1.7.0_40【jdk安装目录】 和其他软件约定的一个变量名 （tomcat，jboss weblogic）
 //path=%path%;%java_home%\bin:window搜索可行程序的目录，此环境变量一般已经存在 system32
-3.编译javac java源文件
-4.运行java class文件名
+3. 编译javac java源文件
+4. 运行java class文件名
 跨平台：jvm屏蔽了操作系统之间的差异，java源程序编译产生的是字节码.class文件。字节码可以直接在jvm上运行
 jvm启动时默认把java.lang包的所有类加载到内存
 classpath jvm搜索class文件的路径
@@ -105,7 +108,7 @@ static: 修饰内部类、类成员(方法、变量、代码块)
 -->>>在静态成员函数中只能直接调用其它的静态成员函数或引用静态属性，否则编译错误。
 -->>>静态成员函数中也不能使用this或者super，因为它们是和类的对象相关联的。
 
-native+方法表示该要用另外一种依赖平台的编程语言实现， 不存在被子类实现
+native+方法表示该要用另外一种依赖平台的编程语言实现，不存在被子类实现
 
 final+变量\方法\类表示不可更改(没有默认值)\覆写\不可被继承(C#sealed)
 但final+修饰对象仅表示对象引用不能改变 对象本身属性可以更改
@@ -146,9 +149,9 @@ Java 把内存划分两种:
 -->>>虚拟机首先加载父类到方法区，并在堆中为父类成员变量在子类空间中初始化
 1装载:通过类的全名产生对应类的二进制数据流，分析并转换为方法区特定的数据结构，创建对应类的java.lang.Class实例  
 2链接:  01分为检测（确保被导入类型的正确性。)
-	02准备（为类变量分配内存，并将其初始化为默认值）--->>>父类静态代码  
-	03解析（把类型中的符号引用转换成直接引用） 
-3:显式初始化，把类变量(static)初始化为正确初始值。  
+	    02准备（为类变量分配内存，并将其初始化为默认值）--->>>父类静态代码  
+	    03解析（把类型中的符号引用转换成直接引用） 
+3显式初始化:把类变量(static)初始化为正确初始值。  
 
 -->>>然后加载子类到方法区，为子类的非继承成员变量分配空间并初始化默认值
 子类1装载2链接3显式初始化                              ---->>>子类静态代码  
@@ -303,18 +306,21 @@ TimeFormatException,
 WindowManager.BadTokenException 
 
 【集合】 （约定：xxx是指接口 xxx类 是指类）
-集合(Collection)  存放对象作为元素     有iterator、size...方法，实现了接口(Iterable<T>)  实现这个接口允许对象成为 "foreach" 语句的目标
+Collection  存放对象作为元素  有iterator、size等方法，实现了接口(Iterable<T>)  实现这个接口允许对象成为 "foreach" 语句的目标
 -->>>List 大量扩充 内容允许重复，允许对象null    有下标索引（有序），根据索引[从0开始]操作对象
-	-->>>ArrayList类	顺序存储，访问快 增删慢
-	-->>>LinkedList类	链式存储，访问慢 增删快
--->>>Set  和Collection基本一样，一点除外：Set无法记住添加顺序（自定义比较器），
-  		不允许重复元素（重写Equals和hashCode方法）。  Set判断两个对象是否相等用equals,而不是使用== 
+	-->>>ArrayList类	 顺序存储（数组），访问快 增删慢 
+	-->>>LinkedList类	链式存储（特殊结构），访问慢 增删快 也是Deque双端队列的实现
+	-->>>Vector类，ArrayList类的线程安全版本
+-->>>Set  Set无法记住添加顺序（自定义比较器），不允许重复元素（重写Equals和hashCode方法，判断两个对象是否相等用equals不是==）
 	-->>>SortedSet 单值排序接口 子类内容可使用比较器排序
+		-->>>NavigableSet
+			-->>>TreeSet类 有序（二叉树）  要么自然顺序[元素类须实现Compareble接口并覆写compareTo(Object o)方法]要么定制排序[提供一个比较器]
 	-->>>HashSet类  散列存放	线程不安全	元素值允许是null  除了Equals相等,两个对象的hashCode方法返回值也要相等 此俩方法需要重写
 		-->>>LinkedHashSet类
-	-->>>TreeSet类 有序（二叉树）  要么自然顺序[元素类须实现Compareble接口并覆写compareTo(Object o)方法]要么定制排序[提供一个比较器]
--->>>Deque  双端队列可两端访问元素
--->>>Quque  队列接口 子类可以实现队列操作
+-->>>Quque 队列接口 子类可以实现队列操作
+	-->>>Deque 双端队列可两端访问元素
+		-->>>ArrayDeque类 
+		-->>>LinkedList类
 
 迭代器(Iterator)    只能单向输出   对collection进行迭代的迭代器  枚举接口Enumeration的取代
 -->>>ListIterator   能双向输出
@@ -325,10 +331,11 @@ Collections 集合工具类 封装了对集合的一些操作。
 
 Map集合  一对值 key->vaule  key具有唯一性 无序  允许值对象(value)是null 而且没有个数限制（即可重复）
 -->>>SortedMap 一对值的排序接口  子类内容可使用比较器按照key排序
--->>>HashMap类	线程不安全，增删快 哈希码快速查找 允许key为null但唯一 除了Equals相等,两个对象的hashCode方法返回值也要相等 此俩方法需要重写
-	-->>>LinkedHashMap类 保存了记录的插入顺序
+-->>>HashMap类	特殊结构（键值，哈希）数组，线程不安全，增删快 哈希码快速查找 允许key为null但唯一 除了Equals相等，hashCode也要相等
+	-->>>LinkedHashMap类 保存记录的插入顺序或访问顺序
+	-->>>ConcurrentHashMap类 线程安全
 -->>>TreeMap类	key有序（二叉树） 不允许key为null
--->>>Hashtable类  线程安全 哈希码快速查找 不允许key或value为null 除了Equals相等,两个对象的hashCode方法返回值也要相等 此俩方法需要重写
+-->>>Hashtable类  线程安全 哈希码快速查找 不允许key或value为null 除了Equals相等，hashCode也要相等 此俩方法需要重写
 
 
 【java.IO输入输出流】
@@ -461,6 +468,39 @@ obj.isAlive()线程是否启动
 obj.join()强制运行线程，其他线程必须等待此线程完成
 Thread.yield()当前线程礼让
 obj.interrupt()打断线程
+
+线程池：开启一条线程是非常浪费资源的，因为它涉及到要与操作系统进行交互；因此JDK5之后Java提供了线程池让我们提高性能，线程池里的线程执行完后，并不会死亡，而是再次回到线程池中成为空闲状态，等待下一个对象来使用。
+
+Executors：创建线程池的工厂类。
+创建方法：
+    // 创建一个可根据需要创建新线程的线程池，但是在以前构造的线程可用时将重用它们
+    static ExecutorService newCachedThreadPool()
+    // 创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程
+    static ExecutorService newFixedThreadPool(int nThreads)
+    // 创建一个可根据需要创建新线程的线程池，但是在以前构造的线程可用时将重用它们，并在需要时使用提供的ThreadFactory创建新线程
+    static ExecutorService newCachedThreadPool(ThreadFactory threadFactory)
+    // 创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程，在需要时使用提供的ThreadFactory创建新线程
+    static ExecutorService newFixedThreadPool(int nThreads, ThreadFactory threadFactory)
+    // 创建一个线程池，它可安排在给定延迟后运行命令或者定期地执行
+    static ScheduledExecutorService newScheduledThreadPool(int corePoolSize)
+    // 创建一个线程池，它可安排在给定延迟后运行命令或者定期地执行
+    static ScheduledExecutorService newScheduledThreadPool(int corePoolSize, ThreadFactory threadFactory)
+    //创建一个使用单个worker线程的Executor，以无界队列方式来运行该线程
+    public static ExecutorService newSingleThreadExecutor()
+
+ExecutorService:线程池管理接口，提供了线程的操作方法。
+    // 启动一次顺序关闭，执行以前提交的任务，但不接受新任务
+    void shutdown()
+    // 试图停止所有正在执行的活动任务，暂停处理正在等待的任务，并返回等待执行的任务列表
+    List<Runnable> shutdownNow()
+    // 提交一个返回值的任务用于执行，返回一个表示任务的未决结果的 Future
+    <T> Future<T> submit(Callable<T> task)
+    // 提交一个 Runnable任务用于执行，并返回一个表示该任务的 Future
+    Future<?> submit(Runnable task)
+    // 提交一个 Runnable任务用于执行，并返回一个表示该任务的 Future
+    <T> Future<T> submit(Runnable task, T result)
+
+
 同步代码块
 同步方法 的同步监听器其实的是this
 同步静态方法的默认同步锁是当前方法所在类的.class对象

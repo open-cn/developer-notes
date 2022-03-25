@@ -6,6 +6,10 @@
 #### MySQL基础
 包括管理MySQL数据库和使用各种SQL语句（如INSERT，DELETE，UPDATE和SELECT）操作数据。您还将学习高级数据选择技术，包括INNER JOIN，LEFT JOIN，Subquery和UNION。
 
+#### MySQL 事务
+
+InnoDB 引擎支持事务，MyISAM 引擎不支持事务。可重复读是默认的隔离级别。
+
 #### MySQL 存储过程
 
 #### MySQL 触发器
@@ -15,6 +19,64 @@ MySQL触发器是存储的程序，它们自动执行以响应与表相关的特
 
 #### MySQL 全文搜索
 使用MySQL全文搜索和各种全文搜索技术，如自然语言搜索，布尔语言搜索和查询扩展。
+
+like 模糊匹配在文本比较少时是合适的，但是对于大量的文本数据检索，是不可想象的。全文索引在大量的数据面前，能比 like 模糊匹配快 N 倍，速度不是一个数量级，但是全文索引可能存在精度问题。
+
+- MySQL 5.6 以前的版本，只有 MyISAM 存储引擎支持全文索引；
+- MySQL 5.6 及以后的版本，MyISAM 和 InnoDB 存储引擎均支持全文索引;
+- 只有字段的数据类型为 char、varchar、text 及其系列才可以建全文索引。
+
+match() 函数中指定的列必须和全文索引中指定的列完全相同，否则就会报错，无法使用全文索引，这是因为全文索引不会记录关键字来自哪一列。如果想要对某一列使用全文索引，请单独为该列创建全文索引。
+
+
+```sql
+# 全文索引，有两个变量，最小搜索长度和最大搜索长度
+# 对于长度小于最小搜索长度和大于最大搜索长度的词语，都不会被索引。
+show variables like '%ft%';
+
+# MyISAM
+ft_min_word_len = 4;
+ft_max_word_len = 84;
+ft_boolean_syntax = + -><()~*:""&|
+
+# InnoDB
+innodb_ft_min_token_size = 3;
+innodb_ft_max_token_size = 84;
+
+
+# 创建联合全文索引列
+create table fulltext_test (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    content text NOT NULL,
+    tag varchar(255),
+    PRIMARY KEY (id),
+    FULLTEXT KEY content_tag_fulltext(content,tag)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+create fulltext index content_tag_fulltext on fulltext_test(content,tag);
+alter table fulltext_test add fulltext index content_tag_fulltext(content,tag);
+
+
+# 删除全文索引列
+drop index content_tag_fulltext on fulltext_test;
+alter table fulltext_test drop index content_tag_fulltext;
+
+
+# 使用全文索引
+select * from fulltext_test where match(content,tag) against('xxx xxx');
+select * from fulltext_test where match(content,tag) against('xxx xxx' in natural language mode);
+
+select * from fulltext_test where match(content,tag) against('x*' in boolean mode);
+# + 必须包含该词
+# - 必须不包含该词
+# > 提高该词的相关性，查询的结果靠前
+# < 降低该词的相关性，查询的结果靠后
+# (*)星号 通配符，只能接在词后面
+```
+
+MySQL 的全文索引最开始仅支持英语，因为英语的词与词之间有空格，使用空格作为分词的分隔符是很方便的。象形文字，比如汉语、日语等，是没有空格的，这就造成了一定的限制。不过 MySQL 5.7.6 开始，引入了一个 ngram 全文分析器来解决这个问题，并且对 MyISAM 和 InnoDB 引擎都有效。
+
+事实上，MyISAM 存储引擎对全文索引的支持有很多的限制，例如表级别锁对性能的影响、数据文件的崩溃、崩溃后的恢复等，这使得 MyISAM 的全文索引对于很多的应用场景并不适合。所以，多数情况下的建议是使用别的解决方案，例如 Sphinx、Lucene 等等第三方的插件，亦或是使用 InnoDB 存储引擎的全文索引。
+
 
 #### MySQL 函数
 最常用的MySQL函数，包括聚合函数，字符串函数，日期和时间函数以及控制流函数。
@@ -193,7 +255,7 @@ lead() over(partition by ... order by ...）
 
 （4）减少或避免排序，如：group by语句中如果不需要排序，可以增加order by null。
 
-（5）统计表中记录数时使用COUNT(*)，而不是COUNT(primary_key)和COUNT(1)；InnoDB表避免使用COUNT(*)操作，计数统计实时要求较强可以使用Memcache或者Redis，非实时统计可以使用单独统计表，定时更新。
+（5）统计表中记录数时使用COUNT(\*)，而不是COUNT(primary_key)和COUNT(1)；InnoDB表避免使用COUNT(\*)操作，计数统计实时要求较强可以使用Memcache或者Redis，非实时统计可以使用单独统计表，定时更新。
 
 （6）做字段变更操作（modify column/change column）的时候必须加上原有的注释属性，否则修改后，注释会丢失。
 
@@ -555,13 +617,14 @@ Y() (deprecated 5.7.6)	Return Y coordinate of Point
 
 ### 使用
 
-mysql查看当前用户有哪些数据库：
+```sql
+-- mysql查看当前用户有哪些数据库：
 show databases;
-打开数据库：
-use ksmsq
+-- 打开数据库：
+use ksmsq;
 
-查看当前数据库中有哪些表：
-show tables;       // 相当于oracle (select * from tab)
+-- 查看当前数据库中有哪些表：
+show tables;       # 相当于oracle (select * from tab)
 
 create table user(
 	id int primary key,
@@ -573,7 +636,7 @@ create table user(
 insert into user(id,name,gender,age) values(10,'tom','男',20);
 
 limit 5,5
-
+```
 
 
 #### 优化

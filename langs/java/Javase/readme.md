@@ -1,10 +1,10 @@
-Java SE Platform
+## Java SE Platform
 
 前身：J2SE，2005年之后更名为JAVA SE
 Java 2 Platform, Standard Edition
 
 
-Java SE Platform 软件包
+### Java SE Platform 软件包
 
 java.applet 提供创建 applet 所必需的类和 applet 用来与其 applet 上下文通信的类。
 java.awt    包含用于创建用户界面和绘制图形图像的所有类。
@@ -228,7 +228,7 @@ org.xml.sax.ext 此包包含适合的 SAX 驱动程序不一定支持的 SAX2 �
 org.xml.sax.helpers 此包包含“帮助器”类，其中包括对引导基于 SAX 的应用程序的支持。
 
 
-其他软件包
+### 其他软件包
 javax.activation
 javax.activity  包含解组期间通过 ORB 机制抛出的与 Activity 服务有关的异常。
 
@@ -251,4 +251,73 @@ javax.tools 为能够从程序（例如，编译器）中调用的工具提供�
 
 
 
+### Annotation
 
+Java 注解（Annotation）又称 Java 标注，是 JDK5.0 引入的一种注释机制。
+
+Java 语言中的类、方法、变量、参数和包等都可以被标注。和 Javadoc 不同，Java 标注可以通过反射获取标注内容。在编译器生成类文件时，标注可以被嵌入到字节码中。Java 虚拟机可以保留标注内容，在运行时可以获取到标注内容。当然它也支持自定义 Java 标注。
+
+1. 作用在代码的注解
+
+- @Override - 检查该方法是否是重写方法。如果发现其父类，或者是引用的接口中并没有该方法时，会报编译错误。
+- @Deprecated - 标记过时方法。如果使用该方法，会报编译警告。
+- @SuppressWarnings - 指示编译器去忽略注解中声明的警告。
+
+2. 作用在其他注解的注解(元注解)
+
+- @Retention - 标识这个注解怎么保存，是只在代码中，还是编入class文件中，或者是在运行时可以通过反射访问。
+- @Documented - 标记这些注解是否包含在用户文档中。
+- @Target - 标记这个注解应该是哪种 Java 成员。
+- @Inherited - 标记这个注解是继承于哪个注解类(默认 注解并没有继承于任何子类)
+- @SafeVarargs - Java 7 开始支持，忽略任何使用参数为泛型变量的方法或构造函数调用产生的警告。
+- @FunctionalInterface - Java 8 开始支持，标识一个匿名函数或函数式接口。
+- @Repeatable - Java 8 开始支持，标识某注解可以在同一个声明上使用多次。
+
+
+java Annotation 的组成中，有 3 个非常重要的主干类。
+
+```java Annotation.java
+package java.lang.annotation;
+public interface Annotation {
+
+    boolean equals(Object obj);
+
+    int hashCode();
+
+    String toString();
+
+    Class<? extends Annotation> annotationType();
+}
+```
+```java ElementType.java
+package java.lang.annotation;
+
+public enum ElementType {
+    TYPE,               /* 类、接口（包括注释类型）或枚举声明  */
+
+    FIELD,              /* 字段声明（包括枚举常量）  */
+
+    METHOD,             /* 方法声明  */
+
+    PARAMETER,          /* 参数声明  */
+
+    CONSTRUCTOR,        /* 构造方法声明  */
+
+    LOCAL_VARIABLE,     /* 局部变量声明  */
+
+    ANNOTATION_TYPE,    /* 注释类型声明  */
+
+    PACKAGE             /* 包声明  */
+}
+```
+
+```java RetentionPolicy.java
+package java.lang.annotation;
+public enum RetentionPolicy {
+    SOURCE,            /* Annotation信息仅存在于编译器处理期间，编译器处理完之后就没有该Annotation信息了  */
+
+    CLASS,             /* 编译器将Annotation存储于类对应的.class文件中。默认行为  */
+
+    RUNTIME            /* 编译器将Annotation存储于class文件中，并且可由JVM读入 */
+}
+```

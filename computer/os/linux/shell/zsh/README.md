@@ -2,6 +2,8 @@
 
 https://zsh.sourceforge.io/Doc/Release/index.html
 
+`man zshbuiltins`
+
 ### fc
 
 fc 命令控制交互式历史机制。请注意，只有在 shell 是交互式的时才会执行历史选项的读取和写入。通常这是自动检测到的，但可以通过在启动 shell 时设置交互选项来强制。
