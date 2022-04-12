@@ -245,6 +245,22 @@ OLAP是数据仓库系统的主要应用，支持复杂的分析操作，侧重�
 面向列的数据库适用于在线分析处理(OLAP)，可以设计为巨大表。
 
 
+#### 协处理器
+协处理器是Hbase的高级组件，可以让用户在region所在的服务器上运行自定义的代码。与传统的RDBMS中的触发器和存储过程类似。
+
+Observer可以实现权限管理、优先级设置、监控、DDL 控制和二级索引等功能。
+
+Endpoint允许扩展集群的能力，对客户端开放新的运算命令，可以实现 min、max、avg、sum、distinct和group by等功能。
+
+##### 触发器Observer
+
+RegionObserver
+WALObserver
+MasterObserver
+
+##### 存储过程Endpoint
+
+
 ### 安装和使用
 Hbase 也有 3 种运行模式:
 

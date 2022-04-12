@@ -18,7 +18,7 @@ Microsoft 试图通过在1998年随Windows 98引入Windows Script Host及其基�
 
 Monad 是一个新的可扩展 CLI，具有全新的设计，能够自动执行一系列核心管理任务。Microsoft 于2003年10月在洛杉矶的专业发展大会上首次公开展示了 Monad。几个月后，他们开放了内部测试版，最终导致了公开测试版。Microsoft 于2005年6月17日发布了第一个 Monad 公开测试版，2005年9月11日发布了 Beta 2，2006年1月10日发布了 Beta 3。
 
-##### PowerShell 
+##### PowerShell
 2006年4月25日，在 Monad 最初发布后不久，Microsoft 宣布 Monad 已更名为 Windows PowerShell，将其定位为其管理技术产品的重要组成部分。同时发布了 PowerShell 的 Release Candidate (RC) 1。更改名称和 RC 的一个重要方面是它现在是 Windows 的一个组件，而不仅仅是一个附加组件。
 
 PowerShell v1 的 Release Candidate 2 于2006年9月26日发布，最终版本于2006年11月14日发布到网络上。用于早期 Windows 版本的 PowerShell 于2007年1月30日发布。PowerShell v2.0 开发在 PowerShell v1 发布之前就开始了。在开发过程中，Microsoft 发布了三个社区技术预览(community technology preview，CTP)。Microsoft 向公众提供了这些版本。Windows PowerShell v2.0 的最后一个 CTP 版本于2008年12月发布。
@@ -33,10 +33,10 @@ Windows 10 为 PowerShell 提供了一个测试框架。
 ### 版本
 PowerShell 最初使用代号“Monad”，于 2003 年 10 月在洛杉矶举行的专业开发者大会上首次公开展示。仍然支持所有主要版本，并且每个主要版本都具有与先前版本的向后兼容性。
 
-#### Windows PowerShell 1.0 
+#### Windows PowerShell 1.0
 PowerShell 1.0 于 2006 年 11 月发布，适用于Windows XP SP2、Windows Server 2003 SP1和Windows Vista。它是Windows Server 2008的可选组件。
 
-#### Windows PowerShell 2.0 
+#### Windows PowerShell 2.0
 PowerShell 2.0 与 Windows 7和Windows Server 2008 R2 集成，并针对带有 Service Pack 3 的 Windows XP、带有 Service Pack 2 的 Windows Server 2003和带有 Service Pack 1 的 Windows Vista 发布。 
 
 PowerShell v2 包括对脚本语言和托管 API 的更改，此外还包括 240 多个新 cmdlet。 
@@ -61,7 +61,7 @@ PowerShell 2.0 的新特性包括：
 - 块注释：PowerShell 2.0 支持使用<#和#>作为分隔符的块注释。
 - 新 API：新 API 的范围从将 PowerShell 解析器和运行时的更多控制交给主机，到创建和管理运行空间 ( RunspacePools)集合以及创建仅允许调用已配置的 PowerShell 子集的受限运行空间的能力. 新的 API 还支持参与由 PowerShell 管理的事务
 
-#### Windows PowerShell 3.0 
+#### Windows PowerShell 3.0
 PowerShell 3.0 与Windows 8和Windows Server 2012集成。Microsoft 还为Windows 7 Service Pack 1、Windows Server 2008 Service Pack 1 和Windows Server 2008 R2 Service Pack 1提供了 PowerShell 3.0 。 
 
 PowerShell 3.0 是更大的软件包Windows Management Framework 3.0 (WMF3) 的一部分，该软件包还包含支持远程处理的WinRM服务。Microsoft 发布了几个WMF3社区技术预览版。Windows Management Framework 3.0 的早期社区技术预览 2 (CTP 2) 版本于 2011 年 12 月 2 日发布。 Windows Management Framework 3.0 于 2012 年 12 月正式发布并包含在 Windows 8 和 Windows Server 中默认为 2012 年。
@@ -76,7 +76,7 @@ PowerShell 3.0 中的新功能包括：  : 33–34
 - 自动模块检测：每当调用来自该模块的命令时，都会隐式加载模块。代码完成也适用于卸载的模块。
 - 新命令：添加了数十个新模块，包括管理磁盘get-WmiObject win32_logicaldisk、卷、防火墙、网络连接和打印机的功能，这些功能以前是通过 WMI 执行的。
 
-#### Windows PowerShell 4.0 
+#### Windows PowerShell 4.0
 PowerShell 4.0 与Windows 8.1和Windows Server 2012 R2集成。Microsoft 还为Windows 7 SP1、Windows Server 2008 R2 SP1 和Windows Server 2012提供了 PowerShell 4.0 。
 
 PowerShell 4.0 中的新功能包括：
@@ -89,7 +89,7 @@ PowerShell 4.0 中的新功能包括：
 - 管理物理和Hyper-V虚拟化网络交换机的网络诊断
 - Where 和 ForEach方法语法提供了一种过滤和迭代对象的替代方法。
 
-#### Windows PowerShell 5.0 
+#### Windows PowerShell 5.0
 包含 PowerShell 5.0 的 Windows 管理框架 (WMF) 5.0 RTM 于 2016 年 2 月 24 日重新发布到 Web 上，此前发布的初始版本存在严重错误。
 
 主要功能包括：
@@ -104,12 +104,12 @@ PowerShell 4.0 中的新功能包括：
 - DSC 本地配置管理器元配置
 - 使用 PowerShell 类创作 DSC 资源
 
-#### Windows PowerShell 5.1 
+#### Windows PowerShell 5.1
 它于2016 年 8 月 2 日与Windows 10 周年更新一起发布，并在Windows Server 2016 中发布。 PackageManagement 现在支持代理，PSReadLine 现在支持 ViMode，并且添加了两个新的 cmdlet：Get-TimeZone 和 Set-TimeZone。LocalAccounts 模块允许添加/删除本地用户帐户。 PowerShell 5.1 的预览版已于 2016 年 7 月 16 日发布，适用于 Windows 7、Windows Server 2008、Windows Server 2008 R2、Windows Server 2012 和 Windows Server 2012 R2，并于 2017 年 1 月 19 日发布。
 
 PowerShell 5.1 是第一个包含“桌面”和“核心”两个版本的版本。“桌面”版是在 .NET Framework 堆栈上运行的传统 Windows PowerShell 的延续。“Core”版本在 .NET Core 上运行，并与 Windows Server 2016 Nano Server 捆绑在一起。为了换取更小的占用空间，后者缺少一些功能，例如管理剪贴板或将计算机加入域的 cmdlet、WMI 版本 1 cmdlet、事件日志 cmdlet 和配置文件。这是专为 Windows 制作的 PowerShell 的最终版本。
 
-#### PowerShell Core 6 
+#### PowerShell Core 6
 PowerShell Core 6.0 于 2016 年 8 月 18 日首次发布，当时 Microsoft 推出了 PowerShell Core 并决定使该产品跨平台、独立于 Windows、免费和开源。它于 2018 年 1 月 10 日在 Windows、macOS和Linux上全面上市。它有自己的支持生命周期，并遵守 Windows 10 引入的 Microsoft 生命周期策略：仅支持最新版本的 PowerShell Core。Microsoft 预计每六个月发布一个 PowerShell Core 6.0 次要版本。
 
 此版本 PowerShell 中最显着的变化是扩展到其他平台。对于 Windows 管理员，此版本的 PowerShell 不包含任何主要的新功能。在 2018 年 1 月 11 日接受社区采访时，PowerShell 团队被要求列出 Windows IT 专业人员从 Windows PowerShell 5.1 迁移到 PowerShell Core 6.0 时会发生的最令人兴奋的 10 件事；对此，Microsoft 的 Angel Calvo 只能说出两个：跨平台和开源。
@@ -118,7 +118,7 @@ PowerShell Core 6.0 于 2016 年 8 月 18 日首次发布，当时 Microsoft 推
 
 PowerShell Core 6.2 主要侧重于性能改进、错误修复以及更小的 cmdlet 和语言增强功能，以提高开发人员的工作效率。
 
-#### PowerShell 7 
+#### PowerShell 7
 PowerShell 7 是 PowerShell Core 6.x 产品以及 Windows PowerShell 5.1 的替代品，后者是最后一个受支持的 Windows PowerShell 版本。 开发的重点是使 PowerShell 7 成为 Windows PowerShell 5.1 的可行替代品，即在与 Windows 附带的模块的兼容性方面与 Windows PowerShell 几乎相同。
 
 PowerShell 7 中的新功能包括：
@@ -136,11 +136,97 @@ PowerShell 7 中的新功能包括：
 - -ShowWindow开关的返回Get-Help
 
 ### 最佳实践
+PowerShell 中的编译命令称为 cmdlet。 Cmdlet 的发音为“command-let”（而不是 CMD-let）。 Cmdlet 名称采用单数形式的“动词-名词”命令形式，这样更易于被发现。
+
+```powershell
+$PSVersionTable # 版本信息
+
+Get-ExecutionPolicy # 查看执行策略 
+Set-ExecutionPolicy # 设置执行策略
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+# Restricted 当执行策略设置为“受限”时，PowerShell 脚本根本无法运行。 这是所有 Windows 客户端操作系统上的默认设置。
+# RemoteSigned 远程签名
+
+Get-Process # 用于确定正在运行哪些进程
+Get-Service # 用于检索服务及其状态的列表
+
+Get-Command # 帮助查找命令。 运行不带任何参数的 Get-Command 会返回系统上所有命令的列表。
+Get-Help # 首先根据提供的输入来搜索命令名称的通配符匹配项。 如果找不到匹配项，它将搜索帮助主题本身；如果还找不到匹配项，则返回错误。
+Get-Member # 可帮助发现可用于命令的对象、属性和方法。 任何生成基于对象的输出的命令都可以通过管道传递到 Get-Member。
+
+# 与通常的看法相反，Get-Help 可用于查找没有帮助主题的命令。
+
+Get-Help -Name Get-Help
+Get-Help -Name Get-Help -Full
+help -Name Get-Help -Full
+help Get-Help -Full
+
+help Get-Help -Parameter Name
+help Get-Command -Full | Out-GridView # 管道，一个命令的输出可以用作另一个命令的输入。 
+help process # 同 help *process*
+
+Get-Help -Name Get-Command -Full
+Get-Help -Name Get-Command -Detailed
+Get-Help -Name Get-Command -Examples
+Get-Help -Name Get-Command -Online
+Get-Help -Name Get-Command -Parameter Noun
+Get-Help -Name Get-Command -ShowWindow
+
+Update-Help
+
+Get-Command -Noun Process
+Get-Command -Name *service*
+Get-Command -Name *service* -CommandType Cmdlet, Function, Alias
+
+Get-Command | Get-Random | Get-Help -Full # 随机一个命令的帮助信息
+
+# 属性
+Get-Service -Name w32time
+Get-Service -Name w32time | Get-Member
+
+Get-Command -ParameterType ServiceController
+Get-Service -Name w32time | Select-Object -Property *
+Get-Service -Name w32time | Select-Object -Property Status, Name, DisplayName, ServiceType
+
+# 方法
+Get-Service -Name w32time | Get-Member -MemberType Method
+(Get-Service -Name w32time).Stop()
+Get-Service -Name w32time | Start-Service -PassThru
+
+Get-Process -Name PowerShell
+Get-Process -Name PowerShell | Get-Member
+
+# 如果命令没有生成输出，则无法通过管道将其传递到 Get-Member。 由于 Start-Service 默认不生成任何输出，在尝试通过管道将其传递到 Get-Member 时会生成错误。
+# 可以使用 Start-Service cmdlet 指定 PassThru 参数，以使其生成输出，然后通过管道将输出传递到 Get-Member，这样不会出错。
+Start-Service -Name w32time -PassThru | Get-Member
+
+Get-Command -Module ActiveDirectory
+Get-ADUser -Identity mike | Get-Member
+Get-ADUser -Identity mike -Properties * | Get-Member
+
+$Users = Get-ADUser -Identity mike -Properties *
+$Users | Get-Member
+$Users | Select-Object -Property Name, LastLogonDate, LastBadPasswordAttempt
+Get-ADUser -Identity mike -Properties LastLogonDate, LastBadPasswordAttempt
+
+$Service = 'w32time'; Get-Service -Name $Service # 分号分隔
+Get-Service | Where-Object Name -eq w32time # 筛选左侧
+
+Get-Service |
+Select-Object -Property DisplayName, Running, Status |
+Where-Object CanPauseAndContinue
+
+Get-Service |
+Where-Object CanPauseAndContinue |
+Select-Object -Property DisplayName, Status
+
+```
+
 #### 端口转发
 
 netsh(Network Shell) 是一个windows系统本身提供的功能强大的网络配置命令行工具。 导出配置脚本：netsh -c interface ip dump > c:\interface.txt 导入配置脚本：netsh -f c:\interface.txt。
 
-```
+```powershell
 netsh interface portproxy show all
 
 netsh interface portproxy add v4tov4 listenport=8000 listenaddress=192.168.12.132 connectport=8000 connectaddress=127.0.0.1

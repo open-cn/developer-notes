@@ -337,6 +337,7 @@ Map集合  一对值 key->vaule  key具有唯一性 无序  允许值对象(valu
 -->>>TreeMap类	key有序（二叉树） 不允许key为null
 -->>>Hashtable类  线程安全 哈希码快速查找 不允许key或value为null 除了Equals相等，hashCode也要相等 此俩方法需要重写
 
+在JDK1.7中，HashMap的数据结构还是连续数组+单链表； 在JDK1.8中，就变为了连续数组+单链表<->红黑树的结构。
 
 【java.IO输入输出流】
 因为输入输出流已经超越了VM的边界，所以有时可能无法回收资源。
