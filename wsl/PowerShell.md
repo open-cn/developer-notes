@@ -135,7 +135,7 @@ PowerShell 7 中的新功能包括：
 - 返回Out-GridViewcmdlet
 - -ShowWindow开关的返回Get-Help
 
-### 最佳实践
+### 使用
 PowerShell 中的编译命令称为 cmdlet。 Cmdlet 的发音为“command-let”（而不是 CMD-let）。 Cmdlet 名称采用单数形式的“动词-名词”命令形式，这样更易于被发现。
 
 ```powershell
@@ -221,7 +221,573 @@ Where-Object CanPauseAndContinue |
 Select-Object -Property DisplayName, Status
 
 ```
+#### PowerShellGet
+PowerShellGet 是一个 PowerShell 模块，其中包含用于向/从 NuGet 存储库发现、安装、发布和更新 PowerShell 模块（以及其他项目）的命令。 PowerShellGet 随 PowerShell 版本 5.0 及更高版本提供。 对于 PowerShell 版本 3.0 及更高版本，它可以作为单独的下载提供。
 
+Microsoft 托管 PowerShell 库联机 NuGet 存储库。 存储库中包含的大多数模块不是由 Microsoft 编写的。 
+
+公司可以托管自己的内部专用 NuGet 存储库，在这些存储库中，他们可以发布仅供内部使用的模块以及从其他源下载的模块（已验证其并非恶意模块）。
+
+由于 PowerShell 库是不受信任的存储库，因此系统会提示你同意安装该模块。
+
+使用 PowerShellGet 模块中包含的 Find-Module cmdlet，在 PowerShell 库中查找安装 MrToolkit 的模块。
+
+```powershell
+Find-Module -Name MrToolkit | Install-Module
+Get-MrPipelineInput -Name Stop-Service # 用于确定接受管道输入的命令参数、接受的对象类型，以及是按值还是按属性名称接受管道输入 。
+```
+
+#### 格式设置
+最常见的格式命令是 Format-Table 和 Format-List。 还可以使用 Format-Wide 和 Format-Custom，但不太常见。
+```powershell
+# 多个列输出 像sql表一样
+Get-Service -Name w32time | Select-Object -Property Status, DisplayName, Can*
+Get-Service -Name w32time | Select-Object -Property Status, DisplayName, Can* |
+Format-Table
+
+# 多个行输出
+Get-Service -Name w32time
+Get-Service -Name w32time | Format-List
+
+# 无法通过管道将格式命令传送给大多数其他命令。 
+# 可以将格式命令通过管道传送给一些 Out-* 命令，但仅此而已。 
+# 因此，建议在行尾执行任何格式设置（右对齐格式）。
+Get-Service -Name w32time | Format-List | Get-Member
+```
+
+#### 别名
+PowerShell 包含一组内置别名，你也可以定义自己的别名。
+
+Get-Alias cmdlet 用于查找别名。 如果已知命令的别名，则 Name 参数用于确定与该别名关联的命令。
+```powershell
+Get-Alias # 查看所有别名
+Get-Alias -Name gcm
+Get-Alias -Name gcm, gm
+Get-Alias gm # Name 参数可忽略，它是位置参数。
+
+Get-Alias -Definition Get-Command, Get-Member # 查找命令的别名
+```
+
+#### 提供程序
+PowerShell 中的提供程序是一种允许文件系统访问数据存储的接口。 PowerShell 中提供了许多内置提供程序。
+
+第三方模块（例如 Active Directory PowerShell 模块和 SQL Server PowerShell 模块）都添加了自己的 PowerShell 提供程序和 PSDrive。
+
+```powershell
+Get-PSProvider # 查看所有提供程序。如用于注册表、别名、环境变量、文件系统、函数、变量、证书和 WSMan 的内置提供程序。
+Get-PSDrive # 显示由提供程序公开的驱动器，还显示 Windows 逻辑驱动器，其中包括映射到网络共享的驱动器。
+
+Import-Module -Name ActiveDirectory, SQLServer # 导入第三方模块
+```
+
+#### 比较运算符
+PowerShell 包含许多比较运算符，用于比较值或查找与特定模式匹配的值。
+
+- -eq 等于 equal
+- -ne 不等于 not equal
+- -gt 大于 greater than
+- -ge 大于或等于 greater than or equal
+- -lt 小于 less than
+- -le 小于或等于 less than or equal
+- -Like	使用 * 通配符进行匹配
+- -NotLike	不使用 * 通配符进行匹配
+- -Match	匹配指定的正则表达式
+- -NotMatch	不匹配指定的正则表达式
+- -Contains	确定集合中是否包含指定的值
+- -NotContains	确定集合是否不包含特定值
+- -In	确定指定的值是否在集合中
+- -NotIn	确定指定的值是否不在集合中
+- -Replace	替换指定的值
+
+以上列出的所有运算符都不区分大小写。 将 c 放置在运算符之前，可使其区分大小写。 例如，-ceq 是区分大小写的 -eq 比较运算符。
+
+大于、大于或等于、小于和小于或等于均可用于字符串或数值。
+
+```powershell
+'PowerShell' -eq 'powershell' # 等于 不区分大小写
+'PowerShell' -ceq 'powershell' # 等于 区分大小写
+'PowerShell' -ne 'powershell' # 不等于 不区分大小写
+5 -gt 5 # 大于
+5 -ge 5 # 大于或等于
+5 -lt 10 # 小于
+'PowerShell' -like '*shell' # 执行“like”匹配
+'PowerShell' -match '^*.shell$' # 使用正则表达式执行匹配
+
+# 使用范围运算符将数字 1 到 10 存储在变量中。
+$Numbers = 1..10
+$Numbers -contains 15 # 确定它是否包含数字 15。
+$Numbers -contains 10
+$Numbers -notcontains 15 # 反转逻辑，以查看 $Numbers 变量是否不包含值。
+$Numbers -notcontains 10
+
+# PowerShell 版本 3.0 首次引入了“in”比较运算符。 它用于确定某个值是否“位于”数组中。 $Numbers 变量是数组，因为它包含多个值。
+15 -in $Numbers # 换言之，-in 执行与 contains 比较运算符相同的测试，不过方向相反。
+10 -in $Numbers
+10 -notin $Numbers # not 反转 -in 运算符的逻辑。
+15 -notin $Numbers
+
+'PowerShell' -replace 'Shell' # 用于替换内容。 如果指定一个值，则会将该值替换为空值。 
+'SQL Saturday - Baton Rouge' -Replace 'saturday','Sat'
+'SQL Saturday - Baton Rouge'.Replace('saturday','Sat') # Replace 方法区分大小写
+```
+
+#### 循环
+
+```powershell
+'ActiveDirectory', 'SQLServer' |
+   ForEach-Object {Get-Command -Module $_} |
+     Group-Object -Property ModuleName -NoElement |
+         Sort-Object -Property Count -Descending
+
+
+$ComputerName = 'DC01', 'WEB01'
+foreach ($Computer in $ComputerName) {
+  Get-ADComputer -Identity $Computer
+}
+
+for ($i = 1; $i -lt 5; $i++) {
+  Write-Output "Sleeping for $i seconds"
+  Start-Sleep -Seconds $i
+}
+
+$number = Get-Random -Minimum 1 -Maximum 10
+do {
+  $guess = Read-Host -Prompt "What's your guess?"
+  if ($guess -lt $number) {
+    Write-Output 'Too low!'
+  }
+  elseif ($guess -gt $number) {
+    Write-Output 'Too high!'
+  }
+}
+until ($guess -eq $number)
+
+$number = Get-Random -Minimum 1 -Maximum 10
+do {
+  $guess = Read-Host -Prompt "What's your guess?"
+  if ($guess -lt $number) {
+    Write-Output 'Too low!'
+  } elseif ($guess -gt $number) {
+    Write-Output 'Too high!'
+  }
+}
+while ($guess -ne $number)
+
+$date = Get-Date -Date 'November 22'
+while ($date.DayOfWeek -ne 'Thursday') {
+  $date = $date.AddDays(1)
+}
+Write-Output $date
+
+# Break 旨在中断循环。 它通常与 switch 语句一起使用。
+for ($i = 1; $i -lt 5; $i++) {
+  Write-Output "Sleeping for $i seconds"
+  Start-Sleep -Seconds $i
+  break
+}
+# Continue 旨在跳到循环的下一次迭代。
+while ($i -lt 5) {
+  $i += 1
+  if ($i -eq 3) {
+    continue
+  }
+  Write-Output $i
+}
+# Return 旨在退出现有作用域。
+$number = 1..10
+foreach ($n in $number) {
+  if ($n -ge 4) {
+    Return $n
+  }
+}
+```
+#### 使用 WMI
+默认情况下，PowerShell 附带可处理 Windows Management Instrumentation (WMI) 等其他技术的 cmdlet。 PowerShell 中存在多个本机 WMI cmdlet，且无需安装任何其他软件或模块。
+
+从一开始，PowerShell 就具有可处理 WMI 的 cmdlet。 
+
+PowerShell 版本 3.0 中引入了通用信息模型 (CIM) cmdlet。 CIM cmdlet 的设计目的是使其可以同时在 Windows 和非 Windows 计算机上使用。 由于 WMI cmdlet 已弃用，因此建议使用 CIM cmdlet 代替 WMI cmdlet。
+
+所有 CIM cmdlet 都包含在一个模块中。 
+
+在同一台计算机上运行多个查询时，为每个查询使用 CIM 会话比使用计算机名更有效。 创建 CIM 会话时只需建立一次连接。 然后，多个查询使用此同一会话检索信息。 如果使用计算机名，cmdlet 需要建立和断开与每个查询的连接。
+
+Get-CimInstance cmdlet 默认使用 WSMan 协议，这意味着远程计算机需要 PowerShell 3.0 或更高版本才能进行连接。 实际上，PowerShell 版本并不那么重要，重要的是堆栈版本。 可以使用 Test-WSMan cmdlet 确定堆栈版本。 堆栈版本需为 3.0。 PowerShell 3.0 及更高版本提供该版本的堆栈。
+
+较旧的 WMI cmdlet 使用 DCOM 协议，该协议与较低版本的 Windows 兼容。 而较新 Windows 版本上的防火墙通常会阻止 DCOM。 可使用 New-CimSessionOption cmdlet 创建可与 New-CimSession 一起使用的 DCOM 协议连接。 这样便可使用 Get-CimInstance cmdlet 与低至 Windows Server 2000 的 Windows 版本进行通信。 这也意味着，将 Get-CimInstance cmdlet 与配置为使用 DCOM 协议的 CimSession 一起使用时，远程计算机上不需要 PowerShell。
+
+```powershell
+Get-Command -Noun WMI* # 确定 PowerShell 中存在哪些 WMI cmdlet。
+
+Get-Command -Module CimCmdlets # 获取 CIM cmdlet 的列表
+
+Get-CimInstance -Query 'Select * from Win32_BIOS' # 使用 WMI 查询语言 (WQL) 来查询 WMI
+Get-CimInstance -ClassName Win32_BIOS # 查询 WMI 的单项
+Get-CimInstance -ClassName Win32_BIOS | Select-Object -Property SerialNumber
+# 默认情况下，系统会在后台检索一些从不使用的属性。 在本地计算机上查询 WMI 时，这可能不会产生什么影响。 但是，如果开始查询远程计算机，前述检索不仅要花费更多的处理时间来返回相关信息，还会在网络中拉取不必要的额外信息。 Get-CimInstance 有一个可以限制检索到的信息的 Property 参数。 这会提升 WMI 查询的效率。
+Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -Property SerialNumber
+Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber # ExpandProperty 返回简单字符串
+(Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber).SerialNumber # 使用点式语法
+
+
+Get-CimInstance -ComputerName dc01 -ClassName Win32_BIOS # 查询远程主机信息，需要域管理员身份运行
+$CimSession = New-CimSession -ComputerName dc01 -Credential (Get-Credential)
+Get-CimInstance -CimSession $CimSession -ClassName Win32_BIOS
+
+$DCOM = New-CimSessionOption -Protocol Dcom
+$Cred = Get-Credential
+$CimSession = New-CimSession -ComputerName sql03 -SessionOption $DCOM -Credential $Cred
+Get-CimInstance -CimSession $CimSession -ClassName Win32_BIOS
+
+Get-CimSession # 查看当前连接的 CimSessions 及其正在使用的协议。
+
+$CimSession = Get-CimSession
+Get-CimInstance -CimSession $CimSession -ClassName Win32_BIOS
+
+Get-CimSession | Remove-CimSession # 删除所有 CIM 会话
+```
+#### 远程处理
+
+```powershell
+Get-Command -ParameterName ComputerName # 确定哪些命令具有 ComputerName 参数 
+
+Enable-PSRemoting
+
+# 一对一远程处理
+$Cred = Get-Credential
+Enter-PSSession -ComputerName dc01 -Credential $Cred
+
+# 一对多远程处理
+Invoke-Command -ComputerName dc01, sql02, web01 {Get-Service -Name W32time} -Credential $Cred
+Invoke-Command -ComputerName dc01, sql02, web01 {Get-Service -Name W32time} -Credential $Cred | Get-Member
+
+Invoke-Command -ComputerName dc01, sql02, web01 {(Get-Service -Name W32time).Stop()} -Credential $Cred
+Invoke-Command -ComputerName dc01, sql02, web01 {Get-Service -Name W32time} -Credential $Cred
+
+# 创建会话
+$Session = New-PSSession -ComputerName dc01, sql02, web01 -Credential $Cred
+Invoke-Command -Session $Session {(Get-Service -Name W32time).Start()}
+Invoke-Command -Session $Session {Get-Service -Name W32time}
+
+Get-PSSession | Remove-PSSession
+```
+
+#### 函数
+在 PowerShell 中命名函数时，结合使用帕斯卡拼写法名称和已批准的谓词和单数名词。 建议在名词前面加上前缀以防止命名冲突。 例如：`<ApprovedVerb>-<Prefix><SingularNoun>`。
+
+```powershell
+
+Get-Verb | Sort-Object -Property Verb # ps批准的谓词的特定列表
+
+function Get-Version { # 防止冲突 Get-PSVersion、Get-MrPSVersion
+    $PSVersionTable.PSVersion
+}
+
+Get-ChildItem -Path Function:\Get-*Version # 查看函数
+Get-ChildItem -Path Function:\Get-*Version | Remove-Item # 删除函数
+Remove-Module -Name <ModuleName> # 卸载模块，来删除函数
+
+function Test-MrParameter {
+
+    param (
+        $ComputerName
+    )
+
+    Write-Output $ComputerName
+
+}
+
+function Get-MrParameterCount {
+    param (
+        [string[]]$ParameterName
+    )
+
+    foreach ($Parameter in $ParameterName) {
+        $Results = Get-Command -ParameterName $Parameter -ErrorAction SilentlyContinue
+
+        [pscustomobject]@{
+            ParameterName = $Parameter
+            NumberOfCmdlets = $Results.Count
+        }
+    }
+}
+
+Get-MrParameterCount -ParameterName ComputerName, Computer, ServerName, Host, Machine
+# 使用标准化参数。比如有 39 个命令具有 ComputerName 参数。 没有任何 cmdlet 具有 Computer、ServerName、Host 或 Machine 这样的参数 。
+
+# 添加 CmdletBinding 会自动添加通用参数。 CmdletBinding 需要一个 param 块，但 param 块可以为空。
+function Test-MrCmdletBinding {
+
+    [CmdletBinding()] #<<-- This turns a regular function into an advanced function
+    param (
+        $ComputerName
+    )
+
+    Write-Output $ComputerName
+
+}
+
+Get-Command -Name Test-MrCmdletBinding -Syntax
+
+# SupportsShouldProcess 会添加 WhatIf 和 Confirm 参数 。 只有做出更改的命令需要这些参数。
+function Test-MrSupportsShouldProcess {
+
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        $ComputerName
+    )
+
+    Write-Output $ComputerName
+
+}
+
+Get-Command -Name Test-MrSupportsShouldProcess -Syntax
+
+function Test-MrParameterValidation {
+
+    [CmdletBinding()]
+    param (
+        [string]$ComputerName
+    )
+
+    Write-Output $ComputerName
+
+}
+
+# 指定了 String 作为 ComputerName 参数的数据类型 。 这将导致它只允许指定一个计算机名。
+# 如果通过以逗号分隔的列表指定了多个计算机名，则会生成错误。
+Test-MrParameterValidation -ComputerName Server01, Server02
+
+# ComputerName 是必需的，如果未指定，该函数将提示输入名称。
+function Test-MrParameterValidation {
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [string]$ComputerName
+    )
+
+    Write-Output $ComputerName
+
+}
+
+# 允许 ComputerName 参数具有多个值
+function Test-MrParameterValidation {
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [string[]]$ComputerName
+    )
+
+    Write-Output $ComputerName
+
+}
+
+# 为 ComputerName 参数指定一个默认值（如果未指定）
+# 默认值不能与必需参数一起使用。 需要将 ValidateNotNullOrEmpty 参数验证属性与默认值一起使用。
+function Test-MrParameterValidation {
+
+    [CmdletBinding()]
+    param (
+        [ValidateNotNullOrEmpty()]
+        [string[]]$ComputerName = $env:COMPUTERNAME
+    )
+
+    foreach ($Computer in $ComputerName) {
+        #Attempting to perform some action on $Computer <<-- Don't use
+        #inline comments like this, use write verbose instead.
+        # 一种更好的选择是使用 Write-Verbose 而不是内联注释。
+        Write-Verbose -Message "Attempting to perform some action on $Computer"
+        Write-Output $Computer
+    }
+
+}
+
+Test-MrVerboseOutput -ComputerName Server01, Server02 -Verbose # 通过 Verbose 参数调用函数时，会显示详细输出。
+
+# 管道输入
+# 管道输入一次输入一个项，这类似于在 foreach 循环中处理项的方式。 如果要接受数组作为输入，则至少需要一个 process 块才能处理所有项。 如果只接受单个值作为输入，则不需要 process 块，但仍建议指定它以保持一致性。
+function Test-MrPipelineInput {
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,
+                   ValueFromPipeline)]
+        [string[]]$ComputerName
+    )
+
+    PROCESS {
+        Write-Output $ComputerName
+    }
+
+}
+
+# 接受按属性名称显示的管道输入是类似的，但它是使用 ValueFromPipelineByPropertyName 参数属性指定的，并且可为任意数量的参数指定该输入，无需考虑数据类型。 
+# 关键在于，通过管道传送的命令输出必须具有与参数名称或函数的参数别名匹配的属性名称。
+function Test-MrErrorHandling {
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,
+                   ValueFromPipeline,
+                   ValueFromPipelineByPropertyName)]
+        [string[]]$ComputerName
+    )
+
+    PROCESS {
+        foreach ($Computer in $ComputerName) {
+            try {
+                Test-WSMan -ComputerName $Computer
+            }
+            catch {
+                Write-Warning -Message "Unable to connect to Computer: $Computer"
+            }
+        }
+    }
+
+}
+
+# 将 ErrorAction 参数的值指定为 Stop，将非终止错误转换为终止错误 。
+function Test-MrErrorHandling {
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,
+                   ValueFromPipeline,
+                   ValueFromPipelineByPropertyName)]
+        [string[]]$ComputerName
+    )
+
+    PROCESS {
+        foreach ($Computer in $ComputerName) {
+            try {
+                Test-WSMan -ComputerName $Computer -ErrorAction Stop
+            }
+            catch {
+                Write-Warning -Message "Unable to connect to Computer: $Computer"
+            }
+        }
+    }
+
+}
+
+# 函数注释
+function Get-MrAutoStoppedService {
+
+<#
+.SYNOPSIS
+    Returns a list of services that are set to start automatically, are not
+    currently running, excluding the services that are set to delayed start.
+
+.DESCRIPTION
+    Get-MrAutoStoppedService is a function that returns a list of services from
+    the specified remote computer(s) that are set to start automatically, are not
+    currently running, and it excludes the services that are set to start automatically
+    with a delayed startup.
+
+.PARAMETER ComputerName
+    The remote computer(s) to check the status of the services on.
+
+.PARAMETER Credential
+    Specifies a user account that has permission to perform this action. The default
+    is the current user.
+
+.EXAMPLE
+     Get-MrAutoStoppedService -ComputerName 'Server1', 'Server2'
+
+.EXAMPLE
+     'Server1', 'Server2' | Get-MrAutoStoppedService
+
+.EXAMPLE
+     Get-MrAutoStoppedService -ComputerName 'Server1' -Credential (Get-Credential)
+
+.INPUTS
+    String
+
+.OUTPUTS
+    PSCustomObject
+
+.NOTES
+    Author:  Mike F Robbins
+    Website: http://mikefrobbins.com
+    Twitter: @mikefrobbins
+#>
+
+    [CmdletBinding()]
+    param (
+
+    )
+
+    #Function Body
+
+}
+```
+
+#### 脚本模块
+PowerShell 中的脚本模块只是一个文件，其中包含一个或多个保存为 .PSM1 文件而不是 .PS1 文件的函数。
+
+所有模块都应该有一个模块清单。 模块清单包含有关模块的元数据。 模块清单文件的文件扩展名是 .PSD1。 并非所有扩展名为 .PSD1 的文件都是模块清单。 它们还可用于存储 DSC 配置的环境部分等用途。
+
+```powershell
+help New-Module # 在内存中创建动态模块，而不是脚本模块
+
+# 查看自动加载模块的路径
+$env:PSModulePath
+$env:PSModulePath -split ';'
+
+# New-ModuleManifest 用于创建模块清单。 Path 是所需的唯一值。但是，如果未指定 RootModule，则该模块将不起作用。 
+# 如果决定使用 PowerShellGet 将模块上传到 NuGet 存储库，最好指定 Author 和 Description，因为该情况需要这些值 。
+New-ModuleManifest -Path $env:ProgramFiles\WindowsPowerShell\Modules\MyScriptModule\MyScriptModule.psd1 -RootModule MyScriptModule -Author 'Mike F Robbins' -Description 'MyScriptModule' -CompanyName 'mikefrobbins.com'
+
+Get-Module -Name MyScriptModule # 不带清单的模块版本为 0.0。 模块没有清单是一个致命的漏洞。
+```
+
+只有 Get-MrPSVersion 函数可供模块的用户使用，但 Get-MrComputerName 函数可供模块本身包含的其他函数使用。
+```powershell
+function Get-MrPSVersion {
+    $PSVersionTable
+}
+
+function Get-MrComputerName {
+    $env:COMPUTERNAME
+}
+
+Export-ModuleMember -Function Get-MrPSVersion
+```
+
+### 最佳实践
+```powershell
+Get-Verb
+# 运行此命令时，将返回大多数命令遵循的谓词的列表。
+# 此外，响应还会说明这些谓词执行哪些操作。 
+# 由于大多数命令都遵循这种命名方式，因此，它设置了命令的预期操作，这样有助于你选择适当的命令，也可帮助你在创建命令时为其命名。
+
+Get-Command
+# 此命令会检索计算机上安装的所有命令的列表。
+
+Get-Command -Name '*Process' # 根据名称筛选
+Get-Command -Verb 'Get'
+Get-Command -Noun U*
+Get-Command -Verb Get -Noun U* # 根据名词和谓词进行筛选
+
+Get-Command -ParameterType Process # 根据类型筛选
+
+Get-Member
+# 它在基于对象的输出上运行，并且能够发现可用于命令的对象、属性和方法。
+
+Get-Process | Get-Member
+Get-Process | Get-Member -MemberType Method
+Get-Process | Get-Member | Select-Object Name, Definition
+Get-Process | Get-Member | Select-Object TypeName -Unique
+
+Get-Help
+# 以命令名称为参数调用此命令，将显示一个帮助页面，其中说明了命令的各个部分。
+
+Get-Command | Select-Object -First 3
+Get-Process | Where-Object {$_.ProcessName -Like "p*"}
+
+```
 #### 端口转发
 
 netsh(Network Shell) 是一个windows系统本身提供的功能强大的网络配置命令行工具。 导出配置脚本：netsh -c interface ip dump > c:\interface.txt 导入配置脚本：netsh -f c:\interface.txt。
@@ -233,8 +799,6 @@ netsh interface portproxy add v4tov4 listenport=8000 listenaddress=192.168.12.13
 
 netsh interface portproxy delete v4tov4 listenport=8000 listenaddress=192.168.12.132
 ```
-
-
 
 #### scoop——Windows下的包管理系统
 要求powershell3或以上版本， .NET Framework 4.5或以上版本。
