@@ -4,6 +4,8 @@
 
 云计算不但包括分布式计算还包括分布式存储和分布式缓存。分布式存储又包括分布式文件存储和分布式数据存储。
 
+cloustack可以说是最早的云平台之一。openstack可以说是曾经最火的虚拟化云平台，没有之一；kubernetes是现在最火最热门的容器云平台，火热程度应该已经超过openstack，成为当下最热门的云平台，几乎没有之一。
+
 ### 概述
 
 云计算（Cloud computing）是继20世纪80年代由大型计算机向客户端/服务器（C/S）模式大转变后，信息技术的又一次革命性变化。2006年8月9日，Google首席执行官Eric Schmidt在搜索引擎大会（SES San Jose 2006）上首次提出云计算概念。云计算是网格计算，分布式计算，并行计算、效用技术、网络存储、虚拟化和负载均衡等传统计算机和网络技术发展融合的产物。其目的是通过基于网络的计算方式，将共享的软件/硬件资源和信息进行组织整合，按需提供给计算机和其他系统使用。
@@ -81,6 +83,8 @@ Parallel computing and distributed computing are ways of exploiting parallelism 
 比较公认的云架构是划分为基础设施层（IaaS）、平台层（PaaS）和软件服务层（SaaS）三个层次的。
 
 ![](images/cloud_computing0.png)
+
+![](images/cloud_computing1.jpg)
 
 #### IaaS
 
@@ -185,7 +189,72 @@ Software-as-a-Service（软件即服务）：应用层。
 5. 安全管理
 现有的安全控制，像身份认证、授权和身份认证管理需要在公有云和私有云中共同工作。整合这些安全协议，你只能选择其一：在两个云中复制控制并保持安全数据同步，或者使用身份认证管理服务，提供单一的服务运转在云端。在计划和时间阶段分配足够的时间，以便解决这些相当复杂的整合问题。
 
+### CloudStack
+
+CloudStack的前身是Cloud.com，后被思杰收购。英特尔、阿尔卡特-朗迅、瞻博网络、博科等都已宣布支持CloudStack。2011年7月，Citrix收购Cloud.com，并将CloudStack 100%开源。2012年4月5日，Citrix又宣布将其拥有的CloudStack开源软件交给Apache软件基金会管理。
+
+CloudStack是一个开源的具有高可用性及扩展性的云计算平台，同时是一个开源云计算解决方案。可以加速高伸缩性的公共和私有云（IaaS）的部署、管理、配置。使用CloudStack作为基础，数据中心操作者可以快速方便的通过现存基础架构创建云服务。
+
+支持管理大部分主流的hypervisor，如KVM虚拟机，XenServer，VMware，Oracle VM，Xen等。
+
+
+### OpenStack
+
+2010年 Openstack项目成立。OpenStack是一个开源的云计算管理平台项目，是一系列软件开源项目的组合。由NASA(美国国家航空航天局)和Rackspace合作研发并发起，以Apache许可证授权的开源代码项目。
+
+Openstack旨在为公共及私有云的建设与管理提供软件。它的主要任务是给用户提供IaaS服务。它的社区拥有超过130家企业及1350位开发者，这些机构与个人将Openstack作为基础设施即服务资源的通用前端。Openstack项目的首要任务是简化云的部署过程并为其带来良好的可扩展性。
+
+很多企业和个人纷纷加入Openstack开源社区，使之成为了目前仅次于LINUX的全球第二大开源社区。按官网最新数据，现在有180多个国家，677家企业，87426名社区会员通过各种方式支撑着这个项目。项目的代码也已经超过了2000万行。
+
+来自咨询机构Forrester的分析表示，OpenStack已经逐步成为事实上(de facto)的基础架构云(IaaS)标准。
+
+#### 核心项目
+
+OpenStack覆盖了网络、虚拟化、操作系统、服务器等各个方面。它是一个正在开发中的云计算平台项目，根据成熟及重要程度的不同，被分解成核心项目、孵化项目，以及支持项目和相关项目。每个项目都有自己的委员会和项目技术主管，而且每个项目都不是一成不变的，孵化项目可以根据发展的成熟度和重要性，转变为核心项目。
+
+截止到Icehouse版本，下面列出了10个核心项目（即OpenStack服务）：
+
+1. 计算（Compute）：Nova。一套控制器，用于为单个用户或使用群组管理虚拟机实例的整个生命周期，根据用户需求来提供虚拟服务。负责虚拟机创建、开机、关机、挂起、暂停、调整、迁移、重启、销毁等操作，配置CPU、内存等信息规格。
+2. 对象存储（Object Storage）：Swift。一套用于在大规模可扩展系统中通过内置冗余及高容错机制实现对象存储的系统，允许进行存储或者检索文件。可为Glance提供镜像存储，为Cinder提供卷备份服务。
+3. 镜像服务（Image Service）：Glance。一套虚拟机镜像查找及检索系统，支持多种虚拟机镜像格式（AKI、AMI、ARI、ISO、QCOW2、Raw、VDI、VHD、VMDK），有创建上传镜像、删除镜像、编辑镜像基本信息的功能。自Bexar版本集成到项目中。
+4. 身份服务（Identity Service）：Keystone。为OpenStack其他服务提供身份验证、服务规则和服务令牌的功能，管理Domains、Projects、Users、Groups、Roles。自Essex版本集成到项目中。
+5. 网络&地址管理（Network）：Neutron。提供云计算的网络虚拟化技术，为OpenStack其他服务提供网络连接服务。为用户提供接口，可以定义Network、Subnet、Router，配置DHCP、DNS、负载均衡、L3服务，网络支持GRE、VLAN。插件架构支持许多主流的网络厂家和技术，如OpenvSwitch。自Folsom版本集成到项目中。
+6. 块存储 (Block Storage)：Cinder。为运行实例提供稳定的数据块存储服务，它的插件驱动架构有利于块设备的创建和管理，如创建卷、删除卷，在实例上挂载和卸载卷。自Folsom版本集成到项目中。
+7. UI 界面 (Dashboard)：Horizon。OpenStack中各种服务的Web管理门户，用于简化用户对服务的操作，例如：启动实例、分配IP地址、配置访问控制等。自Essex版本集成到项目中。
+8. 测量 (Metering)：Ceilometer。像一个漏斗一样，能把OpenStack内部发生的几乎所有的事件都收集起来，然后为计费和监控以及其它服务提供数据支撑。自Havana版本集成到项目中。
+9. 部署编排 (Orchestration)：Heat。提供了一种通过模板定义的协同部署方式，实现云基础设施软件运行环境（计算、存储和网络资源）的自动化部署。自Havana版本集成到项目中。
+10. 数据库服务（Database Service）：Trove。为用户在OpenStack的环境提供可扩展和可靠的关系和非关系数据库引擎服务。自Icehouse版本集成到项目中。
+
+#### 历史版本
+
+1) Austin——Openstack发布的第一个版本，这是第一个开源的云计算平台。
+2) Bexar——Openstack发布的第二个版本，添加了IPv6的支持、影像传递技术，以及Hyper-V和Xen等虚拟服务器功能。
+3) Catus——Openstack发布的第三个版本，添加了虚拟化功能、自动化功能以及一个服务目录。
+4) Diablo——Openstack发布的第四个版本，增加了新的图形化用户界面和统一身份识别管理系统。
+5) Essex——Openstack发布的第五个版本，完善了Keystone认证，删除了对 Windows Hyper-V支持的相关代码。
+6) Folsom——2012年9月Open Stack发布的第六版。Folsom包括了Nova swift、Horizon Keystone、Glance原有的五个子项目之外，又多增Quantum和Cinder两项。Quantum支持了数个现有的虚拟网络套件，如Open vSwitch、Ryu网络操作系统(Network Operation System，NOS)等，也包括了Cisco、Nicira和NEC等厂商提供的虚拟网络套件等，Quantun可以让Open Stack的IaS平台能采用软件定义网络(Software Defined network，SDN)的技术，如OpenFlow。Cinder则加强了区块(Block)与磁盘区(Volume)的储存能力。
+7)Grizly——2013年4月Open Stack基金会发布的第七个版本。Grizzly新增近230个新功能，涉及计算、存储、网络和共享服务等方面。例如Open Stack计算虚拟化-计算使用“Cells”管理分布式集群，使用“NoDB”主机架构，以减少对中央数据库的依赖。 
+8) Havana——2013年10月Open Stack基金会发布的第八个版本。 Havana除了增加Open Stack Metering(Ceilometer)和Open Stack Orchestration(Heat)两个新组件外，还完成了400多个特性计划，修补了3000多补丁。
+9) Icehouse——2014年4月Open Stack基金会发布的第九个版本。新版本提高了项目的稳定性与成熟度，提升用户体验的一致性，特别是针对存储方面。联合身份验证将允许用户通过相同认证信息同时访问Open Stack私有云与共有云。新项目Trove(DB as a service)现在已经成为版本中的组成部分，它允许用户在Open Stack环境中管理关系数据库服务。
+10) Juno——2014年10月OpenStack基金会发布的第十个版本。新增包括围绕Hadoop和Spark集群管理和监控的自动化服务和支持软件开发、大数据分析和大规模应用架构在内的342个功能点，标志着Open Stack正向大范围支持的成熟云平台快速前进。
+
+
+#### 发展趋势
+Open Stack需要完善的部分大体上可以归纳为以下几个方面：
+
+1) 增强动态迁移：虽然Open Stack的Nova组件支持动态迁移，但实质上Open Stack尚未实现真正意义上的动态迁移。在Open Stack中因为没有共存储只能做块迁移，共享迁移只能在有共享存储的情况下才被使用。
+2) 数据安全：安全问题一直是整个云计算行业的问题，尽管Open Stack中存在对用户身份信息的验证等安全措施，甚至划分出可以单独或合并表征安全信任等级的域，但随着用户需求的变化和发展，安全问题仍然不可小觑。
+3) 计费和数据监控:随着Open Stack在公有云平台中的进一步部署，计费和监控成为公有云运营中的一个重要环节。云平台的管理者和云计算服务的提供者必然会进一步开发Open Stack的商业价值。尽管Open Stack中已经有Ceilometer计量组件，通过它提供的API接口可以实现收集云计算里面的基本数据和其他信息，但这项工程目前尚处于完善和测试阶段，还需要大量的技术人员予以维护和支持。
+
 ### Kubernetes
 
+### Zstack
 
+ZStack是综合了OpenStack、CloudStack、Linux和多种虚拟化软件思想精华的下一代私有云IaaS软件。ZStack可以做到15分钟完成安装部署，版本间5分钟无缝升级，全部部署与运维过程实现零人工操作。
+
+张鑫于2006年加入Intel开源技术中心，从事XEN内核开发（Linux系统下的开源虚拟化解决方案），是世界上最早一批虚拟化工程师。2010年他被招聘到硅谷加入Cloud.com，其产品就是CloudStack（类似于OpenStack的开源云平台），成为了CloudStack早期核心开发人员。后来Cloud.com被Citrix收购，张鑫也加入了Citrix。在Citrix期间，张鑫又是最早从事Docker研究的技术人员，与著名的美国Docker公司Rancher有密切的关系。
+
+有了XEN和CloudStack这两代企业级硬件虚拟化的软件产品开发经历和经验，张鑫在2015年初开始开发自己的第三代虚拟化软件产品ZStack，这次瞄准的是私有IaaS云的“操作系统”。ZStack是一个非常神奇的IaaS软件：无须任何手工操作和维护，企业IT人员只需要从网上下载ZStack软件后即可在几分钟内自行部署一个IaaS私有云。
+
+2015年底，张鑫回国创业。2017年1月18日，ZStack宣布获得阿里云领投，找钢网胖猫创投、紫竹小苗基金跟投的数千万人民币A轮投资。未来，阿里云的公有云和ZStack的私有云将构成混合云“联合战队”，用批量化实现企业的混合云。
 
