@@ -101,8 +101,10 @@ Preferences =>Package Settings => Package Control => Settings - User
 
 
 ### Sublime 配置
-在Sublime Text3中,所有Default代码都不能直接更改，而是要在User里面把要更改的代码复制过来再进行更改,这是与之前版本不同的地方.
 
+在Sublime Text3中，所有Default代码都不能直接更改，而是要在User里面把要更改的代码复制过来再进行更改，这是与之前版本不同的地方。
+
+```json Packages/User/Preferences.sublime-settings
 {
 	"theme": "Material-Theme-Palenight.sublime-theme",
 	"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
@@ -114,17 +116,49 @@ Preferences =>Package Settings => Package Control => Settings - User
 	"show_encoding": true,  // 显示编码
 	"show_git_status": false, // 显示 git 状态
 
-	"highlight_line": true, // 高亮正在编辑的行
-	// "line_numbers": true,   // 显示行号
+	"soda_classic_tabs": true,
 
-	// "tab_size": 4,          // tab宽度
+	"highlight_line": true, // 高亮正在编辑的行
+	"line_numbers": true,   // 显示行号
+
+	"tab_size": 4,          // tab宽度
 	"translate_tabs_to_spaces": true,   // tab转换为空格
 	"trim_trailing_white_space_on_save": true,  // 保存时去掉行尾空格
 
 	"word_wrap": true,      // 自动换行
-	"wrap_width": "auto",    // 换行的宽度,默认80会造成左侧大量留白
+	"wrap_width": "auto",    // 换行的宽度，默认80会造成左侧大量留白
 }
+```
 
+Settings Syntax Specific
+
+```json Packages/User/Markdown.sublime-settings
+{
+	"color_scheme": "Packages/Color Scheme - Default/Breakers.sublime-color-scheme",
+	"extensions":
+	[
+		"md",
+		"mdown"
+	],
+	"mde.keep_centered": false,
+	"rulers":
+	[
+	],
+}
+```
+
+Settings Distraction Free Mode
+
+```json Packages/User/Distraction Free.sublime-settings
+{
+	"line_numbers": false,　　// 是否显示行
+	"gutter": false,　　　　 　// 是否显示行高亮光标
+	"draw_centered": true,　　// 是否在中央绘制，为false的话
+	"wrap_width": 80,　　　　  // 自动换行宽度
+	"word_wrap": true,　　　　 // 是否自动换行
+	"scroll_past_end": true,  // 是否滚动到超出文本范围的区域。
+}
+```
 
 ### Sublime 快捷键
 #### 多行编辑

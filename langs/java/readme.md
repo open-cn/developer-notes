@@ -12,6 +12,16 @@
 
 前身：J2EE（Java 2 Platform, Enterprise Edition），2005年之后更名为JAVA EE
 
+### 概述
+
+Sun公司   后被Oracle收购
+
+java学习顺序：javase->sql->jdbc
+	->html,javascript,jquery,ajax,css->servlet->jsp//学到这里也可以
+	->struts2[简化web开发],类似有jsf->hibernate->spring-->ejb3.0-->web service
+
+跨平台：jvm屏蔽了操作系统之间的差异，而java源程序编译产生的是字节码文件(x.class)。字节码可以直接在jvm上运行。
+
 ### JVM
 
 1. 方法区：class类信息，常量池（static 常量和 static 变量），编译后的代码（字节码）等。
@@ -121,7 +131,7 @@ java 堆是所有线程所共享的一块内存，在虚拟机启动时创建，
 弱引用可以和引用队列联合使用，如果弱引用所引用的对象被垃圾回收了，虚拟机会将该对象的引用加入到与之关联的引用队列中；
 
 虚引用：虚引用就是一种可有可无的引用，无法用来表示对象的生命周期，任何时候都可能被回收，虚引用主要使用来跟踪对象被垃圾回收的活动，虚引用和软引用与弱引用的区别在于：虚引用必须和引用队列联合使用；在进行垃圾回收的时候，如果发现一个对象只有虚引用，那么就会将这个对象的引用加入到与之关联的引用队列中，程序可以通过发现一个引用队列中是否已经加入了虚引用，来了解被引用的对象是否需要被进行垃圾回收；
-### Java内存模型（JMM）
+### Java 内存模型（JMM）
 
 我们常说的JVM内存模式指的是JVM的内存分区；而Java内存模式是一种虚拟机规范。
 
@@ -276,73 +286,34 @@ StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个�
 - volatile（保证内存可见性：Lock前缀的指令、内存屏障禁止重排序）
 - synchronized（保证内存可见性和操作原子性：互斥锁；锁优化）
 
-### 搭建环境
+### 入门
 
-1. 下载jdk:选择正确的平台，编译器、工具集和一个运行环境
-      windows、linux、mac
-      java.lang.String
-      
-      安装目录：
-        bin   工具集  javac   java   jar   javadoc
-        include   本地开发的头文件   jni.h    native
-        jre            一个java运行环境
-        lib           库文件   \*.jar
+#### 搭建环境
 
-2. 配置环境变量
-       java_home:和其他软件约定的一个变量名
-           tomcat   jboss  weblogic
-           java-home   javahome
-           java_home=jdk安装目录
-           java_home=C:\jdk1.7.0_45
-       path:window搜索可行程序的目录，这个环境已经存在；system32
-           path=%path%;%java_home%\bin 
-           
-goagent
-fqrouter
-lefei
+1. 下载JDK：选择所在系统对应的平台  window  linux  dos macOS
+	bin 工具集 javac、java、jar、javadoc
+	include 本地（native）开发的头文件（C .h）jre java运行环境 src java的一些源码 lib 库文件*.jar
+	JDK包含编译器、工具集和运行环境
+2. 配置环境变量(java命令不依赖、javac依赖path、环境变量结尾不能是分号)
+	//java_home=C:\Program Files\Java\jdk1.7.0_40【jdk安装目录】 和其他软件约定的一个变量名 （tomcat，jboss weblogic）
+	//path=%path%;%java_home%\bin:window搜索可行程序的目录，此环境变量一般已经存在 system32
+3. 编译javac java源文件
+4. 运行java class文件名
+
+#### HelloWorld
+
+javac -d e:\HelloWorld.java
+
 改错：认真看错误提示信息，如果有多个错误先修改第一个错误
-javac:编译
-java:把类加载到jvm上运行 
-       java 类名
-       java HelloWorld
-       mono  u3d  C#
        
-classpath
-
-java学习顺序：javase->sql->jdbc->
-	html,javascript,jquery,ajax,css->servlet->
-	jsp->struts2[简化web开发],类似有jsf->hibernate->
- 	spring-->ejb3.0-->web service
-
 理解，写代码
 
-跨平台：jvm屏蔽了操作系统之间的差异，而java源程序文件编译后产生的是字节码文件(x.class)	，字节码可以直接在jvm上运行
-     在一个源程序文件中可以定义多个类，也可以定义多个主函数，
-     如果要执行那个类中的主函数，直接在java命令后面跟类名  						
-原则：最好在一个源程序文件中定义一个类
+在一个源程序文件中可以定义多个类，也可以定义多个主函数，如果要执行那个类中的主函数，直接在java命令后面跟类名。
 
+原则：在一个源程序文件中只定义一个类。
 
-javadoc 生成帮助文档
-```java
-/**
-*
-*/
-javadoc  源程序文件名
-api:java内置工具类
-String
-```      
-      
-java documentation:training
-      
-workspace:不要用中文，也不要有空格
-project【java project】-->写类-->写代码
-      
-javac -d e:\ HelloWorld.java
-      
-包命名原则：把公司的域名倒过来
-	http://www.gemptc.com
- 	com.gemptc
-    
+包命名原则：把公司的域名倒过来。http://www.gemptc.com com.gemptc。com.baidu.+工程名或者人名...
+
 类全名：包名+类名
     
 jvm启动时把java.lang包中的所有类加载到内存
@@ -351,7 +322,24 @@ classpath:jvm搜索字节码文件的路径
 	
 classpath=f:\
 java com.gemptc.HelloWorld
-	
+
+编码相关：把.java文件另存为存为gbk，用记事本打开复制、或者另存gbk覆盖，或者在IDE中设置。
+
+workspace:不要用中文，也不要有空格
+project【java project】-->写类-->写代码
+
+文档注释 dos命令提取 javadoc
+
+java documentation:training
+
+javadoc 生成帮助文档
+
+javadoc 源程序文件名
+
+api:java内置工具类
+
+#### Java 标识符
+
 标识符：字符、数字、下划线_，美元符$
 String package;
 int public;
@@ -360,16 +348,31 @@ int i;
 String name;
 String a;
 
-//为什么需要变量：让程序运行，必须要把软件加载到内存，申请和释放内存
-变量的分类：局部变量和成员变量
+java标识符规范      java语言使用unicode标准字符集 严格区分大小写
 
-变量的3要素：
-变量划分存储空间的大小（数据类型）、变量名、变量的作用域
+java所有关键字全部是小写:     for  if关键字 所以For，If是合法标识符 
+
+关键字不是合法标识符
+
+命名约定：
+1. 类或接口名 单词首字母全部大写
+2. 字段、方法和对象第一个单词首字母小写，其他单词首字母大写
+3. 常量全部字母大写 并非必须的    final+数据类型+常量大写
+4. java包全部字母小写
+
+#### Java 变量
+
+变量的意义：程序运行必须先把软件加载到内存，申请和释放
+
+变量的分类：
+1. 局部变量 方法内部定义
+2. 成员变量(全局):属性 实例变量  类的内部方法的外部    局部变量可与成员变量重名，此时成员变量在此方法中暂时失效(this.x即可使用)
+
+变量三要素：分配存储空间的大小（数据类型）、变量名、变量的作用域
 
 变量的作用域(生命周期)：
-
-属性的作用域从定义位置开始，一直到这个类结束;
-局部变量作用域从定义位置开始，到这个方法结束
+1. 属性的作用域从定义位置开始，一直到这个类结束;
+2. 局部变量作用域从定义位置开始，到这个方法结束
 
 ```java
    public void m(){
@@ -389,26 +392,63 @@ String a;
   }
 ```
 
+#### Java 数据类型
+
+基本数据类型为整型6种、布尔、字符共8种，不含String。（一个字节分配8个二进制位）
+
+- 整数 整型数据存储时使用连续空间
+	+ byte     1字节 -128~127   约定：10000000表示-128
+	+ short    2字节
+	+ int      4字节
+	+ long     8字节
+- 实数 浮点型整数和小数是分开存储的
+	+ float    4字节
+	+ double   8字节                    	
+> 注意：浮点类型是一个近似值，不可“==”判断俩个数值或变量相等，要用差的绝对值	Math.abs(a-b)<=0.000001
+- 布尔类型
+- 字符类型  2字节 只存储unicode编码的字符（一个字符2个字节）   转义字符查表    \\反斜杠   \r回车  \t制表符 \n换行  \b退格
+- 引用数据类型	类、接口、数组（String类其实是char型数组）
+
+基本数据类型可隐式转换的
+- byte short char->int->long->float->double 反向即是强制转换
+- byte short char 这三种数据类型互相不进行数据转换    char和int转换联系到unicode编码使用强转即可
+
+逻辑运算符 "短路与"&&与&    "短路或"||与|的区别
+> 注意：&、|操作符两边不是布尔类型时为位运算符。
+
 3.14  double 8b
-123   int         4b
+123   int    4b
 true  false
 'a'    'b'
 "abcdef"
 012=10
+
+#### Java 控制语句
+
+break:可以用在循环中，可以用在switch。continue:只能用在循环中。
+
+跳出外层循环体：
+1. 给外层循环起名；
+2. 设置标志位。
+
+```java
 int a = 10;
 switch(a){
 }
+
 boolean  flag = true;
-1...100
 while(flag){
 		//循环体
 }
-看别人程序，一步一步执行
+
+// 看别人程序，一步一步执行
 do...while
+
 for
-第一步
-第二步
-....
+// 第一步
+// 第二步
+...
+
 while(...){
 	    if(..){
 	       ....
@@ -421,72 +461,112 @@ while(...){
 	   	continue;
 	   }
 }
-break:可以用在循环中，可以用在switch
-continue:只能用在循环中
-	
+```
+
+#### Java 数组
+
 数组：一次定义一批变量，并且能有规律的使用这些变量
+```java
 int age1;
 int age2;
-......
+...
+```
+
+声明`int[] a;`或者`int a[];`是一样的。
+
+#### Java 类
+
 类：
-属性：每个对象，属性的取值是不一样的
-	height
-	weight
-	age
-	name
-方法：每个对象，方法是只有一份
-	speak
-	run
-	...
-小李：对象
-	178cm
-	80kg
-	20
-	"xiaoli"
+属性：每个对象，属性的取值是不一样的：height、weight、age、name...
+方法：每个对象，方法是只有一份：speak、run...
 
-小王：对象
-	175cm
-	70kg
-	21
-	"xiao王"
-	
-	speak
-	run
-	...
-交通工具：
-	speed
-	volumn
-	vendor
-	......
-	
-	
-	increaseSpeed
-	run
-对象1：
-     speed    200码
-     volumn 7
-     vendor  奥迪
-对象2：
-     speed    100码
-     volumn 5
-     vendor  一汽
-对象3：
-     speed    150码
-     volumn 5
-     vendor  上海大众
+小李：对象：178cm、80kg、20、"xiaoli"
+小王：对象：175cm、70kg、21、"xiao王"speak、run...
 
-面向对象：封装、继承、多态
-封装：把数据封装在类中，不允许在类的外部直接使用
-   
-方法重载：
-     方法名相同
-   	 参数类型不同、参数个数不同、参数次序不同
+交通工具：speed、volumn、vendor...       increaseSpeed、run
+对象1：speed：200码、volumn：7、vendor：奥迪
+对象2：speed：100码、volumn：5、vendor：一汽
+对象3：speed：150码、volumn：5、vendor：上海大众
+
+方法的调用
+1. 必须写在类中 
+2. 形式参数传值 实例参数必 须与形参一致：类型，个数，顺序。 注意:代码中小数如1.1默认double型 若是float要写成1.1f
+3. 返回值 返回值类型
+
+方法参数都是值传递。值传递的原则：基本类型传递的是该数据值本身，引用类型传递的是对象的引用。
+
+Transient修饰类成员表示此成员不会被实例化。
+
+类的产生过程:
+- 引用、声明:1.静态的 成员变量、代码块、方法自上而下依次执行
+- 创建类1.非静态代码块2.构造方法 3.非静态成员变量和方法;
+
+JAVA类首次装入时，会对静态成员变量或方法进行一次初始化，但方法不被调用是不会执行的，静态成员变量和静态初始化块级别相同，非静态成员变量和非静态初始化块级别相同。先初始化父类的静态代码--->初始化子类的静态代码-->初始化父类的非静态代码块和属性--->初始化父类构造函数--->初始化子类非静态代码块和属性--->初始化子类构造函数
+
+声明	new实例化
+
+static: 修饰内部类、类成员(方法、变量、代码块)
+
+(类成员)静态字段、属性和静态方法不需要创建实例就可以使用。
+
+注意：
+- 在静态成员函数中只能直接调用其它的静态成员函数或引用静态属性，否则编译错误。
+- 静态成员函数中也不能使用this或者super，因为它们是和类的对象相关联的。
+
+类的静态属性是所有实例共有的。
+
+类中static方法在第一次调用时加载，类中static成员按在类中出现的顺序加载：首先依次被初始化，再依次被赋值。
+
+native+方法表示该要用另外一种依赖平台的编程语言实现，不存在被子类实现
+
+final+变量\方法\类表示不可更改(没有默认值)\覆写\不可被继承(C#sealed)。但final+修饰对象仅表示对象引用不能改变，对象本身属性可以更改。内部类要访问局变量，必须定义成final类型。
+
+抽象类和接口与修饰符private并不是一定排斥，而abstract关键字与static和final排斥。
+
+public 修饰类或者接口时，规则一样 只限用于类名或者接口名与java文件名相同的情况。
+
+抽象类含至少一个抽象方法，没有方法体{...}   注意:{无代码}是空实现不是抽象方法
+
+接口中定义的方法都是抽象方法;  定义的字段都是常量  
+
+接口中定义的方法默认且必须是public abstract(都可省略)修饰 其他修饰java编译器不认可
+
+接口中定义的字段默认且必须是public static final(都可省略)修饰
+
+##### 内部类
+
+内部类的构造方法不用public修饰 无意义   
+
+唯一的好处是方便地访问外部类的私有属性   直接调用属性和方法----->>> 遇到同名变量则 外部类.this.成员   遵循静态与非静态规则
+
+某个类继承内部类时1. extends 外部类.内部类 2.构造方法带参(外部类 对象) 且方法体使用 该对象.super()
+
+成员内部类的对象实例化操作必须在外部类或者外部类的非静态方法中实现   且new操作符之前只能是:外部类对象.new                   内部类class文件名:外部类名$内部类名        可以修饰符修饰类 访问权限和类成员相同  
+局部内部类 方法中定义，要使该方法的参数被内部类访问 参数前需加final修饰  若存此类已有同名变量 测试无法访问方法参数final          内部类class文件名:外部类名+$序号+内部类名
+匿名内部类 不依赖外部类对象  必须继承某个类或者实现某个接口                                                                              
+静态内部类 不依赖外部类对象、也不可以使用外部类的非静态成员 很少用 其中定义主方法便于测试  static+成员内部类(外部类不能static修饰) 
+
+成员内部类不可以有类变量。（为什么？）依赖外部类对象，与类变量（静态属性、方法）由类名直接调用矛盾，但是常量可以。
+
+注：同一个java文件中最外层未用public修饰的类，不是内部类，是一个正常类，只是不能用public修饰。
+
+#### Java 面向对象
+
+面向对象：封装、继承、多态。
+
+封装：把数据封装到类中的，外部不用直接调用 容易数据混乱(直接赋值 有数据溢出或者类型异常的风险)
+
+编译时多态，方法重载(overload)：
+1. 在同一个类中
+1. 方法名相同
+2. 参数类型不同、参数个数不同、参数次序不同
 
 不是方法重载：
 ```java
     m(int a);
     m(int b);
 ```
+
 是方法重载：
 ```java
     m(int a,float f);
@@ -498,47 +578,87 @@ int age2;
     m(String s);
     m(int a);
 ```
-方法重载(overload)：
-	在同一个类中，要求：方法名相同，参数不同
 
-方法覆盖(override)：
-	必须要有继承，要求：4点要求
-		//1、方法名相同
-		//2、参数和返回值类型也相同
-		//3、方法的权限不能比父类的方法权限更严格
-		//4、子类方法抛出的异常不能比父类方法抛出的异常范围大
+##### 继承
+
+`extends class implements interface`
+
+1. 子类中定义的成员变量和父类非私人成员变量和方法相同时，则父类中的该成员不能被继承。
+2. 构造方法:public+类名(){}	4修饰符都可以	没有返回值也不需要void
+
+实例化子类时，子类若未显式调用父类构造则默认调用父类无参构造，父类若无则编译报错。
+编译时类中无构造则系统会默认添加无参构造，若有定义则不添加。
+
 super:指向父类的对象引用
-1、当子类重写了父类的方法，在重写的方法中调用父类方法
-2、调用父类的构造方法：必须写在子类的构造方法第一行
-    super(...)
-3、当子类的属性和父类中的属性相同时，引用父类的属性
-	super.name
+1. 当子类重写了父类的方法，在重写的方法中调用父类方法
+2. 调用父类的构造方法：必须写在子类的构造方法第一行`super(...);`
+3. 当子类的属性和父类中的属性相同时，引用父类的属性`super.name`
+
 this:指向本类对象的引用
-  this(...)
-  this.name
-  
-多态：
-把子类对象当作父类对象来看；如果子类重写了父类中的某个方法，通过父类对象的引用调用这个方法时，实际上调用的是子类中的方法
-```java
- 	Person p = new Student(.....);
- 	String s  = p.getInfo();
-```
+1. `this(...)`
+2. `this.name`
 
-1、要有继承
-2、有方法重写：4点要求
-3、要把子类对象赋值给父类的引用
+super()表示调用父类的构造方法 this()用于调用本类的构造方法。 注意:必须在构造体第一行、构造方法不可以递归
+调用父类方法或者属性关键字super(C#base)  
 
-最大程度解决了软件可扩展问题
+运行时多态，方法覆盖、重写(override)：
+1. 必须要有继承
+1. 方法名相同
+2. 参数和返回值类型也相同
+3. 方法的权限不能比父类的方法权限更严格
+4. 子类方法抛出的异常不能比父类方法抛出的异常范围大
 
-初始化顺序：
-	Person:private int initAge() 
-	public Person()
-	Student:private String initName()
-	public Student()
-	
-静态的方法可以重写，但是不产生多态
+##### 多态
 
-面向接口编程
+(编译时多态)方法的重载
+(运行时多态)把子类对象当做父类对象来看,如果子类重写了父类中的某个方法，通过父类对象的引用调用这个方法时调用子类中的方法
+多态的原理是当方法被调用时，无论对象是否被转换为其父类，都只有位于对象继承链最末端的方法实现会被调用。
+
+增加新功能 一定要继承某个类 运用多态
+
+重载(OverLoad)：1.方法名相同 2.参数不同(个数、类型、顺序至少一个不同) 3.同一个类中 注意:方法重载跟返回值类型和修饰符无关
+覆盖(重写)Override：1.方法名相同 2.参数和返回值类型也相同 3.方法权限不能比父类的更严格 4.子类抛出异常不能比父类的范围大;
+
+被重写的前提是被继承，而构造方法根本就不能被继承，所以谈不上被重写。另外，静态方法只能形式上重写，并不具备多态，本质上不能重写。
+
+
+##### 内存
+
+Java 把内存划分两种:
+- 栈内存	存放基本类型变量和对象的引用变量  当超过变量作用域后，Java自动释放该变量的内存空间              局部变量驻留在栈上
+- 堆内存	存放由 new 创建的对象和数组       堆中分配的内存由java虚拟机的自动垃圾回收器来管理              实例变量和对象驻留在堆上
+	+ 常量池  在堆中分配出来的一块存储区域  存放储显式的String常量和基本类型常量(float、int等)。另外，可以存储不经常改变的东西(public static final)。常量池中的数据可以共享。
+	+ 静态存储 static的修饰的变量和方法
+
+内存加载
+-->>>开始:虚拟机加载主方法所在类，提取类信息到方法区。
+-->>>通过保存在方法区的字节码，虚拟机开始执行main方法，main方法入栈。
+-->>>由上而下执行main方法的指令
+
+创建子类对象：new 子类()给子类实例对象分配堆空间
+-->>>虚拟机首先加载父类到方法区，并在堆中为父类成员变量在子类空间中初始化
+1. 装载:通过类的全名产生对应类的二进制数据流，分析并转换为方法区特定的数据结构，创建对应类的java.lang.Class实例  
+2. 链接:  
+	1. 01分为检测（确保被导入类型的正确性。)
+	2. 02准备（为类变量分配内存，并将其初始化为默认值）--->>>父类静态代码  
+    3. 03解析（把类型中的符号引用转换成直接引用） 
+3. 显式初始化:把类变量(static)初始化为正确初始值。  
+
+-->>>然后加载子类到方法区，为子类的非继承成员变量分配空间并初始化默认值
+子类1装载2链接3显式初始化                              ---->>>子类静态代码  
+调用父类构造方法
+调用子类构造方法
+(保存了父类属性和方法的一个引用super,没有实例化父类,然而其中private成员，虽会被初始化在子类父对象中，但对super不可见)
+
+
+-->>>将子类的实例对象地址赋值给子类的引用变量
+返回堆内存中对象的引用
+
+程序结束
+main方法执行完毕出栈，主线程消亡，虚拟机实例消亡
+
+
+##### 面向接口编程
 
 ```java
 public interface Movable{
@@ -546,15 +666,17 @@ public interface Movable{
 }
 ```
 
-接口与接口之间继承关系:可以多继承
-`public interface IA extends IB`
+接口与接口之间继承关系:可以多继承`public interface IA extends IB`
 
 类与类之间的关系继承：单继承
+
 类和接口之间是实现关系
 ```java
-  public class CA extends CB implements IA,IB{
-  }
+  public class CA extends CB implements IA,IB {
+}
 ```  
+
+#### Java 字符串
 
 String:对象池；不可变对象；最终类
 
@@ -667,7 +789,44 @@ static String valueOf(Object obj)
   String str = s.trim();//"abc d"
 ```
 
-写程序：写一部分，测试一部分
+##### 正则表达式
+
+正则表达式处理字符串、方便匹配数据  字符串拆分、验证和替换功能  查表
+
+#### 单例设计模式
+
+私有化构造方法
+
+Static通常用于Singleton模式开发：
+
+Singleton是一种设计模式，高于语法，可以保证一个类在整个系统中仅有一个对象。
+
+#### Clone机制
+
+存在两种方式
+1. Shallow Clone：这种clone只对基本数据类型有效，对对象内的引用变量无效。
+2. Deep Clone；对对象所有成员都有效，前提是这些成员都实现了Cloneable接口。
+
+注意：
+1. 使用Clone将会抛出异常。
+2. 两种方式按自己需求而用，
+3. clone有缺省行为super.clone()
+
+#### Java 异常
+
+Throwable
+Error         重大的错误 如操作系统 等java代码无法做出更改
+Exception     程序员编程疏忽、不受程序员控制(易检验异常) java代码可处理的
+	RuntimeException:未检验异常 可以不作异常处理      由程序员控制     除非代码错误，否则不应该出现此类异常
+	其他异常:已检验异常 已检验异常  必须异常处理 否则编译通不过
+
+有异常未捕获、程序即终止，捕获后程序即恢复正常。
+
+try{} catch(){}子类异常 catch(){}子类异常 catch(){}父类异常---->捕捉异常由上而下先子类后父类
+
+finally语句必定执行，除非`System.exit(1);`。
+
+注意：finally里若对返回值处理，不会影响基本数据类型的返回值，但影响引用类型的返回值。
 
 ```java
 //一种写法
@@ -698,6 +857,98 @@ finally{
 }
 ```
 
+##### throw与throws配合使用
+
+throw +异常类对象 用在方法内，表示代码到此处异常了。
+throws +异常类 用在方法声明处，抛出此类异常，表示调用此方法需要异常处理。
+
+
+##### 已检验异常
+
+AclNotFoundException,     Access Control List (ACL) 
+BackingStoreException, 
+BrokenBarrierException, 
+CertificateException, 
+ClassNotFoundException, 
+CloneNotSupportedException, 
+DataFormatException, 
+DateParseException, 
+DestroyFailedException, 
+ExecutionException, 
+GeneralSecurityException, 
+HttpException, 
+IllegalAccessException, 
+InstantiationException, 
+InterruptedException, 
+InvalidPreferencesFormatException, 
+InvocationTargetException, 
+IOException, 
+JSONException, 
+LastOwnerException, 
+NoSuchFieldException, 
+NoSuchMethodException, 
+NotOwnerException, 
+ParseException, 
+ParserConfigurationException, 
+PrivilegedActionException, 
+SAXException, 
+SQLException, 
+TimeoutException, 
+TooManyListenersException, 
+UnsupportedCallbackException, 
+URISyntaxException, 
+XmlPullParserException 
+（以下属于Android里的异常）
+AndroidException, 
+Surface.OutOfResourcesException, 
+
+##### 未检验异常
+
+AnnotationTypeMismatchException, 
+ArithmeticException, (算术运算中，被0除或模除)
+ArrayStoreException, (数据存储异常，操作数组时类型不一致)
+BufferOverflowException, 
+BufferUnderflowException, 
+ClassCastException, (类转换异常)
+ConcurrentModificationException, 
+DOMException, 
+EmptyStackException, 
+EnumConstantNotPresentException, 
+IllegalArgumentException, 
+IllegalMonitorStateException, 
+IllegalStateException, 
+IncompleteAnnotationException, 
+IndexOutOfBoundsException, (索引超限）ArrayIndexOutOfBoundsException(数组越界)
+MalformedParameterizedTypeException, 
+MissingResourceException, 
+NegativeArraySizeException, 
+NoSuchElementException, 
+NullPointerException, (空指针)
+ParseException, 
+ProviderException, 
+RejectedExecutionException, 
+SecurityException, 
+TypeNotPresentException, 
+UndeclaredThrowableException, 
+UnsupportedDigestAlgorithmException, 
+UnsupportedOperationException, 
+（以下属于Android里的异常）
+ActivityNotFoundException, 
+AndroidRuntimeException, 
+GLException, 
+InflateException, 
+ParcelFormatException, 
+ParseException, 
+RemoteViews.ActionException, 
+Resources.NotFoundException, 
+SQLException, 
+StaleDataException, 
+SurfaceHolder.BadSurfaceTypeException, 
+TimeFormatException, 
+WindowManager.BadTokenException 
+
+#### Java 事务
+
 事务：一组不可分割的执行单元
 
 ```java
@@ -712,36 +963,283 @@ finally{
     	 tran.endTransaction();//false:回滚-->a1 = a1 + 500  true:commit
     }
 ```
-Throwable
-			Error
-			Exception
-				RuntimeException:未检验异常
-				其他异常:已检验异常
-未检验异常:可以不做异常处理
-已检验异常：必须要做异常处理，否则编译通不过
-throws
-throw
-	
-```java	
-	Person p = new Person();
-	//集合中存储的是对象的引用：p
-```	
 
-List:存储的元素可以是重复，有下标(a[0])
-		   list.get(0);
-Set:不能存储相同的元素，没有小标
-Queue:队列，先进先出:LinkedList  
+#### Java 集合
 
-List:ArrayList,LinkedList(Queue,DeQue)
-Set:HashSet
-SortedSet: TreeSet
+集合 （约定：xxx是指接口 xxx类 是指类）
+Collection  存放对象作为元素  有iterator、size等方法，实现了接口(Iterable<T>)  实现这个接口允许对象成为 "foreach" 语句的目标
+-->>>List 大量扩充 内容允许重复，允许对象null    有下标索引（有序），根据索引[从0开始]操作对象
+	-->>>ArrayList类	 顺序存储（数组），访问快 增删慢 
+	-->>>LinkedList类	链式存储（特殊结构），访问慢 增删快 也是Deque双端队列的实现
+	-->>>Vector类，ArrayList类的线程安全版本
+-->>>Set  Set无法记住添加顺序（自定义比较器），不允许重复元素（重写Equals和hashCode方法，判断两个对象是否相等用equals不是==）
+	-->>>SortedSet 单值排序接口 子类内容可使用比较器排序
+		-->>>NavigableSet
+			-->>>TreeSet类 有序（二叉树）  要么自然顺序[元素类须实现Compareble接口并覆写compareTo(Object o)方法]要么定制排序[提供一个比较器]
+	-->>>HashSet类  散列存放	线程不安全	元素值允许是null  除了Equals相等,两个对象的hashCode方法返回值也要相等 此俩方法需要重写
+		-->>>LinkedHashSet类
+-->>>Quque 队列接口 子类可以实现队列操作
+	-->>>Deque 双端队列可两端访问元素
+		-->>>ArrayDeque类 
+		-->>>LinkedList类
 
-Map:HashMap
-SortMap:TreeMap
+迭代器(Iterator)    只能单向输出   对collection进行迭代的迭代器  枚举接口Enumeration的取代
+-->>>ListIterator   能双向输出
 
-zhangsan
+Properties
+Collections 集合工具类 封装了对集合的一些操作。
 
 
+Map集合  一对值 key->vaule  key具有唯一性 无序  允许值对象(value)是null 而且没有个数限制（即可重复）
+-->>>SortedMap 一对值的排序接口  子类内容可使用比较器按照key排序
+-->>>HashMap类	特殊结构（键值，哈希）数组，线程不安全，增删快 哈希码快速查找 允许key为null但唯一 除了Equals相等，hashCode也要相等
+	-->>>LinkedHashMap类 保存记录的插入顺序或访问顺序
+	-->>>ConcurrentHashMap类 线程安全
+-->>>TreeMap类	key有序（二叉树） 不允许key为null
+-->>>Hashtable类  线程安全 哈希码快速查找 不允许key或value为null 除了Equals相等，hashCode也要相等 此俩方法需要重写
+
+在JDK1.7中，HashMap的数据结构还是连续数组+单链表； 在JDK1.8中，就变为了连续数组+单链表<->红黑树的结构。
+
+#### Java IO输入输出流
+
+因为输入输出流已经超越了VM的边界，所以有时可能无法回收资源。
+
+原则：凡是跨出虚拟机边界的资源都要求程序员自己关闭，不要指望垃圾回收。
+
+- 带缓存的流
+	+ 空间越大效率越高，典型的空间换时间
+	+ 切记flush方法将缓冲区中的内容一次性写入或写出
+	+ close()也可以达到相同的效果，因为每次close都会使用flush
+- 管道流，也是一种节点流，用来给两个线程交换数据
+- 输出流：connect（输入流）
+
+InputStream(字节输入流的抽象类)
+-->>>FileInputStream(文件)
+-->>>FilterInputStream（过滤流）		过滤流：用于给节点增加功能	过滤流的构造方式是以其他流位参数构造（这样的设计模式称为装饰模式）
+	-->>>BufferedInputStream(带缓存)	
+	-->>>DateInputStream(数据)		包装现有的OutputStream和写高位优先类型数据	可以编写类型包括字节,16位,32位,64位的整数,32位浮点数,64位双字节字符串,字节串和MUTF-8编码的字符串
+-->>>ByteArrayInputStream【内存输入流】
+-->>>ObjectInputStream[对象序列化二进制]	过滤流 对象的序列化
+-->>>PipedInputStream[管道流]			
+-->>>SequenceInputStream[合并流]
+-->>>ZipInputStream[压缩流]
+
+Reader(字符输入流的抽象类)
+-->>>InputStreamReader(字符流in对象)	字节输入流转换成字符输出流对象
+	-->>>FileReader(文件)【缓存区】
+-->>>BufferedReader(带缓存)
+-->>>
+
+
+OutputStream(字节输出流的抽象类)
+-->>>FileOutputStream(文件)
+-->>>FilterOutputStream
+	-->>>BufferedOutputStream(带缓存)
+	-->>>DateOutputStream(数据)
+-->>>ByteArrayOutputStream【内存输出流】
+-->>>ObjectOutputStream[对象]
+-->>>PipedOutputStream[管道流]
+-->>>ZipOutputStream[压缩流]
+
+Writer(字符输出流的抽象类)
+-->>>OutputStreamWriter(字节流out对象)	字节输出流转换成字符输入流		常用声明格式:OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(file));
+	-->>>FileWriter(文件)【缓存区】
+-->>>BufferedWriter(带缓存的)
+-->>>
+
+java.uti.zip压缩输入输出流
+ZipInputStream
+ZipOutputStream
+
+#### Java 泛型
+
+类型的参数化。不包含基本类型，可以是其包装类。
+泛型类 类名 <T1,T2...> 此类的对象（不是类）内部即可认为T是某个固定类使用。
+泛型方法 void <T1,T2...> 方法名(T t) 返回值类型、局部变量类型也可以是T，参数则必须有T 入口
+
+#### Java 网络
+
+端口(port)：一台PC中可以有65536个端口，进程通过端口交换数据。连线的时候需要输入IP也需要输入端口信息。计算机通信实际上的主机之间的进程通信，进程的通信就需要在端口进行联系。端口应该用1024以上的端口，以下的端口都已经设定功能。
+
+套接字(socket)的引入：
+
+Ip+Port=Socket（这是个对象的概念。）
+
+Socket为传输层概念，而JSP是对应用层编程。例：
+
+```java
+java.net.*;
+
+// Server端定义顺序
+ServerSocket(int port)
+Socket.accept()；// 阻塞方法，当客户端发出请求是就恢复
+// 如果客户端收到请求：
+Socket SI=ss.accept()；
+
+// 在client端
+Socket s=new Socket(“127.0.0.1”,8000);
+```
+注意客户端和服务器的Socket为两个不同的socket。
+
+Socket的两个方法：
+1. getInputStream()：客户端用
+2. getOutputStream() 服务器端用
+
+使用完毕后切记Socket.close()，两个Socket都关，而且不用关内部的流。
+
+
+##### TCP/IP协议
+
+名称中只有TCP，但是在TCP/IP的传输层同时存在TCP和UDP两个协议。
+
+TCP
+-->>>InetAdress
+-->>>ServerSocket 单向通信
+
+Tranfer Control Protocol的简称，是一种面向连接的保证可靠传输的协议。通过TCP协议传输，得到的是一个顺序的无差错的数据流。发送方和接收方的成对的两个socket之间必须建立连接，以便在TCP协议的基础上进行通信，当一个socket(通常都是server socket)等待建立连接时，另一个socket可以要求进行连接，一旦这两个socket连接起来，它们就可以进行双向数据传输，双方都可以进行发送或接收操作。
+
+UDP
+
+User Datagram Protocol的简称，是一种无连接的协议，每个数据报都是一个独立的信息，包括完整的源地址或目的地址，它在网络上以任何可能的路径传往目的地，因此能否到达目的地，到达目的地的时间以及内容的正确性都是不能被保证的。
+
+- DatagramSocket（邮递员）：对应数据报的Socket概念，不需要创建两个socket，不可使用输入输出流。
+- DatagramPacket（信件）：数据包，是UDP下进行传输数据的单位，数据存放在字节数组中。
+- UDP也需要现有Server端，然后再有Client端。
+- 两端都是DatagramPacket（相当于电话的概念），需要NEW两个DatagramPacket。
+
+InetAddress:网址
+这种信息传输方式相当于传真，信息打包，在接受端准备纸。
+
+模式：
+发送端：Server:
+```java
+DatagramPacket  inDataPacket=new DatagramPacket ((msg,msg.length); InetAdress.getByName(ip),port);
+```
+接收端：
+```java
+clientAddress=inDataPack.getAddress();//取得地址
+clientPort=inDataPack.getPort();//取得端口号
+datagramSocket.send;  //Server
+datagramSocket.accept;  //Client
+```
+URL:在应用层的编程
+
+注意比较：
+```
+http://Localhost:8080/directory  //查找网络服务器的目录
+file://directory                 //查找本地的文件系统
+```
+java的开发主要以http为基础。
+
+#### Java 反射
+反射主要用于工具和框架的开发。
+
+反射是对于类的再抽象；通过字符串来抽象类。
+
+JAVA类的运行：classLoader:加载到虚拟机（vm）。Vm中只能存储对象（动态运行时的概念），.class文件加载到VM上就成为一个对象，同时初始静态成员及静态代码（只执行一次）。
+
+Lang包下有一个类为Class：在反射中使用。此类中的每个对象为VM中的类对象，每个类都对应类类的一个对象（class.class）。例：对于一个Object类，用getClass()得到其类的对象，获得类的对象就相当于获得类的信息，可以调用其下的所有方法，包括类的私有方法。
+
+注意：在反射中没有简单数据类型，所有的编译时类型都是对象。
+
+反射把编译时应该解决的问题留到了运行时。
+
+#### Java 多线程
+
+进程与线程的区别：
+1. 进程有独立的进程空间，进程中的数据存放空间（堆空间和栈空间）是独立的。
+2. 线程的堆空间是共享的，栈空间是独立的，线程消耗的资源也比进程小，相互之间可以影响的。
+
+线程的生命周期：创建状态时，可通过Thread类的方法设置线程各种属性。如优先级、守护等。
+
+创建线程方式之继承Thread类覆写run方法 建立该子类对象后调用start方法开启线程
+创建线程方式之实现Runnable接口覆写run方法 建立该子类对象作为参数传递给Thread类的构造函数，该Thread类对象调用start方法开启线程
+
+Thread子类不共享数据Runnable共享数据
+obj.isAlive()线程是否启动
+obj.join()强制运行线程，其他线程必须等待此线程完成
+Thread.yield()当前线程礼让
+obj.interrupt()打断线程
+
+线程池：开启一条线程是非常浪费资源的，因为它涉及到要与操作系统进行交互；因此JDK5之后Java提供了线程池让我们提高性能，线程池里的线程执行完后，并不会死亡，而是再次回到线程池中成为空闲状态，等待下一个对象来使用。
+
+Executors：创建线程池的工厂类。
+```java
+    // 创建一个可根据需要创建新线程的线程池，但是在以前构造的线程可用时将重用它们
+    static ExecutorService newCachedThreadPool()
+    // 创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程
+    static ExecutorService newFixedThreadPool(int nThreads)
+    // 创建一个可根据需要创建新线程的线程池，但是在以前构造的线程可用时将重用它们，并在需要时使用提供的ThreadFactory创建新线程
+    static ExecutorService newCachedThreadPool(ThreadFactory threadFactory)
+    // 创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程，在需要时使用提供的ThreadFactory创建新线程
+    static ExecutorService newFixedThreadPool(int nThreads, ThreadFactory threadFactory)
+    // 创建一个线程池，它可安排在给定延迟后运行命令或者定期地执行
+    static ScheduledExecutorService newScheduledThreadPool(int corePoolSize)
+    // 创建一个线程池，它可安排在给定延迟后运行命令或者定期地执行
+    static ScheduledExecutorService newScheduledThreadPool(int corePoolSize, ThreadFactory threadFactory)
+    //创建一个使用单个worker线程的Executor，以无界队列方式来运行该线程
+    public static ExecutorService newSingleThreadExecutor()
+```
+
+ExecutorService：线程池管理接口，提供了线程的操作方法。
+```java
+    // 启动一次顺序关闭，执行以前提交的任务，但不接受新任务
+    void shutdown()
+    // 试图停止所有正在执行的活动任务，暂停处理正在等待的任务，并返回等待执行的任务列表
+    List<Runnable> shutdownNow()
+    // 提交一个返回值的任务用于执行，返回一个表示任务的未决结果的 Future
+    <T> Future<T> submit(Callable<T> task)
+    // 提交一个 Runnable任务用于执行，并返回一个表示该任务的 Future
+    Future<?> submit(Runnable task)
+    // 提交一个 Runnable任务用于执行，并返回一个表示该任务的 Future
+    <T> Future<T> submit(Runnable task, T result)
+```
+
+##### 同步代码块
+同步方法 的同步监听器其实的是this
+同步静态方法的默认同步锁是当前方法所在类的.class对象
+
+同步的实现方式synchronized,wait 与 notify 
+
+#### JDBC
+
+JDBC(java database connectivity) 包java.sql\javax.sql
+
+JDBC 驱动的4种类型
+1: JDBC-ODBC桥驱动程序	X
+2: Native-API驱动程序	X
+3: JDBC-NET通过服务器中间件与数据库通信-----中间件交互
+4: 原生协议以及纯Java驱动程序		----直接交互
+
+常用数据库URL地址的写法：
+Oracle—jdbc:oracle:thin:@localhost:1521:sid
+SqlServer—jdbc:microsoft:sqlserver://localhost:1433; DatabaseName=sid
+MySql—jdbc:mysql://localhost:3306/sid
+	jdbc:mysql:///sid
+
+ResourceBundle类的作用就是读取资源属性文件（文件名.properties） 国际化
+ResourceBundle.getBundle("文件名").getString("feild");
+
+1.通过DriverManager.getConnection("url","user","password")创建连接Connection对象
+2.通过此连接创建Statement对象，此对象调用执行sql语句的方法executeQuery("sql语句")，返回结果集ResultSet对象
+-->>>executeQuery 用于产生单个结果集的语句，例如 SELECT 语句。
+-->>>executeUpdate 用于执行 INSERT、UPDATE 或 DELETE 语句以及 SQLDDL（数据定义语言）语句，例如 CREATE TABLE 和 DROP TABLE
+	executeUpdate 的返回值是一个整数，指示受影响的行数（即更新计数）。
+	对于CREATE TABLE 或 DROP TABLE 等不操作行的语句，executeUpdate 的返回值总为零。
+-->>>execute用于执行返回多个结果集、多个更新计数或二者组合的语句。但多数程序员不会需要该高级功能
+...
+
+-->>>Statement对象用于执行不带参数的简单 SQL 语句 建议使用PreparedStatement
+	-->>>PreparedStatement对象用于执行带或不带 IN参数的预编译 SQL 语句
+		-->>>CallableStatement对象用于执行对数据库已存储过程的调用
+3.通过连接对象提交或者回滚
+4.关闭Statement对象关闭Connection对象
+
+
+
+
+
+### 最佳实践
 
 加入支持jar包源码：
 1、右击工程-->properties-->builder path-->libraries-->add external jar-->android sdk/extra/v4/support-v4.jar
