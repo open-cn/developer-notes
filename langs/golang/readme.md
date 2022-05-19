@@ -54,7 +54,7 @@ uintptr 无符号整型，用于存放一个指针
 #### Go 语言变量
 ```go
 var v_name = value // 根据值自行判断类型
-v_name := value。  // 省略 var 使用 := 此时该符号左边的所有变量，如 v_name， 如果都已经被声明过册产生编译错误。
+v_name := value  // 省略 var 使用 := 此时该符号左边的所有变量，如 v_name， 如果都已经被声明过册产生编译错误。
 var identifier type
 
 var b int = 1 // 如果没有初始化，则变量默认为零值。 int 零值为0，bool 零值为false， string 零值为“”
