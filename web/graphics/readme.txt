@@ -29,8 +29,7 @@ WebGL通过引入一个与OpenGL ES 2.0非常一致的API来做到这一点，�
 
 
 2、WebRTC
-WebRTC中的RTC代表实时通信 Real-Time Communications，该技术支持在浏览器客户端（对等）之间进行音频/视频流传输和数据共享。
+网页即时通信（Web Real-Time Communications），该技术支持在浏览器客户端（对等）之间进行音频/视频流传输和数据共享。它于2011年6月1日开源并在Google、Mozilla、Opera支持下被纳入万维网联盟的W3C推荐标准。
 
-
-
+谷歌2011年6月3日宣布向开发人员开放WebRTC架构的源代码。这个源代码将根据没有专利费的BSD（伯克利软件发布）式的许可证向用户提供。
 

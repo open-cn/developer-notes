@@ -15,7 +15,7 @@ Spark 支持四种运行模式
 
 引入 Spark 初始化 SparkContext
 
-Read-Eval-Print-Loop 交互式 shell 
+Read-Eval-Print-Loop 交互式 shell
 ./bin/spark-shell  进入 scala 的 shell
 ./bin/pyspark 进入 Python 的 shell
 在 Spark shell 中，有一个专有的 SparkContext 已经为你创建好。在变量中叫做 sc。你自己创建的 SparkContext 将无法工作。可以用 --master 参数来设置 SparkContext 要连接的集群，用 --jars 来设置需要添加到 classpath 中的 JAR 包，如果有多个 JAR 包使用逗号分割符连接它们。
@@ -57,7 +57,7 @@ RDD.saveAsObjectFile 和 SparkContext.objectFile 支持保存一个RDD
 RDD 操作
 
 RDD 的 actions 从 RDD 中返回值
-textFile.count() 
+textFile.count()
 textFile.first()
 collect 返回一个list
 reduce countByKey  take(n)
@@ -273,7 +273,7 @@ sql("SELECT * FROM records r JOIN src s ON r.key = s.key").show()
 
 
 运行Thrift JDBC/ODBC服务器
-./sbin/start-thriftserver.sh ./sbin/stop-thriftserver.sh 
+./sbin/start-thriftserver.sh ./sbin/stop-thriftserver.sh
 ./bin/beeline
 beeline> !connect jdbc:hive2://localhost:10000
 0: jdbc:hive2://localhost:10000> select * from src;
