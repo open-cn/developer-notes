@@ -7,7 +7,7 @@
 因此，基础知识点要全面，重点部分着重使用经验。
 
 ### 工具
-本笔记项目主要基于 markdown 文件、Sublime Text 3
+本笔记项目主要基于 markdown 文件、Sublime Text
 
 markdown 语法使用 Markdown GFM
 

@@ -1,20 +1,25 @@
 ## Sublime Text
 
+http://www.sublimetext.com/download
+
 ### 安装 package control
+
 https://packagecontrol.io/installation
-View => Show Console
+
+View => Show Console
 
 '6f4c264a24d933ce70df5dedcf1dcaee ebe013ee18cced0ef93d5f746d80ef60'
-'817937144c34c84c88cd43b85318b26
-56f9c3fac02f8f72cbc18360b2c26d139'
+'817937144c34c84c88cd43b85318b26 56f9c3fac02f8f72cbc18360b2c26d139'
 
 SUBLIME TEXT 3
+```python
 import urllib.request,os,hashlib; h = '817937144c34c84c88cd43b85318b26' + '56f9c3fac02f8f72cbc18360b2c26d139'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
-
+```
 
 SUBLIME TEXT 2
+```python
 import urllib2,os,hashlib; h = '6f4c264a24d933ce70df5dedcf1dcaee' + 'ebe013ee18cced0ef93d5f746d80ef60'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); os.makedirs( ipp ) if not os.path.exists(ipp) else None; urllib2.install_opener( urllib2.build_opener( urllib2.ProxyHandler()) ); by = urllib2.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); open( os.path.join( ipp, pf), 'wb' ).write(by) if dh == h else None; print('Error validating download (got %s instead of %s), please try manual install' % (dh, h) if dh != h else 'Please restart Sublime Text to finish installation')
-
+```
 
 ### 安装插件
 
@@ -54,7 +59,7 @@ convert 好像不能转换gbk 或者 utf-8
 
 匹配各种左括号和右括号，例如：[], (), {}, "", '', <tag></tag>，以及自定义括号和标签。
 
-#### markdown 支持
+#### markdown
 sublime自带的markdown语法高亮并不是很友好，推荐安装Markdown Editing
 
 安装完成后点击右下角或者在视图 => 语法=>MarkdownEditing->三种风格，分别是Standard Markdown，GitHub flavored Markdown，MultiMarkdown。
@@ -85,7 +90,7 @@ Markdown Editing并不只是一个markdown的主题插件，它自定义许多ma
 }
 ```
 
-#### markdown 预览支持
+#### markdown 预览
 可以选择Markdown Preview或MarkdownLivePreview。
 
 Markdown Preview不能实时预览，但你可以设置快捷键让它在浏览器中预览，在首选项=> 快捷键设置里添加
@@ -97,7 +102,7 @@ MarkdownLivePreview可以实现实时预览，在首选项->Package Setting里�
 
 但是，这个插件的预览效果并不理想，很丑，而且不能横向滚动，也就是说如果一行显示不过来那你就看不到了。而且装上它后虽然可以实时预览，但不知道因为什么原因输入的时候会有些卡。
 
-#### 图片粘贴支持
+#### 图片粘贴
 imagepaste
 
 该插件存在一些问题，比如生成的图片质量不如直接保持的图片文件
@@ -106,6 +111,16 @@ imagepaste
 
 SublimeREPL 可以直接在编辑器中运行一个解释器，支持很多语言：
 Clojure, CoffeeScript, F#, Groovy, Haskell, Lua, MozRepl, NodeJS, Python, R, Ruby, Scala, shell
+
+#### 文件对比
+
+##### sublimerge
+
+需要激活sublime
+
+##### Compare Side-By-Side
+
+
 
 ### 安装FAQ
 
