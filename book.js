@@ -1,17 +1,21 @@
 module.exports = {
     // 书的标题
     "title": "开发者笔记",
+    "description": "",
     // 语言
-    "language":"zh",
+    "language":"zh-hans",
     // 插件
     "plugins": [
         // 添加插件
+        "summary",
         "code",
         // 去掉插件
-        "-fontsettings",
+        // "-highlight",
         "-lunr",
         "-search",
-        // "-highlight",
+        "-sharing",
+        "-fontsettings",
+        // "-livereload",
     ],
     // 插件的配置
     "pluginsConfig": {
