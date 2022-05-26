@@ -10,12 +10,12 @@ module.exports = {
         "summary",
         "code",
         // 去掉插件
-        // "-highlight",
+        "-highlight",
         "-lunr",
         "-search",
         "-sharing",
         "-fontsettings",
-        // "-livereload",
+        "-livereload",
     ],
     // 插件的配置
     "pluginsConfig": {
