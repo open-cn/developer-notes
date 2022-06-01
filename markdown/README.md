@@ -256,8 +256,8 @@ _   下划线
 !   感叹号
 ```
 
-#### Markdown 注脚 
-注脚 使用 [^keyword] 表示注脚。例如：
+#### Markdown 注脚
+注脚 使用 [^keyword] 表示注脚。例如：
 ```markdown
 [^footnote1]: 这是一个 *注脚* 的 **文本**。
 [^footnote2]: 这是另一个 *注脚* 的 **文本**。
