@@ -1,14 +1,10 @@
 ## python
 
-标记语言、脚本语言、编译语言
-
-强类型语言(静态类型语言)是指需要进行变量/对象类型声明的语言，一般情况下需要编译执行。例如C/C++/Java/C#
-
-弱类型语言(动态类型语言)是指不需要进行变量/对象类型声明的语言，一般情况下不需要编译(但也有编译型的)。例如PHP/ASP/Ruby/Python/Perl/ABAP/SQL/JavaScript/Unix Shell等等。
-
 Python有两个版本，一个是2.x版，一个是3.x版，这两个版本是不兼容的，因为现在Python正在朝着3.x版本进化，在进化过程中，大量的针对2.x版本的代码要修改后才能运行，所以，目前有许多第三方库还暂时无法在3.x上使用。
 
-Python解释器 CPython IPython PyPy Jython IronPython...
+Python解释器有CPython、IPython、PyPy、Jython和IronPython等。
+
+### 概述
 
 由于整个Python语言从规范到解释器都是开源的，所以理论上，只要水平够高，任何人都可以编写Python解释器来执行Python代码（当然难度很大）。
 
@@ -33,23 +29,32 @@ hello, world
 大小写敏感
 
 整数和浮点数
+
 字符串
-    u'123' 表示Unicode字符串
-    '"均可
-    多行内容'''...'''
-    模板格式化：占位符 %2d 数值不足二位的话前面补空格，超出的话全部输出 %02d 数值位数不够的话前面补0
-        >>> 'Hi, %s, you have $%d.' % ('Michael', 1000000)# "()" can be leave out when there is one param
-        %d 整数
-        %f 浮点数
-        %s 字符串
-        %x 十六进制整数
+
+1. u'123' 表示Unicode字符串
+2. '"均可
+3. 多行内容'''...'''
+4. 模板格式化：占位符 %2d 数值不足二位的话前面补空格，超出的话全部输出 %02d 数值位数不够的话前面补0
+    > 'Hi, %s, you have $%d.' % ('Michael', 1000000)# "()" can be leave out when there is one param
+    + %d 整数
+    + %f 浮点数
+    + %s 字符串
+    + %x 十六进制整数
+
 布尔值和布尔运算 and、or和not
+
 空值None
+
 变量
+
 赋值语句 a=1
+
 常量  通常用全部大写的变量名表示常量：PI = 3.14159265359
 
-list是一种有序的集合，可以随时添加和删除其中的元素。长度可变,元素类型无限制
+#### list 可变数组
+
+list是一种有序的集合，可以随时添加和删除其中的元素。长度可变，元素类型无限制
 ```py
 >>> classmates = ['Michael', 'Bob', 'Tracy']
 >>> classmates[0] IndexError index<0 order desc
@@ -62,12 +67,31 @@ list是一种有序的集合，可以随时添加和删除其中的元素。长�
 ```
 len(list)函数可以获得list元素的个数
 
-tuple是一种有序的集合
-    长度和元素均不可变，元素是对象的话，其属性可变
-    小括号包围 当只有一个数时，作为小括号而不是tuple，使用(1,)明确为tuple
+#### tuple 不可变数组
 
+tuple是一种有序的集合。
+- 长度和元素均不可变，但元素是对象的话，其属性可变。
+- 小括号包围 当只有一个数时，作为小括号而不是tuple，使用(1,)明确为tuple
 
-条件判断,只要判断条件x是非零数值、非空字符串、非空list等，就判断为True，否则为False。
+#### 切片
+
+切片（Slice）操作符。因为索引从0开始，所以不包含终值。
+
+```py
+list[0:3]    # or list[:3]
+list[-2:-1]  # list 的倒数第一第二
+list[-10:]   # list 的倒数十个元素
+list[:10:2]  # list 前10个，步长为2
+list[:]      # list 全部元素
+```
+tuple也是一种list，区别是操作的结果仍是tuple。
+
+字符串也可以看成是一种list，区别是操作的结果仍是字符串。
+
+#### 条件判断
+
+条件判断，只要判断条件x是非零数值、非空字符串、非空list等，就判断为True，否则为False。
+
 ```py
 if a>0:
     print 1
@@ -77,8 +101,8 @@ else:
     print -1
 ```
 
+#### 循环
 
-循环
 ```py
 for name in names:# names list
     print name
@@ -87,26 +111,32 @@ while x:
     print 1
 ```
 
+#### 集合 Set
 
 set是元素不能重复的list add remove $交集 |并集
 
-字典dict
+#### 字典 Dict
 
 dict全称dictionary，在其他语言中也称为map，使用键-值（key-value）存储，具有极快的查找速度。
+
 key必须是不可变对象。
+
 > d = {'Michael': 95, 'Bob': 75, 'Tracy': 85}
 如果key不存在，dict就会报错。可用判断'Thomas' in d 或者d.get(key,default)
 > d.pop(key) # delete key and value
 
+#### 函数
 
-函数   抽象
+抽象
 
 help(函数名)
 
-函数名其实就是指向一个函数对象的引用，完全可以把函数名赋给一个变量，相当于给这个函数起了一个“别名”：所以也可以通过变量 a()调用函数
+函数名其实就是指向一个函数对象的引用，完全可以把函数名赋给一个变量，相当于给这个函数起了一个“别名”：所以也可以通过变量 a()调用函数。
+
 ```py
-# y默认参数，如果默认值是引用对象，有坑，这个值的变化是会影响下一次调用 z可变参数，实质是tuple
-# kw关键字参数 函数内自动组装成一个dict
+# y默认参数，如果默认值是引用对象，有坑，这个值的变化是会影响下一次调用。
+# z可变参数，实质是tuple。
+# kw关键字参数 函数内自动组装成一个dict。
 # 注意，参数定义的顺序必须是：必选参数、默认参数、可变参数和关键字参数。
 def my_abs(x, y=2, *z, **kw):
     ...        # 函数体如果为空 则用pass代替，否则报语法错误
@@ -122,7 +152,7 @@ x = 1 y = 2 c = z args = (4,) kw = {'x': 99}
 所以，对于任意函数，都可以通过类似func(*args, **kw)的形式调用它，无论它的参数是如何定义的。
 
 
-递归函数
+#### 递归函数
 
 函数调用是通过栈（stack）这种数据结构实现的，每当进入一个函数调用，栈就会加一层栈帧，每当函数返回，栈就会减一层栈帧。由于栈的大小不是无限的，所以，递归调用的次数过多，会导致栈溢出。
 
@@ -132,7 +162,9 @@ def fact(n):
         return 1
     return n * fact(n - 1)
 ```
+
 尾递归优化 只传递递归函数本身 Python、Java等大部分语言都未实现
+
 ```py
 def fact(n):
     return fact_iter(n, 1)
@@ -142,26 +174,16 @@ def fact_iter(num, product):
     return fact_iter(num - 1, num * product) # 只传递递归函数本身
 ```
 
+#### 异常处理
 
 抛异常
 
 raise TypeError('bad operand type')
 
 
-切片（Slice）操作符 因为索引从0开始，所以不包含终值
-```py
-list[0:3]    # or list[:3]
-list[-2:-1]  # list 的倒数第一第二
-list[-10:]   # list 的倒数十个元素
-list[:10:2]  # list 前10个，步长为2
-list[:]      # list 全部元素
-```
-tuple也是一种list，区别是操作的结果仍是tuple
-字符串也可以看成是一种list，区别是操作的结果仍是字符串
+#### 迭代
 
-
-
-迭代  for ... in
+for ... in
 
 判断一个对象是可迭代对象
 ```py
@@ -206,7 +228,8 @@ for x, y in [(1,1),(2,3),(3,4)]:
 ['AX', 'AY', 'AZ', 'BX', 'BY', 'BZ', 'CX', 'CY', 'CZ']
 ```
 
-生成器
+#### 生成器
+
 ```py
 >>> g=(x * x for x in range(1, 11))
 <generator object <genexpr> at 0x1082a43c0>
@@ -214,24 +237,33 @@ for x, y in [(1,1),(2,3),(3,4)]:
 for n in g:
     print n
 ```
+
 如果一个函数定义中包含yield关键字，那么这个函数就不再是一个普通函数，而是一个generator。在每次调用next()的时候执行，遇到yield语句返回，再次执行时从上次返回的yield语句处继续执行。
 
 
-
+#### 函数式编程
 Python对函数式编程提供部分支持。由于Python允许使用变量，因此，Python不是纯函数式编程语言。
 
 
 
-高阶函数，就是让函数的参数能够接收别的函数。与javascript类似
+#### 高阶函数
 
-返回函数  函数作为返回值 内部函数可以引用外部函数的参数和局部变量，返回内部函数时，相关参数和变量都保存在返回的函数中，这种称为“闭包（Closure）”的程序结构拥有极大的威力。
-    当我们调用外部函数时，每次调用都会返回一个新的函数，即使传入相同的参数。（因为闭包的存在？）
-    内部函数使用外部函数中局部循环等后续会变化的变量时，务必再创建一个新函数，此处同javascript
+就是让函数的参数能够接收别的函数。与javascript类似。
 
-匿名函数 lambda x: x * x 关键字lambda表示匿名函数，冒号前面的x表示函数参数。
-    匿名函数有个限制，就是只能有一个表达式，不用写return，返回值就是该表达式的结果。
+##### 返回函数
 
-装饰器decorator OOP中的装饰模式使用继承和组合，而在Python是语法层次支持decorator
+函数作为返回值，内部函数可以引用外部函数的参数和局部变量，返回内部函数时，相关参数和变量都保存在返回的函数中，这种称为“闭包（Closure）”的程序结构拥有极大的威力。
+- 当我们调用外部函数时，每次调用都会返回一个新的函数，即使传入相同的参数。（因为闭包的存在？）
+- 内部函数使用外部函数中局部循环等后续会变化的变量时，务必再创建一个新函数，此处同javascript
+
+##### 匿名函数
+`lambda x: x * x`关键字lambda表示匿名函数，冒号前面的x表示函数参数。
+
+- 匿名函数有个限制，就是只能有一个表达式，不用写return，返回值就是该表达式的结果。
+
+##### 装饰器 decorator
+OOP中的装饰模式使用继承和组合，而在Python是语法层次支持decorator。
+
 ```py
 import functools
 def log(text):        ''' 函数Log装饰器 '''
@@ -243,9 +275,13 @@ def log(text):        ''' 函数Log装饰器 '''
         return wrapper
     return decorator
 ```
-偏函数（Partial function）
-    Python的functools模块提供。增加或改变原函数部分参数的默认值，以便使用。
-    要注意，这里的偏函数和数学意义上的偏函数不一样。
+
+##### 偏函数（Partial function）
+
+Python的functools模块提供。增加或改变原函数部分参数的默认值，以便使用。
+
+要注意，这里的偏函数和数学意义上的偏函数不一样。
+
 ```py
 int2 = functools.partial(int, base=2)
 max2 = functools.partial(max, 10) 10作为默认传入的参数，位置应该是第一个
@@ -269,55 +305,49 @@ Python内建了map()和reduce()函数。
 ```
 
 3. map与reduce整合
-(1)str转换为int的函数
-```py
-def str2int(s):
-    def fn(x, y):
-        return x * 10 + y
-    def char2num(ch):
-        return {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}[ch]
-    return reduce(fn, map(char2num, s))
-```
-还可以用lambda函数进一步简化成：
-```py
-def str2int(s):
-    return reduce(lambda x,y: x*10+y, map(char2num, s))
-```
-(2)首字母转大写
-```py
-def parser(s): return s[0].upper() + s[1:].lower()
-list=input('输入一个数组：')
-map(parser,list)
-```
+    1) str转换为int的函数
+    ```py
+    def str2int(s):
+        def fn(x, y):
+            return x * 10 + y
+        def char2num(ch):
+            return {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}[ch]
+        return reduce(fn, map(char2num, s))
+    ```
+    还可以用lambda函数进一步简化成：
+    ```py
+    def str2int(s):
+        return reduce(lambda x,y: x*10+y, map(char2num, s))
+    ```
+    2) 首字母转大写
+    ```py
+    def parser(s): return s[0].upper() + s[1:].lower()
+    list=input('输入一个数组：')
+    map(parser,list)
+    ```
 
-Python内建的filter()过滤函数
+4. Python内建的filter()过滤函数。和map类似，filter也接收一个函数和一个序列。和map不同的是，filter把传入的函数依次作用于每个元素，然后根据返回值是True还是False决定保留还是丢弃该元素。
+    1) 用filter()删除1~100的素数。
+    ```py
+    def not_prime(x):
+        if not isinstance(x, int):
+            raise TypeError('input is not integer')
+        if (x<1):
+            raise TypeError('input out of range')
+        if (x==1) return True;
+        for i in range(1,x):
+            if (x%i==0):
+                return True
+        return False
+    filter(not_prime,range(1,101))
+    ```
+5. Python内建的sorted()排序函数
 
-和map类似，filter也接收一个函数和一个序列。
-
-和map不同的是，filter把传入的函数依次作用于每个元素，然后根据返回值是True还是False决定保留还是丢弃该元素。
-
-(1)用filter()删除1~100的素数
-```py
-def not_prime(x):
-    if not isinstance(x, int):
-        raise TypeError('input is not integer')
-    if (x<1):
-        raise TypeError('input out of range')
-    if (x==1) return True;
-    for i in range(1,x):
-        if (x%i==0):
-            return True
-    return False
-filter(not_prime,range(1,101))
-```
-
-Python内建的sorted()排序函数
 ```py
 >>> sorted([36, 5, 12, 9, 21])
 >>> def f(x,y): return -x+y
 >>> sorted([36, 5, 12, 9, 21],f)
 ```
-
 
 #### 模块和包
 
