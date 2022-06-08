@@ -131,6 +131,193 @@ java 堆是所有线程所共享的一块内存，在虚拟机启动时创建，
 弱引用可以和引用队列联合使用，如果弱引用所引用的对象被垃圾回收了，虚拟机会将该对象的引用加入到与之关联的引用队列中；
 
 虚引用：虚引用就是一种可有可无的引用，无法用来表示对象的生命周期，任何时候都可能被回收，虚引用主要使用来跟踪对象被垃圾回收的活动，虚引用和软引用与弱引用的区别在于：虚引用必须和引用队列联合使用；在进行垃圾回收的时候，如果发现一个对象只有虚引用，那么就会将这个对象的引用加入到与之关联的引用队列中，程序可以通过发现一个引用队列中是否已经加入了虚引用，来了解被引用的对象是否需要被进行垃圾回收；
+
+#### JVM内存模型优点
+
+- 内置基于内存的并发模型：多线程机制
+- 同步锁Synchronization
+- 大量线程安全型库包支持
+- 基于内存的并发机制，粒度灵活控制，灵活度高于数据库锁。
+- 多核并行计算模型
+- 基于线程的异步模型。
+
+#### JVM性能的人为问题
+
+- 关键原因是：没有正确处理好对象的生命周期。
+- 需要从需求中找出存在自然边界的业务对象，将其对应落实到内存中，成为内存模型In-memory Domain Model。
+- 有大小边界限制的内存是缓存，没有永远使用不完的内存，缓存=“有边界的”内存。
+- 缓存是Domain Model对象缓存，不同于传统意义上数据库缓存的定义。
+- 分布式缓存可以提高巨量数据处理计算能力。
+
+#### Java内存种类
+- 栈（Stack）内存：存取速度快，数据可多线程间共享。存在栈中的数据大小与生存期必须确定
+- 堆（Heap）内存：大小动态变化，对象的生命周期不必事先告诉编译器JVM。
+
+两种内存使用
+
+- Stack栈内存
+	+ 基本数据类型，Java 指令代码，常量 
+	+ 对象实例的引用 对象的方法代码
+- Heap堆内存
+	+ 对象实例的属性数据和数组。堆内存由Java虚拟机的自动垃圾回收器来管理。
+
+对象如何保存在内存中？
+
+- 对象的属性Attribute Property
+	+ 属性值作为数据，保存在数据区heap 中，包括属性的类型Classtype和对象本身的类型
+- 方法method
+	+ 方法本身是指令的操作码，保存在stack中。 
+	+ 方法内部变量作为指令的操作数也是在Stack中， 
+	+ 包括基本类型和其他对象的引用。
+- 对象实例在heap 中分配好内存以后，需要在stack中保存一个4字节的heap内存地址，用来定位该对象实例在heap 中的位置，便于找到该对象实例。
+
+静态属性和方法的特点
+
+- 静态属性和方法都是保存在Stack中，
+- Stack内存是共享的，其他线程都可以访问静态属性实际是全局变量。
+- 静态方法在Stack，就无法访问Heap中的数据。静态方法无法访问普通对象中数据。
+- 静态属性意味着全局变量，生命周期和JVM一致。JVM属于技术边界，静态只能用于技术边界内工具性质使用，不能用作业务。
+
+#### 内存管理：垃圾回收机制
+
+- 每一种垃圾收集的算法（引用计数、复制、标记-清除和标记-整理等）在特定条件下都有其优点和缺点。
+- 当有很多对象成为垃圾时，复制可以做得很好，但是复制许多生命周期长的对象时它就变得很糟（要反复复制它们）。
+- 标记-整理适合生命周期长对象可以做得很好（只复制一次），但是不适合短生命的对象。
+- Sun JVM 1.2 及以后版本使用的技术称为 分代垃圾收集（generational garbage collection），它结合了这两种技术以结合二者的长处。
+
+
+#### JVM性能优化
+- 内存微调优化
+	+ 内存分配：
+		* 新生代 Eden和survior 旧生代内存大小分配。 
+		* 内存越大，吞吐量越大，但是需要内存整理的时间就越长，响应时间有延迟。
+	+ 垃圾回收机制
+		* 垃圾回收启动整个应用都暂停，暂停时间造成响应时间有延迟。
+	+ 内存微调目标
+		* 在延迟性(响应时间)和吞吐量上取得一个平衡。
+		* 内存大小影响吞吐量和延迟性。需要在内存大小和响应时间之间取得一个平衡。
+		* 垃圾回收机制是延迟的最大问题。目标尽量不启动，少启动。
+- 锁争夺微调:
+	+ 多线程 不变性 单写原则 Actor Disrupotor
+- CPU使用率微调
+- I/O 微调
+
+#### 内存模型
+
+##### 新生代Eden内存分配
+- 新生代(New Generation )：Eden + 1 Survivor。所有新创建的对象在Eden。
+- 当Eden满了，启动Stop-The-World的GC，或为minor gc，采取数次复制Copy-Collection到Survivor。
+- 经过几次收集，寿命不断延长的对象从Survivor 进入老生代，也称为进入保有Tenuring，类似普通缓存LRU算法。
+
+##### survivor设计要旨
+- 足够大到能容纳所有请求响应中涉及的对象数据。
+- 每个survivor空间也要足够大到能够容纳活跃的请求对象和保有对象。
+- Survivor大小决定了保有Tenuring阀值，阀值如果能大到容纳所有常住对象，那么保有迁移过程就越快。
+
+##### 老生代Old
+- 老生代的gc称为major gc，就是通常说的full gc。
+- 采用标记-整理算法。由于老年区域比较大，而且通常对象生命周期都比较长，标记-整理需要一定时间。所以这部分的gc时间比较长。
+- minor gc可能引发full gc。当eden＋from space的空间大于老生代的剩余空间时，会引发full gc。这是悲观算法，要确保eden＋from space的对象如果都存活，必须有足够的老生代空间存放这些对象。
+- 这些都根据情况调整启动JVM的设置。
+- 使用 Adaptive让JVM自动划分新生代和老生代。
+
+##### Permanent Generation 永久代
+- 该区域比较稳定，主要用于存放classloader信息，比如类信息和method信息。
+- 缺省是64M ，如果你的代码量很大，容易出现OutOfMemoryError: PermGen space。
+- 2G以上内存设置MaxPermSize为160M
+- -XX:PermSize=128m -XX:MaxPermSize=160m
+
+##### 降低Full GC发生概率
+- 为了降低Full GC发生概率，如果降低了老生代大小，那么OutOfMemoryError发生，Full GC概率反而会上升。
+- 如果为了降低Full GC，增加老生代大小，执行时间可能会被延长。
+- 必须寻找合适大小的老生代。
+- 避免大的对象迁移到老生代。
+- 减少迁移到老生代的对象数目
+
+##### java.lang.OutOfMemoryError
+1) 在高负荷的情况下的却需要很大的内存，因此可以通过修改JVM参数来增加Java Heap Memory。
+2) 应用程序使用对象或者资源没有释放，导致内存消耗持续增加，关键采取OO封装边界方式，树立对象都有生命周期的基本习惯。
+3) 再一种也可能是对于第三方开源项目中资源释放了解不够导致使用以后资源没有释放（例如JDBC的ResultSet等）。
+
+##### JVM参数
+- -Xms, -Xmx—定义JVM的heap大小最小和最大值。
+- -XX:NewSize— 定义年轻态的最小大小，Eden越大越好，但是越大响应有延迟。
+	+ -Xmx2G -Xms1G -XX:NewSIze=512M (OldGen at least 1G)
+	+ -Xmx3G -Xms1G -XX:NewSize=512M (OldGen at least 2G)
+	+ Xmx4G -Xms2G -XX:NewSize=1G (OldGen at least 2.5G)
+	+ -Xmx6G -Xms3G -XX:NewSize=2G (OldGen at least 3.5G)
+	+ -Xmx8G -Xms4G -XX:NewSize=3G (OldGen at least 4.5G)
+
+参数调整示意
+```shell
+JAVA_OPTS="$JAVA_OPTS -server -Xss1280K -Xms1664m -Xmx1664m -XX:MaxPermSize=128m -XX:SurvivorRatio=16 -XX:NewSize=1280m -XX:MaxNewSize=1280m -XX:+DisableExplicitGC -XX:GCTimeRatio=2 -XX:ParallelGCThreads=4 -XX:+UseParNewGC -XX:MaxGCPauseMillis=2000 -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=80 -XX:+CMSClassUnloadingEnabled
+```
+
+##### Survivor大小
+1. NewSize / ( SurvivorRatio + 2）
+1. 如果SurvivorRatio =16， NewSize =1280m，那么S大小是70M。
+1. 太小，溢出的复制Collection进入老生代。
+1. 太大，闲置无用 浪费内存。
+1. 使用XX:+PrintTenuringDistribution 和-XX:+PrintGCDetails, -XX:+PrintHeapAtGC观察：
+1. 与-XX:+UseAdaptiveSizePolicy 冲突
+
+
+##### 垃圾回收机制启动
+垃圾回收机制不会频繁启动，因为机制一旦启动，造成应用程序停顿。
+机制一般内存剩余5%左右启动，所以有现象：启动服务器，内存不断消耗，有多大内存消耗多大。
+
+问题：如果服务器程序频繁触及5%底线，机制频繁启动，造成服务器慢..甚至死机。
+根源：应用程序无限制频繁大量创建对象，消耗内存。
+
+##### 控制垃圾回收
+1. 带CMS参数的都是和并发回收相关的
+1. -XX:+UseParNewGC，对新生代采用多线程并行回收。
+1. CMSInitiatingOccupancyFraction=90说明年老代到90%满的时候开始执行对年老代的并发垃圾回收（CMS）
+1. 用jmap和jstack查看
+
+##### 串行、并行回收的区别
+
+新生代 高吞吐量：
+-XX:+UseSerialGC
+-XX:+UseParallelGC
+-XX:+UseParNewGC
+
+老生代 低暂停：
+-XX:+UseParallelOldGC
+-XX:+UseConcMarkSweepGC
+
+相同点：GC时都暂停一切。
+
+不同点：一个线程和多个线程同时GC
+
+##### 并行和CMS（Concurrent-Mark-Sweep）区别
+
+CMS步骤：
+- initial mark
+- concurrent marking
+- remark
+- concurrent sweeping
+
+区别：CMS一个线程，并行多个线程
+CMS只是在1 3阶段暂停，而并行全部暂停。
+
+##### Parallel GC 和 CMS GC
+
+- 压实compaction是移除内存碎片，也就是移除已经分配的内存之间的空白空间。
+- 在Parallel GC中，无论Full GC是否执行，压实总是被执行，会花费更多时间，不过在执行完Full GC后，内存也许再被使用时，会分配得快些，能够顺序分配了。
+- CMS GC 并不执行压实，所以更快，碎片太多，没有空间放置大的需要连续空间的对象，“Concurrent mode failure”会发生。
+
+##### 并行和CMS配置
+
+-XX:UserParNewGC 适合于
+ 新生代 (multiple GC threads)
+-XX:+UseConcMarkSweepGC 适合于
+ 老生代 (one GC thread, freezes the JVM only during the initial mark and remark phases) 
+ -XX:InitiatingOccupancyFraction 80是表示CMS是在老生代接近满80%启动，如CPU空闲，可设定点一些。
+ -XX:+CMSIncrementalMode 用于CMS，不会让处理器Hold住整个并发phases 。
+
+
+
 ### Java 内存模型（JMM）
 
 我们常说的JVM内存模式指的是JVM的内存分区；而Java内存模式是一种虚拟机规范。
@@ -1246,3 +1433,4 @@ ResourceBundle.getBundle("文件名").getString("feild");
 2、libraries-->edit source-->右边编辑-->浏览到-->android sdk/extra/v4/src
 3、右击工程-->properties-->builder path-->order and export-->support-v4移动顶部
 
+Java性能优化技巧 https://www.jdon.com/performance/java-performance.html

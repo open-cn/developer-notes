@@ -27,7 +27,7 @@ Go 程序可以由多个标记组成，可以是关键字，标识符，常量�
 如果你打算将多个语句写在同一行，它们则必须使用 ; 人为区分，但在实际开发中不鼓励这种做法。
 
 注释
-可以在任何地方使用以 // 开头的单行注释。多行注释也叫块注释，均已以 /* 开头，并以 */ 结尾。
+可以在任何地方使用以`//`开头的单行注释。多行注释也叫块注释，均已以`/*`开头，并以`*/`结尾。
 
 标识符
 一个或是多个字母(A~Z和a~z)数字(0~9)、下划线_组成的序列，但是第一个字符必须是字母或下划线而不能是数字。
@@ -372,5 +372,46 @@ go run hello.go
 go build hello.go
 
 
+### 最佳实践
+#### db
 
+字段类型需要支持查询的scan时，需要实现sql.Scanner接口 
+字段类型需要支持插入时，需要实现driver.Valuer接口
+
+#### goland
+
+升级1.13版本之后下载依赖出现错误：
+```
+verifying gitlab.dhms.net/service/define/v3@v3.5.18-0.20200211155333-741d0f4ff61f/go.mod: gitlab.dhms.net/service/define/v3@v3.5.18-0.20200211155333-741d0f4ff61f/go.mod: reading https://sum.golang.org/lookup/gitlab.dhms.net/service/define/v3@v3.5.18-0.20200211155333-741d0f4ff61f: 410 Gone
+```
+
+原因是1.13之后设置了默认的GOSUMDB=sum.golang.org，由于墙的原因无法访问，执行以下命令关闭即可：
+`go env -w GOSUMDB=off`
+
+#### bind http params
+```go
+type DoView struct {
+    Ids         string          `form:”ids" jquery: “ids” `
+}
+```
+解析 get delete 请求 使用 jquery 从 QueryParams 中取得参数值；
+其他请求 通过 Content-Type 请求头 解析 json\xml\form；
+其中 form 根据 form标签 从 FormParams 中取得各参数。
+
+```go
+// utils.BuildSQL & bind http params
+
+type DoView struct {
+    Ids         string          `jquery: “ids”  db:"wo_created" op:"gte"
+`
+}
+```
+db 数据库被筛选的字段
+op 大小关系
+
+过滤掉 空字符串 数值0
+
+
+string
+omitempty
 
