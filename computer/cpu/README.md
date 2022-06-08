@@ -143,7 +143,7 @@ x86 处理器有三个主要的操作模式：保护模式、实地址模式和�
 
 下图展示的是基本程序执行寄存器（basic program execution registers）。8 个通用寄存器，6 个段寄存器，一个处理器状态标志寄存器（EFLAGS），和一 个指令指针寄存器（EIP）。
 
-![](./_images/README0.jpg)
+![](./_images/README1.gif)
 
 
 3) MMX 寄存器
@@ -158,20 +158,31 @@ x86 结构还包括了 8 个 128 位 XMM 寄存器，它们被用于 SIMD 流扩
 
 FPU 中有 8 个浮点数据寄存器，分别命名为 ST（0），ST（1），ST（2），ST（3），ST（4）， ST（5）， ST （6）和 ST（7）。其他控制寄存器和指针寄存器如下图所示。
 
-![](./_images/README2.gif)
+![](./_images/README3.gif)
 
 #### 通用寄存器
 通用寄存器主要用于算术运算和数据传输。如下图所示，EAX 寄存器的低 16 位在使用时可以用 AX 表示。
 
-![](./_images/README1.gif)
+![](./_images/README2.gif)
 
 一些寄存器的组成部分可以处理 8 位的值。例如，AX 寄存器的高 8 位被称为 AH，而低 8 位被称为 AL。同样的重叠关系也存在于 EAX、EBX、ECX 和 EDX 寄存器中：
 
 32 位|16 位|8 位（高）|8 位（低）
+---|---|---|---
+EAX|AX|AH|AL
+EBX|BX|BH|BL
+ECX|CX|CH|CL
+EDX|DX|DH|DL
+
 
 其他通用寄存器只能用 32 位或 16 位名称来访问，如下表所示：
 
-![](./_images/README3.gif)
+32 位|16 位
+---|---
+ESI|SI
+EDI|DI
+EBP|BP
+ESP|SP
 
 ##### 特殊用法
 某些通用寄存器有特殊用法：
