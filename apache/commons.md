@@ -1,5 +1,7 @@
 ## Apache commons
 
+### 概述
+
 Apache Commons 是一个 Apache 项目，专注于可重用 Java 组件的所有方面。
 
 The Apache Commons project is composed of three parts:
@@ -157,3 +159,44 @@ The commons-validator提供了一个简单的，可扩展的框架来在一个XM
 这些是被视为不活跃的 Commons 组件，因为它们最近几乎没有看到开发活动。
 
 如果您想使用这些组件中的任何一个，您必须自己构建它们。最好假设这些组件不会在不久的将来发布。
+
+### Apache Commons Lang
+
+##### FastDateFormat
+FastDateFormat是一个快速且线程安全的时间操作类，它完全可以替代SimpleDateFromat。因为是线程安全的，所以你可以把它作为一个类的静态字段使用。
+
+FastDateFormat之所以是线程安全的，是因为这个类是无状态的：内部的成员在构造时就完成了初始化，并在对象存活期，不提供任何API供外界修改他们。构造方法为protected，不允许直接构造它的对象，可以通过工厂方法获取。
+
+##### DateFormatUtils
+将时间转化为字符串的工具类。不可实例化对象且线程安全，依赖于FastDateFormat。
+
+
+##### DateUtils
+DateUtils提供了很多很方便的功能，减轻了使用Date的复杂性。把原来需用Calendar才能完成的功能统一集中了起来，也就是说没有对应的CalendarUtils类。在JDK中，Date与Calendar概念本身就有些混淆，只是为了保持兼容性才引入的Calendar。相对于Calendar提供的方法，DateUtils提供了更加合理的方法，对时间的单个字段操作变得更加的容易。
+
+##### StopWatch
+StopWatch是一个方便的计时器。
+
+```java
+StopWatch stopWatch = new StopWatch();
+stopWatch.start();
+...
+stopWatch.stop();
+System.out.println(stopWatch.getTime());
+```
+
+主要方法：
+
+- start(): 开始计时
+- stop(): 停止计时
+- reset(): 重置计时
+- suspend(): 暂停计时
+- resume(): 继续计时
+- getTime(): 获取消耗的毫秒数
+- getNanoTime(): 获取消耗的纳秒数
+- getStartTime(): 获取开始的毫秒数
+- isStarted(): 是否开始
+- isSuspended(): 是否暂停
+- isStopped(): 是否停止
+
+

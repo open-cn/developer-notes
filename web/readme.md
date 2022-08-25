@@ -1,14 +1,125 @@
-## Web
+## 万维网
 
-Web标准（网页标准）
+万维网（World Wide Web）亦作WWW、Web、全球广域网。
 
-HTML 网页的基本结构
-CSS 网页的表现效果
-JavaScript 网页的交互效果
+### 概述
+
+1994年6月，在北美留学的一名中国地理学家李小文（后来成为中国科学院院士）于中国新闻电脑网络（CND）的电子出版物《华夏文摘》上首次将“World Wide Web”称为“万维天罗地网”，简称“万维网”，这样其中文名称汉语拼音也是以WWW开始，自此“万维网”这一名称在中国开始被广泛采用。
+
+Web 是一个透过互联网访问的，由许多互相链接的超文本组成的信息系统。
+
+Web 是信息时代发展的核心，也是数十亿人在互联网上进行交互的主要工具。网页主要是文本文件格式化和超文本置标语言（HTML）。除了格式化文字之外，网页还可能包含图片、视频、声音和软件组件，这些组件会在用户的网页浏览器中呈现为多媒体内容的连贯页面。
+
+Web 资源可以是任何类型的可下载媒体。网页是通过以超文本标记语言(HTML)格式化的超文本链接相互连接的文档。HTML 语法显示带有URL的嵌入式超链接，允许用户导航到其他 Web 资源。除了文本之外，网页还可能包含对图像、视频、音频和软件组件的引用，这些组件在用户的网络浏览器中显示或内部执行，以呈现页面或多媒体内容流。Web 应用程序是用作应用程序软件的网页。
+
+具有共同主题和通常共同域名的多个网络资源组成一个网站。网站存储在运行网络服务器的计算机中，网络服务器是一个程序，用于响应用户计算机上运行的网络浏览器通过 Internet 发出的请求。网站内容可以由发布者提供，也可以由用户生成的内容以交互方式提供。提供网站的目的有无数信息、娱乐、商业和政府原因。
+
+Web 最初被设想为一个文档管理系统。Web 中的信息通过超文本传输协议(HTTP) 传输，供用户通过软件应用程序访问。
+
+#### 起源
+
+Web最早的构想可以追溯到1980年英国科学家蒂姆-伯纳斯-李（Tim Berners-Lee）构建的ENQUIRE项目。这是一个类似维基百科的超文本在线编辑数据库。1989年3月，伯纳斯·李撰写了《关于信息化管理的建议》一文，文中提及ENQUIRE并且描述了一个更加精巧的管理模型。1990年11月12日他和罗伯特-卡里奥合作提出了一个更加正式的关于Web的建议。在1990年11月13日他在一台NeXT工作站上写了第一个网页以实现他文中的想法。在那年的圣诞节，伯纳斯-李制作了要让网络工作的所有必要工具：第一个网页浏览器WorldWideWeb（同时也是网页编辑器）和第一个网页服务器。
+
+1991年8月6日，他在alt.hypertext新闻组上贴了Web项目简介的文章。这一天也标志着因特网上Web公共服务的首次亮相。
+
+Web中至关重要的概念─超文本，起源于1960年代的几个从前的项目。譬如泰德-尼尔森的仙那度计划和道格拉斯-英格巴特的NLS。而这两个项目的灵感都是来源于万尼瓦尔-布什在其1945年的论文《和我们想得一样》中为微缩胶片设计的Memex系统。
+
+伯纳斯-李的另一个才华横溢的突破是将超文本嫁接到因特网上。在他的《编织万维网》一书中解释，他曾多次向技术社群的成员暗示这两种技术结合是可行的，但是却没有任何人接受他的建议，他最后只好自己解决了这个计划。他发明了三项关键技术：
+- 一个全球网络资源唯一认证的系统，统一资源标志符（URI）；
+- 超文本标记语言（HTML）；
+- 超文本传输协议（HTTP）。
+
+1993年4月30日，欧洲核子研究组织（CERN）宣布免费提供 Web 协议和代码，使其得以广泛使用。两个月之后Gopher协议宣布不再是免费使用，造成大量用户从Gopher转向Web。早期流行的网页浏览器是用于Unix和X Windows系统的ViolaWWW。
+
+1993年推出的Mosaic网页浏览器，是由伊利诺伊大学厄巴纳-香槟分校（NCSA-UIUC）的国家超级电脑应用中心团队所开发的图形接口浏览器，由马克-安德森领导。Mosaic的资金来自美国高速运算及通信计划（High-Performance Computing and Communications Initiative）和高速运算及通信法案（High Performance Computing and Communication Act of 1991），这是美国参议员阿尔-戈尔所发起的几项运算发展计划之一。在Mosaic发布之前，网页中的图片和文字混合并不常见，Web 的受欢迎程度远低于互联网上使用的旧协议，例如Gopher和WAIS。Mosaic的图形使用接口让Web成为迄今为止最受欢迎的互联网协议。
+
+1994年10月，Web联盟（W3C）在麻省理工学院计算机科学实验室成立，创建者是Web的发明者伯纳斯-李。到了1994年底，全球网站数量仍然相对稀少，但是很多著名网站已经相当活跃，这些网站已经预示或者启发了当今最流行的服务。
+
+透过互联网，世界各地都创建了其他网站。这促进了协议和格式化的国际标准发展。伯纳斯-李继续参与指导Web标准的开发，例如编写网页的标记语言和他提倡的语义网愿景。Web透过一种易于使用和灵活的格式，使信息在互联网上传播。因此，Web对于互联网的普及发挥了重要的作用。虽然这两个词语有时被混在一起使用，但Web并不是互联网的同义词。Web是一个信息空间，包含超链接文档和其他资源，由其URIs标识。它使用互联网协议如TCP/IP和HTTP实现为客户端和服务端软件。
+
+#### Web 2.0
+
+“Web 2.0”不是一个技术的标准，因为Web 2.0仅是一个用来阐述技术转变的术语。这个术语是由O'Reilly Media的Dale Dougherty和MediaLive的Craig Cline在共同合作的动脑会议（brain storming）上提出来的。Dougherty提出了Web目前正处于复兴时期，有着不断改变的规则和不断演化的商业模型。而Dougherty则是举例说明——“DoubleClick是Web 1.0，Google AdSense则是Web 2.0。Ofoto是Web 1.0；Flickr则是Web 2.0”，而不是给出确切的定义，和补充一个商业前景，同时O'Reilly Media、Battelle和MediaLive在2004年10月启动了第一个Web 2.0大会。第二次的年会已在2005年10月举办。
+
+Web 2.0是一种新的互联网方式，通过网络应用（Web Applications）促进网络上人与人间的信息交换和协同合作，其模式更加以用户为中心。典型的Web 2.0站点有：网络社区、网络应用程序、社交网站、博客、Wiki等等。
+
+Web 2.0的支持者认为Web的使用正日渐以交互性和未来的社会性网络为导向，所提供的服务内容，通过或不通过创建一个可视的、交互的网页来充分挖掘网络效应。某种观点认为，和传统网站相比，Web 2.0的网站更多表现为Point of presence或者是用户产生内容的门户网站。
+
+另一方面，其实早在1999年，著名的管理学者彼得·杜拉克（Peter F. Drucker）就曾指出当时的信息技术发展走错了方向，因为真正推动社会进步的，是“Information Technology”里的“Information”，而不是“Technology”。着重技术层面而忽略了信息的话，就只是一具空的躯壳，不能使社会增值。而Web 2.0很明显是透过参与者的交互：不论是提供内容、为内容索引或评分，都能够使他们所使用的平台增值。透过参与者的交互，好的产品或信息本着它的口碑，从一小撮用户扩展到一大班人，一旦超过了临界质量，就会“像病毒一样广泛流传”（葛拉威尔，2002）。
+
+正如同创新2.0所倡导的以人为本、草根创新、开放创新、共同创新理念，Web 2.0的核心概念是互动、分享与关系，所有的网络行为，都可用“互动、分享、关系”的概念来作诠释。
+
+##### Web 1.0
+
+Web 1.0是一个返璞词，指的是万维网发展的第一阶段，时间大约从1991年到2004年。根据Graham Cormode和Balachander Krishnamurthy的说法，“在Web 1.0中，内容创作者很少，绝大多数用户只是内容的消费者。”个人网页很常见，主要由托管在ISP经营的网络服务器上或是托管在免费的网络托管服务（如：GeoCities）上的静态网页组成。随着Web 2.0的出现，普通的网络用户可以通过低成本的网络托管服务或通过专属服务器（诸如Blogger或LiveJournal），拥有社交网络个人资料（诸如Myspace和Facebook等网站）和个人博客。通常，内容是动态生成的，允许读者以一种与以往不同的方式发表评论。
+
+一些 Web 2.0 功能在 Web 1.0 时代就已经存在，但实现方式不同。例如，Web 1.0 站点可能有一个用于访问者评论的留言簿页面，而不是每个页面末尾的评论部分（典型的 Web 2.0）。在 Web 1.0 期间，必须考虑服务器性能和带宽——多个页面上冗长的评论线程可能会降低整个站点的速度。
+
+泰瑞-弗莱在他的《新媒体（第三版）》中，将Web 1.0和Web 2.0之间的区别描述为
+>"从个人网站变为博客和博客网站聚合，从发布变为参与，网络内容从作为前期投资的结果变为正在进行的交互过程，以及从内容管理系统变为基于“标签”网站内容的链接使用的关键字（分众分类法）的迁移。
+弗莱认为，这些因素形成了导致Web 2.0“热潮”爆发的趋势。
+
+##### 相关技术
+
+- 博客（Blog）：最早期的Web 2.0服务之一，可使任何参与者拥有自己的专栏、成为网络内容产生源，进而形成微媒体，为网络提供文字、图片、声音或视频信息。
+- 内容源（RSS）：伴随Blog(博客）产生的简单文本协议，将博客产生的内容进行重新格式化输出，从而将内容从页面中分离出来，便于同步到第三方网站或提供给订阅者进行阅读。
+- Wiki：是一个众人协作的平台，方便写百科全书、词典等。wiki指的是一种超文本系统，这种超文本系统支持面向社群的协作写作。
+- Digg：参与评论与评分
+	+ Web 2.0最显著的特点之一是，Web 2.0的显著特点是分享机制和去中心化，Digg机制为更多网络用户提供了参与网络建设的机制，无需进行内容贡献或创作，只要用户对网络内容进行评分或点评，即可参与到网络内容的建设过程当中。
+- 博客（Delicious）：用户可根据自己的喜好进行网络内容的收藏于转载，并将自己的收藏或转载整理成列表、分享给更多的用户，从而在网络上起到信息聚合与过滤的作用。
+- 社会化网络（SNS）：从原有的以网站、内容为中心，转而侧重于以人与人之间的关联为中心，网络上每一个节点所承载的不再是信息，而是以具体的自然人为节点，形成的新型互联网形态。
+- 微博（microblog）：博客的精简版，有较为严格的字数限制。更简单的发布流程和更随意（被限制的话题、领域）的写作方式，使得参与到网络内容贡献中的门槛降低，更大程度的推动了网络内容建设和个体信息贡献。
+- 基于位置信息的服务（LBS）：集地理信息系统（GIS）、微博（Twitter）和移动设备（Mobile）以及A-GPS定位服务于一身的增强型微博系统，其主导思想是每一条信息不仅利用时间为索引、同时也加入了地理经纬度的索引，从而不仅可通过时间对信息进行筛选、亦可利用地理坐标对信息进行合理的筛选。
+- 即时通讯（IM）：聊天一直是网民们上网的主要活动之一，网上聊天的主要工具已经从初期的聊天室、论坛变为以MSN、QQ为主要代表的即时通讯软件。
+
+##### 批评
+
+Web 2.0”根本不代表万维网的新版本，而只是继续使用所谓的“Web 1.0”技术和概念。首先，诸如Ajax之类的技术并没有取代HTTP之类的底层协议，而是在它们之上添加了一个抽象层。其次，在“Web 2.0”一词出现之前，Web 2.0 的许多想法已经在网络系统的实现中得到体现。例如，亚马逊网站自 1995 年推出以来就允许用户以自我出版的形式撰写评论和消费者指南。亚马逊还在 2002 年向外部开发人员开放了其 API。先前的发展还来自对计算机支持的协作学习和计算机支持的协作工作(CSCW)的研究，以及Lotus Notes和Lotus Domino等成熟产品的研究，所有这些现象都出现在 Web 2.0 之前。开发 Web 最初技术的伯纳斯·李也一直是该术语的直言不讳的批评者。
+
+“没有人真正知道这意味着什么……如果 Web 2.0 对你来说是博客和 wiki，那么这就是人与人之间的关系。但这就是 Web 一直以来的样子……Web 2.0，对某些人来说，它意味着将一些想法转移到客户端，使其更直接，但是将网络作为人与人之间的交互的想法实际上就是网络。这就是它的设计初衷……一个协作空间人们可以互动的地方。”
+
+其他批评者将 Web 2.0 称为“第二个泡沫”（指1997-2000 年的互联网泡沫），这表明太多的 Web 2.0 公司试图开发相同的产品，但缺乏商业模式。例如，《经济学人》将 2000 年代中后期对网络公司的关注称为“泡沫 2.0”。
+
+就 Web 2.0 的社会影响而言，Andrew Keen等批评者认为，Web 2.0 创造了一种数字自恋和业余爱好者的崇拜，它允许任何人在任何地方分享并过度重视自己的观点，从而破坏了专业知识的概念关于任何主题并发布任何类型的内容，无论他们的实际才能、知识、证书、偏见或可能的隐藏议程如何。Keen 在 2007 年出版的著作《Cult of the Amateur》认为，Web 2.0 的核心假设，即所有意见和用户生成的内容都具有同等价值和相关性，是错误的。此外，星期日泰晤士报评论家 John Flintoff 将 Web 2.0 描述为“创造了无尽的平庸数字森林：不知情的政治评论、不合时宜的家庭视频、令人尴尬的业余音乐、难以阅读的诗歌、散文和小说……错误，半-真相和误解”。在 1994 年的《连线》采访中，史蒂夫-乔布斯预测个人出版网络的未来发展，他说：“网络很棒，因为那个人不能把任何东西强加给你——你必须去拿它。他们可以”。迈克尔·戈尔曼，美国前总统美国图书馆协会一直直言反对 Web 2.0，因为它表面上声称缺乏专业知识，但他相信未来仍有希望。
+
+“摆在我们面前的任务是将 500 年来印刷业发展起来的真实性、专业性和学术工具的优点扩展到数字世界，而这些优点在印刷之前的手稿时代通常是不存在的”。
+
+从政治经济学的角度来看，对 Web 2.0 的批评也越来越多。因为，正如 Tim O'Reilly 和 John Batelle 所说，Web 2.0 是基于“客户......为你建立业务”，批评者认为谷歌、Facebook、YouTube 和 Twitter 等网站是利用用户创建内容的“免费劳动力”。Web 2.0 网站使用服务条款协议来获得用户生成内容的永久许可，并使用该内容创建用户资料以出售给营销人员。这是加强对 Web 2.0 站点内发生的用户活动的监视的一部分。哈佛大学伯克曼互联网与社会中心的乔纳森-齐特林（Jonathan Zittrain）认为，政府可以使用这些数据来监控持不同政见的公民。AJAX驱动的网站的兴起，其中大部分内容必须在客户端呈现，这意味着旧硬件的用户与纯粹由 HTML 组成的网站相比，性能更差，处理发生在服务器上。在 Web 2.0 站点中，残疾或受损用户的可访问性也可能受到影响。
+
+其他人指出，Web 2.0 技术与特定的政治意识形态相关联。“Web 2.0 话语是新自由主义意识形态具体化的渠道。”Web 2.0 的技术也可以“在新自由主义政治经济学的框架内作为一种规范性技术发挥作用”。
+
+根据 Henry Jenkins 的说法，从文化融合的角度来看 Web 2.0，这可能会出现问题，因为消费者正在做越来越多的工作以自娱自乐。例如，Twitter 为用户提供在线工具来创建自己的推文，用户在制作媒体内容时正在做所有的工作。
+
+#### Web3
+
+Web3（也称为Web 3.0）是一种基于区块链技术的万维网新迭代的想法，它结合了去中心化和令牌等概念——基于经济学。一些技术专家和记者将其与Web 2.0进行了对比，他们说数据和内容集中在一小群有时被称为“大型科技”的公司中。“Web3”一词由以太坊联合创始人Gavin Wood在2014年创造，这个想法在 2021 年引起了加密货币爱好者、大型科技公司和风险投资公司的兴趣。
+
+一些专家认为，Web3 将为用户提供更高的数据安全性、可扩展性和隐私性，并对抗大型科技公司的影响。其他人对去中心化网络提出了担忧，理由是可能会导致低节制和有害内容的扩散，将财富集中给一小部分投资者和个人，或由于隐私损失更广泛的数据收集。其他人，例如Elon Musk和Jack Dorsey，认为 Web3 只是一个流行词。
+
+Web 1.0，大部分网站由静态页面组成，绝大多数用户是内容的消费者，而不是生产者。Web 2.0 是基于“网络作为平台”的理念，并以用户创建的内容为中心，上传到论坛、社交媒体和网络服务、博客和wiki以及其他服务。
+
+Web3 的具体愿景各不相同，但它们围绕去中心化的概念展开，并且通常包含区块链技术，例如各种加密货币和不可替代的代币(NFT)。Bloomberg将 Web3 描述为“将以代币的形式将金融资产构建到您在网上所做的几乎任何事情的内部运作中”的想法。一些愿景是基于去中心化自治组织(DAO) 的概念。去中心化金融（DeFi）是另一个关键概念；在其中，用户在没有银行或政府参与的情况下交换货币。自我主权身份允许用户在不依赖OAuth等身份验证系统的情况下识别自己，在该身份验证系统受信任方才能评估身份。技术学者认为，Web3 可能会与Web 2.0站点一起运行，而 Web 2.0 站点可能会采用 Web3 技术以保持其服务的相关性。
+
+##### 批评
+
+包括Reddit和Discord在内的一些Web 2.0公司已经探索将 Web3 技术整合到他们的平台中。2021 年 11 月 8 日，首席执行官 Jason Citron 在推特上发布了一张截图，暗示 Discord 可能正在探索将加密货币钱包整合到他们的平台中。两天后，在用户强烈反对之后，Discord 宣布他们没有整合此类技术的计划，并且这是在公司范围的黑客马拉松中开发的仅限内部的概念。
+
+The Conversation引用的一些法律学者对监管去中心化网络的难度表示担忧，他们报告说这可能会使防止网络犯罪、在线骚扰、仇恨言论和虐待儿童图像的传播变得更加困难。但是，该新闻网站还指出，“去中心化网络，代表了过去的网络自由主义观点和希望，即互联网可以通过打破现有的权力结构来赋予普通人权力”。Web3的其他一些批评者认为这个概念是加密货币泡沫的一部分，或者作为他们认为被夸大或有害的基于区块链的趋势的延伸，尤其是 NFT。一些批评者对加密货币和 NFT对环境的影响提出了担忧。加密货币的效率各不相同，与更广泛使用的工作量证明相比，权益证明的设计能耗更低，尽管在实践中它的安全性和去中心化程度存在分歧。其他人表示相信 Web3 和相关技术是一个金字塔计划。
+
+Twitter的联合创始人兼前 CEO Jack Dorsey将 Web3 斥为“风险资本家的玩物”。Dorsey 认为 Web3 不会使互联网民主化，但它会将权力从 Facebook 等参与者转移到Andreessen Horowitz等风险投资基金。
+
+2021 年 12 月 14 日，软件工程师 Molly White推出了Web3 Is Going Just Great，该网站记录了涉及加密货币和 Web3 的“主要骗局、计划和地毯拉动”。
+
+在 2022 年初，Signal的创建者Moxie Marlinspike阐明了 Web3 如何不像看起来那样去中心化，这主要是由于加密货币领域的整合，包括目前主要由Alchemy和Infura公司控制的区块链应用程序编程接口，主要由Binance、Coinbase、MetaMask和OpenSea主导的加密货币交易所，以及目前由Tether主导的稳定币市场. Marlinspike 还表示，新网络与旧网络相似。
+
+### Web标准（网页标准）
+
+- HTML 网页的基本结构
+- CSS 网页的表现效果
+- JavaScript 网页的交互效果
 
 
-W3C( World Wide Web Consortium )万维网联盟，创建于1994年是Web技术领域最具权威和影响力的国际中立性技术标准机构；是专门负责网络标准制定的非赢利组织。制定了结构标准和样式标准；
-https://www.w3.org/TR/?status=rec
+W3C（World Wide Web Consortium）万维网联盟，创建于1994年是Web技术领域最具权威和影响力的国际中立性技术标准机构；是专门负责网络标准制定的非赢利组织。制定了结构标准和样式标准；<https://www.w3.org/TR/?status=rec>
 
 ECMA：欧洲电脑网商联合会（厂商协会），制定了行为标准；
 
@@ -16,45 +127,45 @@ ECMA：欧洲电脑网商联合会（厂商协会），制定了行为标准；
 一、网页结构
 结构化标准语言主要包括 XML、HTML、XHTML。
 1) XML（EXtensible Markup Language）
-W3C 于 1998 年 2 月 10 日发布的 XML 1.0（https://www.w3.org/TR/1998/REC-xml-19980210）。
-W3C 于 2000 年 10 月 6 日发布的 XML 1.0(SE)（https://www.w3.org/TR/2000/REC-XML-20001006）。
-For the latest version, please look at https://www.w3.org/TR/REC-xml/
+W3C 于 1998 年 2 月 10 日发布的 XML 1.0（<https://www.w3.org/TR/1998/REC-xml-19980210>）。
+W3C 于 2000 年 10 月 6 日发布的 XML 1.0(SE)（<https://www.w3.org/TR/2000/REC-XML-20001006>）。
+For the latest version, please look at <https://www.w3.org/TR/REC-xml/>
 
 2) HTML（Hypertext Markup Language）
-https://www.w3.org/TR/REC-html40-971218/
-https://www.w3.org/TR/1998/REC-html40-19980424/
-https://www.w3.org/TR/html4/
+<https://www.w3.org/TR/REC-html40-971218/>
+<https://www.w3.org/TR/1998/REC-html40-19980424/
+<https://www.w3.org/TR/html4/>
 
-https://www.w3.org/TR/1999/REC-html401-19991224/
-https://www.w3.org/TR/html401/
+<https://www.w3.org/TR/1999/REC-html401-19991224/>
+<https://www.w3.org/TR/html401/>
 
 W3C 于 2008 年 1 月 22 日发布 HTML 5 工作草案。
-http://www.w3.org/TR/html5/
+<http://www.w3.org/TR/html5/>
 
-For the latest version, please look at https://www.w3.org/TR/html/
+For the latest version, please look at <https://www.w3.org/TR/html/>
 
 3) XHTML
-W3C 于 2000 年 1 月 26 日发布的 XHTML 1.0（https://www.w3.org/TR/2000/REC-xhtml1-20000126/）。
-W3C 于 2002 年 8 月 1 日发布的 XHTML 1.0(SE)（https://www.w3.org/TR/2002/REC-xhtml1-20020801/）。
-For the latest version, please look at https://www.w3.org/TR/xhtml1/
+W3C 于 2000 年 1 月 26 日发布的 XHTML 1.0（<https://www.w3.org/TR/2000/REC-xhtml1-20000126/>）。
+W3C 于 2002 年 8 月 1 日发布的 XHTML 1.0(SE)（<https://www.w3.org/TR/2002/REC-xhtml1-20020801/>）。
+For the latest version, please look at <https://www.w3.org/TR/xhtml1/>
 
 二、网页样式
 1) CSS（Cascading Style Sheets）
-1996 年 12 月，CSS 的第一个版本正式出版（https://www.w3.org/TR/REC-CSS1-961217）。
-For the latest version, please look at https://www.w3.org/TR/CSS1/
+1996 年 12 月，CSS 的第一个版本正式出版（<https://www.w3.org/TR/REC-CSS1-961217>）。
+For the latest version, please look at <https://www.w3.org/TR/CSS1/>
 
-1998 年 5 月，CSS2 版本正式出版（https://www.w3.org/TR/1998/REC-CSS2-19980512/）。
-For the latest version, please look at https://www.w3.org/TR/CSS2/
+1998 年 5 月，CSS2 版本正式出版（https://www.w3.org/TR/1998/REC-CSS2-19980512/>）。
+For the latest version, please look at <https://www.w3.org/TR/CSS2/>
 
-For the latest version, please look at https://www.w3.org/TR/CSS/
+For the latest version, please look at <https://www.w3.org/TR/CSS/>
 
 三、网页行为
 1) DOM（Document Object Model）
-W3C DOM 规范（https://www.w3.org/DOM/）
+W3C DOM 规范（<https://www.w3.org/DOM/>）
 2) BOM（Browser Object Model）
 
 3) ECMAScript
-目前使用最广泛的是 ECMAScript 262，也即 JavaScript 5.0 版本，参考地址为：http://www.ecma-international.org/publications/standards/Ecma-262.htm。
+目前使用最广泛的是 ECMAScript 262，也即 JavaScript 5.0 版本，参考地址为：<http://www.ecma-international.org/publications/standards/Ecma-262.htm>。
 
 
 JavaScript 是由 ECMAScript，DOM 和 BOM 三者组成的。
@@ -67,22 +178,36 @@ DOM 和 BOM 是由浏览器实现的。
 
 
 
+#### Web APIs
+Document Object Model
+DOM是一种API，它允许访问和修改当前文档。 它允许操纵文档Node和Element。 HTML，XML和SVG对其进行了扩展以操纵其特定元素。
+
+
+Device APIs
+这组API允许访问网页和应用程序可用的各种硬件功能。 例如 环境光传感器 Ambient Light Sensor API，地理位置 Geolocation API，指针锁定 Pointer Lock API，接近度 Proximity API，设备方向 Device Orientation API，屏幕方向 Screen Orientation API，振动 Vibration API。
+
+
+Communication APIs
+这些API使网页和应用程序可以与其他页面或设备进行通信。 例如 Network Information API，Web Notifications API，Simple Push API。
+
+
+Data management APIs
+可以使用这组API来存储和管理用户数据。 例如。 FileHandle API，IndexedDB。
 
 
 
+#### SVG APIs
+可伸缩矢量图形（Scalable Vector Graphics）是一种基于XML的标记语言，用于描述基于二维的矢量图形。
+因此，这是一个基于文本的开放式Web标准，用于描述可以清晰地呈现任意大小的图像，并且专门设计用于与其他Web标准（包括CSS，DOM，JavaScript和SMIL）良好地配合使用。
+SVG本质上是图形，而HTML是文本。
+
+
+#### MathML APIs
+数学标记语言（MathML）是XML的一种方言，用于描述数学符号并捕获其结构和内容。
 
 
 
-
-
-
-
-
-【浏览器兼容性问题】
-
-HTML兼容
-CSS兼容
-JavaScript兼容
+### 浏览器兼容性问题
 
 1. HTML兼容
 低版本浏览器不能识别一些高版本浏览器使用的标签。比如HTML5新增的标签。
@@ -108,8 +233,6 @@ Presto: -o-
 3. JavaScript兼容
 
 
-
-
 IE6、7、8不支持HTML5、CSS3、SVG标准，可被判定为“极难兼容”
 IE9不支持Flex、Web Socket、WebGL，可被判定为“较难兼容”
 IE10部分支持Flex（-ms-flexbox）、Web Socket，可被判定为“较易兼容”
@@ -123,10 +246,20 @@ Chrome、Firefox、Safari、Opera 、Edge可视为“现代浏览器”
 
 
 
-【前端里程碑框架】
+### 框架
+- HTML5 Boilerplate：单纯的十分完善的移动终端友好的HTML模版，完善到所有的页面似乎都应该遵守这个规则。
+- normalize：一个支持HTML5的css reset
+- jQuery
+- Modernizr：一个强大的浏览器特性监测工具
+	+ 一组 Apache 配置参数，帮你提高网站的性能
+	+ 还提供了一些文件，比如apache的配置htaccess、 404页面、flash跨域需要的文件crossdomain.xml、爬虫过滤文件robots.txt等，可以按需使用。
+
+
+#### 前端里程碑框架
+
 这些框架代表了前端应用当时先进、成熟、主流的开发方式与发展方向，兼容性问题也在这些框架的基础之上不断得到解决，大致也分为三个阶段：
 
-一、DOM操作框架，代表框架：jQuery
+##### DOM操作框架，代表框架：jQuery
 
 jQuery是DOM操作时代前端框架最优秀，也几乎是唯一代表；但是在以React为代表的新式前端框架崛起之后，迅速没落。
 
@@ -134,7 +267,7 @@ JQuery 1.x兼容IE6+浏览器
 JQuery 2.x兼容IE9+浏览器
 JQuery 3.x兼容IE9+浏览器
 
-二、响应式框架，代表框架：Bootstrap
+##### 响应式框架，代表框架：Bootstrap
 
 Bootstrap是最经典的响应式CSS框架，其核心是16列布局栅格系统，使用媒体查询设定阈值为超小屏幕，小屏幕，中等屏幕，大屏幕，超大屏幕创建不同的样式。
 
@@ -143,52 +276,6 @@ Bootstrap 3兼容IE8+浏览器
 Bootstrap 4兼容IE10+浏览器
 Bootstrap 5不兼容IE浏览器
 
-三、前端MVC框架，代表框架：React、Angular、Vue
+##### 前端MVC框架，代表框架：React、Angular、Vue
 
-
-
-
-
-【框架】
-HTML5 Boilerplate
-单纯的十分完善的移动终端友好的HTML模版，完善到所有的页面似乎都应该遵守这个规则。
-normalize，一个支持HTML5的css reset
-jQuery
-Modernizr，一个强大的浏览器特性监测工具
-一组 Apache 配置参数，帮你提高网站的性能
-还提供了一些文件，比如apache的配置htaccess、 404页面、flash跨域需要的文件crossdomain.xml、爬虫过滤文件robots.txt等，可以按需使用。
-
-
-
-
-
-
-
-
-【Web APIs】
-Document Object Model
-DOM是一种API，它允许访问和修改当前文档。 它允许操纵文档Node和Element。 HTML，XML和SVG对其进行了扩展以操纵其特定元素。
-
-
-Device APIs
-这组API允许访问网页和应用程序可用的各种硬件功能。 例如 环境光传感器 Ambient Light Sensor API，地理位置 Geolocation API，指针锁定 Pointer Lock API，接近度 Proximity API，设备方向 Device Orientation API，屏幕方向 Screen Orientation API，振动 Vibration API。
-
-
-Communication APIs
-这些API使网页和应用程序可以与其他页面或设备进行通信。 例如 Network Information API，Web Notifications API，Simple Push API。
-
-
-Data management APIs
-可以使用这组API来存储和管理用户数据。 例如。 FileHandle API，IndexedDB。
-
-
-
-【SVG APIs】
-可伸缩矢量图形（Scalable Vector Graphics）是一种基于XML的标记语言，用于描述基于二维的矢量图形。
-因此，这是一个基于文本的开放式Web标准，用于描述可以清晰地呈现任意大小的图像，并且专门设计用于与其他Web标准（包括CSS，DOM，JavaScript和SMIL）良好地配合使用。
-SVG本质上是图形，而HTML是文本。
-
-
-【MathML APIs】
-数学标记语言（MathML）是XML的一种方言，用于描述数学符号并捕获其结构和内容。
 

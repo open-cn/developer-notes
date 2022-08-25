@@ -1,7 +1,6 @@
 ## Flink
-Apache Flink
 
-### Flink 概述
+### 概述
 
 Apache Flink 是一个框架和分布式处理引擎，用于在无边界和有边界数据流上进行有状态的计算。Flink 能在所有常见集群环境中运行，并能以内存速度和任意规模进行计算。
 
@@ -1149,12 +1148,12 @@ bin/flink cancel  -yid application_1572866255793_17760 8b08d32f2f0be5c5b6d064576
 
 bin/flink run -s hdfs：///flink/savepoint/savepoint-8b08d3-c077f4bd59b0  -m yarn-cluster -yn 2 -yjm 1024 -ytm 2048 -yt test/ --class com.xxx.xxx.xxx.Kafka2Phoenix /opt/xxx/xxx/xxx/xxx-1.0.jar
 
-后台运行：ok
+后台运行：
 
 nohup bin/flink run -s hdfs：///flink/savepoint/savepoint-8b08d3-c077f4bd59b0  -m yarn-cluster -yn 2 -yjm 1024 -ytm 2048 -yt test/ --class com.xxx.xxx.xxx.Kafka2Phoenix /opt/xxx/xxx/xxx/xxx-1.0.jar >/opt/xxx/xxx/xxx/xxx-1.0.log &
 
 ### Flink CLI
-```bash
+```shell
 flink --help
 ```
 
@@ -3551,11 +3550,11 @@ Solr冷热数据分离：分表  问题解决
 
 ### 怎样学习flink
 
-1.先对flink有宏观视野上理解，看阿里大会整理的文档资料，其中也有可运行的demo。
-2.看各个flink 大V的博客，对架构和原理逐步深入理解（可以微信和google搜索关键词）
-3.英文好，最好是看Apache flink官网文档，既全面又权威（先看前面后看官网，国人帮整理，理解速度会快些）
-4.基于以上3方面理解基础上，自己有相当的技术基础及理解能力 + 毅力恒心 + 热爱程度，可以去啃下源代码。基本问题不大（往下又分2种情况：1.有基础曾经研究并扩展过开源代码；2.无基础 无经验  花费时间就要长些，需要毅力，有人指点会快些。）
-5.提高解决问题的能力。
+1. 先对flink有宏观视野上理解，看阿里大会整理的文档资料，其中也有可运行的demo。
+2. 看各个flink 大V的博客，对架构和原理逐步深入理解（可以微信和google搜索关键词）
+3. 英文好，最好是看Apache flink官网文档，既全面又权威（先看前面后看官网，国人帮整理，理解速度会快些）
+4. 基于以上3方面理解基础上，自己有相当的技术基础及理解能力 + 毅力恒心 + 热爱程度，可以去啃下源代码。基本问题不大（往下又分2种情况：1.有基础曾经研究并扩展过开源代码；2.无基础 无经验  花费时间就要长些，需要毅力，有人指点会快些。）
+5. 提高解决问题的能力。
 
 
 ##### flink知识点

@@ -1,5 +1,22 @@
-JavaScript
+## JavaScript
 
+### 概述
+
+liveScript ==> javaScript ==> ECMAscript
+
+#### 起源
+
+1994年，网景公司(Netscape)发布了Navigator浏览器0.9版，这是世界上第一款比较成熟的网络浏览器，轰动一时。但是这是一款名副其实的浏览器--只能浏览页面，浏览器无法与用户互动。当时解决这个问题有两个办法，一个是采用现有的语言，许它们直接嵌入网页。另一个是发明一种全新的语言。
+
+1995年Sun公司将Oak语言改名为Java，正式向市场推出。Sun公司大肆宣传，许诺这种语言可以"一次编写，到处运行"(Write Once, Run Anywhere)，它看上去很可能成为未来的主宰。
+
+34岁的系统程序员Brendan Eich登场了。1995年4月，网景公司录用了他，他只用10天时间就把Javascript设计出来了：
+1) 借鉴C语言的基本语法;
+2) 借鉴Java语言的数据类型和内存管理;
+3) 借鉴Scheme语言，将函数提升到"第一等公民"(first class)的地位;
+4) 借鉴Self语言，使用基于原型(prototype)的继承机制。
+
+### 语法
 
 类型
 5 种不同的数据类型：string、number、boolean、object、function
@@ -127,7 +144,7 @@ continue ???
 
 
 
-EventLoop 事件循环
+#### EventLoop 事件循环
 
 通常，在大多数浏览器中，每个浏览器选项卡都有一个事件循环，以使每个进程都隔离开，并避免使用无限的循环或繁重的处理来阻止整个浏览器的网页。该环境管理多个并发的事件循环，例如处理 API 调用。 Web 工作进程也运行在自己的事件循环中。
 
@@ -186,4 +203,251 @@ useCapture
 
 EventTarget.removeEventListener()
 EventTarget.dispatchEvent()
+
+#### 标准内建对象和其属性、方法（Built-ins）
+
+- Value properties
+	+ Infinity
+	+ NaN
+	+ undefined
+	+ globalThis
+- Function properties
+	+ eval()
+	+ isFinite()
+	+ isNaN()
+	+ parseFloat()
+	+ parseInt()
+	+ decodeURI()
+	+ decodeURIComponent()
+	+ encodeURI()
+	+ encodeURIComponent()
+- Fundamental objects
+	+ Object
+	+ Function
+	+ Boolean
+	+ Symbol
+- Error objects
+	+ Error
+	+ AggregateError
+	+ EvalError
+	+ InternalError
+	+ RangeError
+	+ ReferenceError
+	+ SyntaxError
+	+ TypeError
+	+ URIError
+- Numbers & dates
+	+ Number
+	+ BigInt
+	+ Math
+	+ Date
+- Text processing
+	+ String
+	+ RegExp
+- Indexed Collections
+	+ Array
+	+ Int8Array
+	+ Uint8Array
+	+ Uint8ClampedArray
+	+ Int16Array
+	+ Uint16Array
+	+ Int32Array
+	+ Uint32Array
+	+ Float32Array
+	+ Float64Array
+	+ BigInt64Array
+	+ BigUint64Array
+- Keyed collections
+	+ Map
+	+ Set
+	+ WeakMap
+	+ WeakSet
+- Structured data
+	+ ArrayBuffer
+	+ SharedArrayBuffer
+	+ Atomics
+	+ DataView
+	+ JSON
+- Control abstraction
+	+ Promise
+	+ Generator
+	+ GeneratorFunction
+	+ AsyncFunction
+- Reflection
+	+ Reflect
+	+ Proxy
+- Internationalization
+	+ Intl
+	+ Intl.Collator
+	+ Intl.DateTimeFormat
+	+ Intl.ListFormat
+	+ Intl.NumberFormat
+	+ Intl.PluralRules
+	+ Intl.RelativeTimeFormat
+	+ Intl.Locale
+- WebAssembly
+	+ WebAssembly
+	+ WebAssembly.Module
+	+ WebAssembly.Instance
+	+ WebAssembly.Memory
+	+ WebAssembly.Table
+	+ WebAssembly.CompileError
+	+ WebAssembly.LinkError
+	+ WebAssembly.RuntimeError
+
+#### 语句和声明（Statements）
+
+- Control flow
+	+ Block
+	+ break
+	+ continue
+	+ Empty
+	+ if...else
+	+ switch
+	+ throw
+	+ try...catch
+- Declarations
+	+ var
+	+ let
+	+ const
+- Functions and classes
+	+ function
+	+ function*
+	+ async function
+	+ return
+	+ class
+- Iterations
+	+ do...while
+	+ for
+	+ for each...in
+	+ for...in
+	+ for...of
+	+ for await...of
+	+ while
+- Other
+	+ debugger
+	+ import
+	+ label
+	+ with
+
+#### 表达式和操作符（Expressions and operators）
+
+- Primary expressions
+	+ this
+	+ function
+	+ class
+	+ function*
+	+ yield
+	+ yield*
+	+ async function
+	+ await
+	+ `[]`
+	+ {}
+	+ /ab+c/i
+	+ ( )
+	+ null
+- Left-hand-side expressions
+	+ Property accessors
+	+ new
+	+ new.target
+	+ super
+	+ ...obj
+- Increment & decrement
+	+ A++
+	+ A--
+	+ ++A
+	+ --A
+- Unary operators
+	+ delete
+	+ void
+	+ typeof
+	+ `+`
+	+ `-`
+	+ `~`
+	+ `!`
+- Arithmetic operators
+	+ `+`
+	+ `-`
+	+ `/`
+	+ `*`
+	+ `%`
+	+ `**`
+- Relational operators
+	+ `in`
+	+ `instanceof`
+	+ `<`
+	+ `>`
+	+ `<=`
+	+ `>=`
+- Equality operators
+	+ `==`
+	+ `!=`
+	+ `===`
+	+ `!==`
+- Bitwise shift operators
+	+ `<<`
+	+ `>>`
+	+ `>>>`
+- Binary bitwise operators
+	+ `&`
+	+ `|`
+	+ `^`
+- Binary logical operators
+	+ `&&`
+	+ `||`
+- Conditional (ternary) operator
+	+ (condition ? ifTrue : ifFalse)
+- Assignment operators
+	+ `=`
+	+ `*=`
+	+ `/=`
+	+ `%=`
+	+ `+=`
+	+ `-=`
+	+ `<<=`
+	+ `>>=`
+	+ `>>>=`
+	+ `&=`
+	+ `^=`
+	+ `|=`
+	+ `[a, b] = [1, 2]`
+	+ `{a, b} = {a:1, b:2}`
+
+#### Functions 函数
+
+- arguments
+	```js
+    	// The arguments object is a local variable available within all non-arrow functions.
+    	console.log(typeof arguments); // 'object'
+    	// The arguments object is not an Array. It is similar, but lacks all Array properties except length. For example, it does not have the pop() method.
+    	// However, it can be converted to a real Array:
+    	var args = Array.prototype.slice.call(arguments);
+    	var args = [].slice.call(arguments);
+    	let args = Array.from(arguments);
+    	let args = [...arguments];
+	````
+- Arrow functions
+- Default parameters
+- Rest parameters
+
+#### 其他
+
+- Lexical grammar 词汇语法
+    + 不可见字符、空格、行终止符、注释字符、Hashbang 语法、关键字、保留字、特殊含义的标识符（arguments|get|set）
+    + null true/false
+    + Number
+      * Decimal(42|5e1|1e-3) Binary(0b10000) Octal(0888|0O888|0o888) Hexadecimal(0x666 | 0X666) BigInt(0x123456789ABCDEFn|123456789123456789n) Numeric separators(1_000_000|10_0000_1000|0o2_2|1_000_000n)
+    + Object
+    + Array
+    + String
+      * Hexadecimal escape sequences： 16进制转义序列 '\xA9'
+      * Unicode escape sequences： unicode 转义序列 '\u00A9'
+      * Unicode code point escapes '\u{2F804}'
+    + RegExp
+    + Template Strings
+    + Automatic semicolon insertion(ASI) 自动分号插入
+- Data types and data structures
+- Strict mode
+- Deprecated features
+
 

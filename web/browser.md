@@ -1,26 +1,25 @@
 ## Web浏览器
 
 
-【历史】
+### 概述
+#### 历史
 
-1993年发布的一款浏览器 Mosaic
+- 1993年发布的一款浏览器 Mosaic
 很快就出现了另一个浏览器，这就是著名的Mozilla。后来Mozilla更名为Netscape，也就是网景。Mozilla后来变成了Firefox。
-
-1998年2月23日，网景公司建立了Mozilla组织，开发用于测试目的的Mozilla浏览器，这个浏览器不适合直接为最终用户使用。
-当美国在线（AOL，网景母公司）完全的从Mozilla组织中撤出后，Mozilla基金会在2003年7月15日成立了。
-
-在2005年8月3日，Mozilla基金会建立了一个完全拥有的子公司叫Mozilla公司来继续开发和发布Mozilla Firefox和Mozilla Thunderbird。
+- 1998年2月23日，网景公司建立了Mozilla组织，开发用于测试目的的Mozilla浏览器，这个浏览器不适合直接为最终用户使用。
+- 当美国在线（AOL，网景母公司）完全的从Mozilla组织中撤出后，Mozilla基金会在2003年7月15日成立了。
+- 在2005年8月3日，Mozilla基金会建立了一个完全拥有的子公司叫Mozilla公司来继续开发和发布Mozilla Firefox和Mozilla Thunderbird。
 
 基金会享有免税资格，下属机构Mozilla公司也是免税的。
 
 
-【浏览器内核】
+### 浏览器内核
 浏览器内核主要包括以下三个技术分支：排版渲染引擎、 JavaScript引擎，以及其他。
 
 V8与WebKit被用于Chrome浏览器中。
 
 
-【JavaScript Engine js引擎】
+#### JavaScript引擎
 javaScript的解释、编译、执行
 
 Mozilla
@@ -49,7 +48,7 @@ Opera
 
 
 
-【Rendering Engine 渲染/排版引擎】
+#### 渲染排版引擎
 负责对网页语法的解释（HTML、javaScript、引入css等），并渲染（显示）网页
 
 在Mozilla将其排版引擎（Gecko）作为独立于浏览器的一个配件之后，“排版引擎”这个词汇才被广泛使用。
@@ -117,9 +116,8 @@ Safari浏览器的 WebKit 所包含的 WebCore 排版引擎是KHTML的衍生产�
 WebCore包含了浏览器引擎的核心部分如处理html、dom、css、svg、获取资源、渲染页面过程控制、回调/通知外壳程序以及与Javascript实现的Binding等等；
 
 
-
-【现状】
-WebKit      Active      https://webkit.org/status/
+#### 现状
+WebKit      Active      <https://webkit.org/status/>
 Blink       Active
 EdgeHTML    Active
 Gecko       Active

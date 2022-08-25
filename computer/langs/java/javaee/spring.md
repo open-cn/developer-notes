@@ -514,10 +514,150 @@ JdbcTemplate 的全限定命名为 org.springframework.jdbc.core.JdbcTemplate，
 
 ### Spring Transaction
 
-事务（Transaction）是基于关系型数据库（RDBMS）的企业应用的重要组成部分。事务具有 4 个特性：原子性、一致性、隔离性和持久性，简称为 ACID 特性。
+事务（Transaction）是基于关系型数据库（RDBMS）的企业应用的重要组成部分。
 
-- 原子性（Atomicity）：一个事务是一个不可分割的工作单位，事务中包括的动作要么都做要么都不做。
-- 一致性（Consistency）：事务必须保证数据库从一个一致性状态变到另一个一致性状态，一致性和原子性是密切相关的。
-- 隔离性（Isolation）：一个事务的执行不能被其它事务干扰，即一个事务内部的操作及使用的数据对并发的其它事务是隔离的，并发执行的各个事务之间不能互相打扰。
-- 持久性（Durability）：持久性也称为永久性，指一个事务一旦提交，它对数据库中数据的改变就是永久性的，后面的其它操作和故障都不应该对其有任何影响。
+事务允许我们将几个或一组操作组合成一个要么全部成功、要么全部失败的工作单元。如果事务中的所有的操作都执行成功，那自然万事大吉。但如果事务中的任何一个操作失败，那么事务中所有的操作都会被回滚，已经执行成功操作也会被完全清除干净，就好像什么事都没有发生一样。
+
+Spring 支持以下 2 种事务管理方式：
+- 编程式事务管理：编程式事务管理是通过编写代码实现的事务管理。
+	+ 这种方式能够在代码中精确地定义事务的边界，我们可以根据需求规定事务从哪里开始，到哪里结束。
+	+ 事务规则与业务代码耦合度高，难以维护。
+- 声明式事务管理：Spring 声明式事务管理在底层采用了 AOP 技术。
+	+ 其最大的优点在于无须通过编程的方式管理事务，只需要在配置文件中进行相关的规则声明，就可以将事务规则应用到业务逻辑中。
+	+ 易用性高，对业务代码没有侵入性，耦合度低，易于维护。
+
+Spring 为不同的持久化框架或平台提供了不同的事务管理器（PlatformTransactionManager）接口实现：
+- `org.springframework.jdbc.datasource.DataSourceTransactionManager`：使用 Spring JDBC 或 iBatis 进行持久化数据时使用。
+- `org.springframework.orm.hibernate3.HibernateTransactionManager`：使用 Hibernate 3.0 及以上版本进行持久化数据时使用。
+- `org.springframework.orm.jpa.JpaTransactionManager`：使用 JPA 进行持久化时使用。
+- `org.springframework.jdo.JdoTransactionManager`：当持久化机制是 Jdo 时使用。
+- `org.springframework.transaction.jta.JtaTransactionManager`：使用 JTA 来实现事务管理，在一个事务跨越多个不同的资源（即分布式事务）使用该实现。	
+
+Spring 将 XML 配置中的事务信息封装到对象 TransactionDefinition 中，然后通过事务管理器的 getTransaction() 方法获得事务的状态（TransactionStatus），并对事务进行下一步的操作。
+```java
+public interface TransactionDefinition {
+    int getPropagationBehavior(); // 获取事务的传播行为
+    int getIsolationLevel(); // 获取事务的隔离级别
+    String getName(); // 获取事务的名称
+    int getTimeout(); // 获取事务的超时时间
+    boolean isReadOnly(); // 获取事务是否只读
+}
+```
+
+Spring 中提供了以下隔离级别，我们可以根据自身的需求自行选择合适的隔离级别。
+- ISOLATION_DEFAULT：使用后端数据库默认的隔离级别。
+- ISOLATION_READ_UNCOMMITTED：允许读取尚未提交的更改，可能导致脏读、幻读和不可重复读。
+- ISOLATION_READ_COMMITTED：Oracle 默认级别，允许读取已提交的并发事务，防止脏读，可能出现幻读和不可重复读。
+- ISOLATION_REPEATABLE_READ：MySQL 默认级别，多次读取相同字段的结果是一致的，防止脏读和不可重复读，可能出现幻读。
+- ISOLATION_SERIALIZABLE：完全服从 ACID 的隔离级别，防止脏读、不可重复读和幻读。
+
+在理想情况下，事务之间是完全隔离的，不会出现脏读、幻读和不可重复读问题。但完全的事务隔离会导致性能问题，而且并不是所有的应用都需要事务的完全隔离，因此有时应用程序在事务隔离上也有一定的灵活性。
+
+事务传播行为（propagation behavior）指的是，当一个事务方法被另一个事务方法调用时，这个事务方法应该如何运行。事务方法指的是能让数据库表数据发生改变的方法，例如新增数据、删除数据、修改数据的方法。
+
+Spring 提供了以下 7 种不同的事务传播行为：
+- PROPAGATION_MANDATORY：支持当前事务，如果不存在当前事务，则引发异常。
+- PROPAGATION_NESTED：如果当前事务存在，则在嵌套事务中执行。
+- PROPAGATION_NEVER：不支持当前事务，如果当前事务存在，则引发异常。
+- PROPAGATION_NOT_SUPPORTED：不支持当前事务，始终以非事务方式执行。
+- PROPAGATION_REQUIRED：默认传播行为，如果存在当前事务，则当前方法就在当前事务中运行，如果不存在，则创建一个新的事务，并在这个新建的事务中运行。
+- PROPAGATION_REQUIRES_NEW：创建新事务，如果已经存在事务则暂停当前事务。
+- PROPAGATION_SUPPORTS：支持当前事务，如果不存在事务，则以非事务方式执行。
+
+
+TransactionStatus 接口提供了一些简单的方法，来控制事务的执行、查询事务的状态，接口定义如下。
+```java
+public interface TransactionStatus extends SavepointManager {
+    boolean isNewTransaction(); // 获取是否是新事务
+    boolean hasSavepoint(); // 获取是否存在保存点
+    void setRollbackOnly(); // 设置事务回滚
+    boolean isRollbackOnly(); // 获取事务是否回滚
+    boolean isCompleted(); // 获取事务是否完成
+}
+```
+
+### Spring SpEL
+
+Spring Expression Language（简称 SpEL）是一种功能强大的表达式语言，支持运行时查询和操作对象图。表达式语言一般是用最简单的形式完成最主要的工作，以此减少工作量。
+
+Java 有许多可用的表达式语言，例如 JSP EL，OGNL，MVEL 和 JBoss EL，SpEL 语法类似于 JSP EL，功能类似于 Struts2 中的 OGNL，能在运行时构建复杂表达式、存取对象图属性、调用对象方法等，并且能与 Spring 功能完美整合，如 SpEL 可以用来配置 Bean 定义。
+
+SpEL 并不与 Spring 直接相关，可以被独立使用。SpEL 表达式的创建是为了向 Spring 社区提供一种受良好支持的表达式语言，该语言适用于 Spring 家族中的所有产品。也就是说，SpEL 是一种与技术无关的 API，可以集成其它表达式语言。
+
+SpEL 提供了以下接口和类：
+- Expression interface：该接口负责评估表达式字符串。
+- ExpressionParser interface：该接口负责解析字符串。
+- EvaluationContext interface：该接口负责定义上下文环境。
+
+SpEL 支持如下表达式：
+1. 基本表达式
+	+ 字面量表达式、关系、逻辑与算术运算表达式、字符串连接及截取表达式、三目运算表达式、正则表达式、括号优先级表达式；
+2. 类相关表达式
+	+ 类类型表达式、类实例化、instanceof 表达式、变量定义及引用、赋值表达式、自定义函数、对象属性存取及安全导航表达式、对象方法调用、Bean 引用；
+3. 集合相关表达式
+	+ 内联 List、内联数组、集合、字典访问、列表、字典、数组修改、集合投影、集合选择；不支持多维内联数组初始化；不支持内联字典定义；
+4. 其他表达式
+	+ 模板表达式。
+
+注：SpEL 表达式中的关键字不区分大小写。
+
+#### SpEL对Bean定义的支持
+
+SpEL 表达式可以与 XML 或基于注解的配置元数据一起使用，SpEL 表达式以#{开头，以}结尾，如#{'Hello'}。
+```xml
+<!-- 使用以下表达式来设置属性或构造函数的参数值。 -->
+<bean id="number" class="com.example.Number">
+    <property name="randomNumber" value="#{T(java.lang.Math).random() * 100.0}"/>
+</bean>
+<!-- 通过名称引用其它 Bean 属性。 -->
+<bean id="shapeGuess" class="com.example.ShapeGuess">
+    <property name="shapSeed" value="#{number.randomNumber}"/>
+</bean>
+```
+```java
+// @Value 注解可以放在字段、方法、以及构造函数参数上，以指定默认值。
+
+public static class FieldValueTestBean
+    @value("#{ systemProperties[ 'user.region'] }")
+    private String defaultLocale;
+    public void setDefaultLocale (String defaultLocale) {
+        this.defaultLocale = defaultLocale;
+    }
+    public string getDefaultLocale() {
+        return this.defaultLocale;
+    }
+}
+```
+
+### Spring整合日志框架Log4j2
+
+对于一款软件而言，日志记录都是十分重要的。它不仅能够监控程序的运行情况，周期性的记录到文件中，还能够跟踪程序中代码的运行轨迹，向文件或控制台打印代码的调试信息。当程序出现错误时，日志记录可以帮助开发人员及时定位问题，因此对开发人员来说，日志记录更是尤为重要。
+
+Spring 5 框架自带了通用的日志封装，但依然可以整合其他的日志框架对日志进行记录，其中最广为人知的就是大名鼎鼎的 Log4j。
+
+#### Log4j
+
+Log4j 是 Apache 提供的一款开源的强有力的 Java 日志记录工具。它可以通过配置文件灵活、细致地控制日志的生成过程，例如日志级别、日志的输出类型、日志的输出方式以及输出格式等。
+
+Log4j 共有两个大版本，如下所示：
+- Log4j 1.x 1999 年至 2015 年：即我们常说的 Log4j，它于 1999 年首次发布，就迅速成为有史以来最常用的日志框架。
+	+ 2015 年 8 月 5 日，Apache Logging Services 宣布 Log4j 1.x 生命周期结束，其代码库不再发布更新，并鼓励用户升级到 Log4j 2.x。
+- Log4j 2.x	2014 年至今：即 Log4j2，2014 年 Log4j 2.x 作为 Log4j 1.x 的替代品发布。
+
+Log4j 2.x 是对 Log4j 1.x 的重大升级，它完全重写了 Log4j 的日志实现，比 Log4j 1.x 效率更高、更可靠且更易于开发和维护。此外，Log4j 2.x 还对 Logback 进行了许多改进，修复了 Logback 架构中的一些固有问题。
+
+特别注意：由于 Log4j2 在 2021 年 12 月 10 日被曝存在远程代码执行漏洞，所有 Apache Log4j 2.x <= 2.14.1 版本均受到影响。随后，Log4j2 官方对此漏洞进行了了修复。
+
+#### Spring 整合 Log4j2
+
+Spring 5 是基于 Java 8 实现的，其自身作了不少的优化，将许多不建议使用的类和方法从代码库中删除，其中就包括了 Log4jConfigListener（Spring 加载 Log4j  配置的监听器）。因此从 Spring 5 开始就不在支持对 Log4j 的整合，而更加推荐我们通过 Log4j2 进行日志记录。
+
+```
+log4j-api-2.17.1.jar
+log4j-core-2.17.1.jar
+log4j-slf4j18-impl-2.17.1.jar 绑定到 SLF4J 的配置器
+
+log4j-slf4j-impl-x.x.x.jar 应该与 SLF4J 1.7.x 版本或更早版本一起使用。
+log4j-slf4j18-impl-x.x.x.jar 应该与 SLF4J 1.8.x 版本或更高版本一起使用。
+```
 

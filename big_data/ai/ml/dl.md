@@ -13,9 +13,7 @@ TensorFlow-v1.4
 
 深度强化学习(DRL)、自动机器学习(AutoML)和图神经网络(GNN)。
 
-#### 历史
-
-##### 起源阶段
+#### 起源
 
 1943年，心里学家麦卡洛克和数学逻辑学家皮兹发表论文《神经活动中内在思想的逻辑演算》，提出了MP模型。MP模型是模仿神经元的结构和工作原理，构成出的一个基于神经网络的数学模型，本质上是一种“模拟人类大脑”的神经元模型。MP模型作为人工神经网络的起源，开创了人工神经网络的新时代，也奠定了神经网络模型的基础。
 
@@ -27,13 +25,13 @@ TensorFlow-v1.4
 
 1982年，著名物理学家约翰·霍普菲尔德发明了Hopfield神经网络。Hopfield神经网络是一种结合存储系统和二元系统的循环神经网络。Hopfield网络也可以模拟人类的记忆，根据激活函数的选取不同，有连续型和离散型两种类型，分别用于优化计算和联想记忆。但由于容易陷入局部最小值的缺陷，该算法并未在当时引起很大的轰动。
 
-##### 发展阶段
+##### 发展
 
 直到1986年，深度学习之父杰弗里·辛顿提出了一种适用于多层感知器的反向传播算法——BP算法。BP算法在传统神经网络正向传播的基础上，增加了误差的反向传播过程。反向传播过程不断地调整神经元之间的权值和阈值，直到输出的误差达到减小到允许的范围之内，或达到预先设定的训练次数为止。BP算法完美的解决了非线性分类问题，让人工神经网络再次的引起了人们广泛的关注。
 
 但是由于八十年代计算机的硬件水平有限，如：运算能力跟不上，这就导致当神经网络的规模增大时，再使用BP算法会出现“梯度消失”的问题。这使得BP算法的发展受到了很大的限制。再加上90年代中期，以SVM为代表的其它浅层机器学习算法被提出，并在分类、回归问题上均取得了很好的效果，其原理又明显不同于神经网络模型，所以人工神经网络的发展再次进入了瓶颈期。
 
-##### 爆发阶段
+##### 爆发
 
 2006年，杰弗里·辛顿以及他的学生鲁斯兰·萨拉赫丁诺夫正式提出了深度学习的概念。他们在世界顶级学术期刊《科学》发表的一篇文章中详细的给出了“梯度消失”问题的解决方案——通过无监督的学习方法逐层训练算法，再使用有监督的反向传播算法进行调优。该深度学习方法的提出，立即在学术圈引起了巨大的反响，以斯坦福大学、多伦多大学为代表的众多世界知名高校纷纷投入巨大的人力、财力进行深度学习领域的相关研究。而后又在迅速蔓延到工业界中。
 
@@ -47,9 +45,87 @@ TensorFlow-v1.4
 
 所以在深度学习的浪潮之下，不管是AI的相关从业者还是其他各行各业的工作者，都应该以开放、学习的心态关注深度学习、人工智能的热点动态。人工智能正在悄无声息的改变着我们的生活！
 
+### TensorFlow
+
+TensorFlow 是一个端到端开源机器学习平台。它拥有一个全面而灵活的生态系统，其中包含各种工具、库和社区资源，可助力研究人员推动先进机器学习技术的发展，并使开发者能够轻松地构建和部署由机器学习提供支持的应用。
+
+
+1. 轻松地构建模型
+	- TensorFlow 提供多个抽象级别，因此您可以根据自己的需求选择合适的级别。您可以使用高阶 Keras API 构建和训练模型，该 API 让您能够轻松地开始使用 TensorFlow 和机器学习。
+	+ 如果您需要更高的灵活性，则可以借助即刻执行环境进行快速迭代和直观的调试。对于大型机器学习训练任务，您可以使用 Distribution Strategy API 在不同的硬件配置上进行分布式训练，而无需更改模型定义。
+1. 随时随地进行可靠的机器学习生产
+	+ TensorFlow 始终提供直接的生产途径。不管是在服务器、边缘设备还是网络上，TensorFlow 都可以助您轻松地训练和部署模型，无论您使用何种语言或平台。
+	+ 如果您需要完整的生产型机器学习流水线，请使用 TensorFlow Extended (TFX)。要在移动设备和边缘设备上进行推断，请使用 TensorFlow Lite。请使用 TensorFlow.js 在 JavaScript 环境中训练和部署模型。
+1. 强大的研究实验：
+	+ 构建和训练先进的模型，并且不会降低速度或性能。借助 Keras Functional API 和 Model Subclassing API 等功能，TensorFlow 可以助您灵活地创建复杂拓扑并实现相关控制。为了轻松地设计原型并快速进行调试，请使用即刻执行环境。
+	+ TensorFlow 还支持强大的附加库和模型生态系统以供您开展实验，包括 Ragged Tensors、TensorFlow Probability、Tensor2Tensor 和 BERT。
+
+#### 安装
+使用 Python 的 pip 软件包管理器安装 TensorFlow。
+```shell
+# Requires the latest pip
+pip install --upgrade pip
+
+# Current stable release for CPU and GPU
+pip install tensorflow
+
+# Or try the preview build (unstable)
+pip install tf-nightly
+```
+
+TensorFlow 2 软件包需要使用高于 19.0 的 pip 版本（对于 macOS 来说，则需要高于 20.3 的 pip 版本）。
+
+##### 版本
+
+对于 TensorFlow 1.x，CPU 和 GPU 软件包是分开的：
+- tensorflow==1.15：仅支持 CPU 的版本
+- tensorflow-gpu==1.15：支持 GPU 的版本（适用于 Ubuntu 和 Windows）
+
+TensorFlow 2 软件包：
+- tensorflow：支持 CPU 和 GPU 的最新稳定版（适用于 Ubuntu 和 Windows）
+- tf-nightly：预览 build（不稳定）。Ubuntu 和 Windows 均包含 GPU 支持。
+
+##### GPU 支持
+
+对于 Ubuntu 和 Windows，需要安装支持 CUDA® 的显卡，才能实现 GPU 支持。
+
+为了实现 TensorFlow GPU 支持，需要各种驱动程序和库。为了简化安装并避免库冲突，建议您使用支持 GPU 的 TensorFlow Docker 映像（仅限 Linux）。此设置方式只需要 NVIDIA® GPU 驱动程序。
+
+Ubuntu2004
+```shell
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
+sudo apt-get update
+sudo apt-get -y install cuda
+```
+
+Windows 设置
+```powershell
+# 将 CUDA®、CUPTI 和 cuDNN 安装目录添加到 %PATH% 环境变量中。例如，如果 CUDA® 工具包安装到 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0，并且 cuDNN 安装到 C:\tools\cuda，请更新 %PATH% 以匹配路径：
+
+SET PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0\bin;%PATH%
+SET PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0\extras\CUPTI\lib64;%PATH%
+SET PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0\include;%PATH%
+SET PATH=C:\tools\cuda\bin;%PATH%
+```
+
+#### CUDA
+
+统一计算设备架构（Compute Unified Device Architecture，CUDA），是显卡厂商NVIDIA推出的一种通用并行计算平台和编程模型。
+
+CUDA™架构使GPU能够解决复杂的计算问题。它包含了CUDA指令集架构（ISA）以及GPU内部的并行计算引擎。开发人员可以使用C语言来为CUDA™架构编写程序，所编写出的程序可以在支持CUDA™的处理器上以超高性能运行。
+
+2008年NVIDIA推出CUDA SDK2.0版本，大幅提升了CUDA的使用范围。
+
+CUDA3.0已经开始支持C++和FORTRAN。
+
+目前为止基于 CUDA 的 GPU 销量已达数以百万计，软件开发商、科学家以及研究人员正在各个领域中运用 CUDA，其中包括图像与视频处理、计算生物学和化学、流体力学模拟、CT 图像再现、地震分析以及光线追踪等等。
+
 ### Caffe
 
-Caffe是一个清晰、可读性高、快速的深度学习框架，详情请参见Caffe官网。http://caffe.berkeleyvision.org
+Caffe是一个清晰、可读性高、快速的深度学习框架，详情请参见Caffe官网。<http://caffe.berkeleyvision.org>
 
 
 ### MXNet

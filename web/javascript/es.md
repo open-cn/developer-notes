@@ -1,58 +1,35 @@
-ECMAScript 是一种由Ecma国际（前身为欧洲计算机制造商协会,英文名称是European Computer Manufacturers Association）通过 ECMA-262 标准化的脚本程序设计语言。
+## ECMAScript
+
+ECMAScript 是一种由Ecma国际（前身为欧洲计算机制造商协会，European Computer Manufacturers Association）通过 ECMA-262 标准化的脚本程序设计语言。
+
+### 概述
+
+#### 起源
+
+- 1997年06月，ECMAScript 1.0版发布。
+- 1998年6月，ECMAScript 2.0版发布。
+    格式修正，以使得其形式与ISO/IEC16262国际标准一致。
+- 1999年12月，ECMAScript 3.0版发布，成为JavaScript的通行标准，得到了广泛支持。
+    + 强大的正则表达式，更好的文字链处理，新的控制指令，异常处理，错误定义更加明确，数输出的格式化及其它改变。
+- 2007年10月，ECMAScript 4.0版草案发布，对3.0版做了大幅升级，预计次年8月发布正式版本。
+    + 草案发布后，由于4.0版的目标过于激进，各方对于是否通过这个标准，发生了严重分歧。反对JavaScript的大幅升级，主张小幅改动。
+- 2008年7月，ECMA开会决定，中止ECMAScript 4.0的开发，将其中涉及现有功能改善的一小部分，发布为ECMAScript 3.1，而将其他激进的设想扩大范围，放入以后的版本。该版本的项目代号起名为Harmony（和谐）。会后不久，ECMAScript 3.1就改名为ECMAScript 5。
+- 2009年12月，ECMAScript 5.0版正式发布。
+    + 添加 "strict mode"（严格模式），添加 JSON 支持。
+    + Harmony项目则一分为二，一些较为可行的设想定名为JavaScript.next继续开发，后来演变成ECMAScript 6；一些不是很成熟的设想，则被视为JavaScript.next.next，在更远的将来再考虑推出。
+- 2011年6月，ECMAscript 5.1版发布，并且成为ISO国际标准（ISO/IEC 16262:2011）。
+- 2013年3月，ECMAScript 6草案冻结，不再添加新功能。新的功能设想将被放到ECMAScript 7。
+- 2013年12月，ECMAScript 6草案发布。然后是12个月的讨论期，听取各方反馈。
+- 2015年6月17日，ECMAScript 6发布正式版本，即ECMAScript 2015。
+    + 添加类和模块
+- 2016 ECMAScript 7发布正式版本，即ECMAScript 2016。
+    + 增加指数运算符`**`，增加 Array.prototype.includes
+- 2016 ECMAScript 8发布正式版本，即ECMAScript 2017。
+    + Object.values/Object.entries、字符串填充、Object.getOwnPropertyDescriptor、尾随逗号、异步函数、共享内存和原子等。
+- 2016 ECMAScript 9发布正式版本，即ECMAScript 2018。
 
 
-1997年06月，ECMAScript 1.0版发布。
-
-
-1998年6月，ECMAScript 2.0版发布。
-格式修正，以使得其形式与ISO/IEC16262国际标准一致。
-
-
-1999年12月，ECMAScript 3.0版发布，成为JavaScript的通行标准，得到了广泛支持。
-强大的正则表达式，更好的文字链处理，新的控制指令，异常处理，错误定义更加明确，数输出的格式化及其它改变。
-
-
-2007年10月，ECMAScript 4.0版草案发布，对3.0版做了大幅升级，预计次年8月发布正式版本。
-草案发布后，由于4.0版的目标过于激进，各方对于是否通过这个标准，发生了严重分歧。反对JavaScript的大幅升级，主张小幅改动。
-
-
-2008年7月，ECMA开会决定，中止ECMAScript 4.0的开发，将其中涉及现有功能改善的一小部分，发布为ECMAScript 3.1，
-而将其他激进的设想扩大范围，放入以后的版本。该版本的项目代号起名为Harmony（和谐）。
-会后不久，ECMAScript 3.1就改名为ECMAScript 5。
-
-
-2009年12月，ECMAScript 5.0版正式发布。
-添加 "strict mode"（严格模式），添加 JSON 支持。
-Harmony项目则一分为二，一些较为可行的设想定名为JavaScript.next继续开发，后来演变成ECMAScript 6；
-一些不是很成熟的设想，则被视为JavaScript.next.next，在更远的将来再考虑推出。
-
-
-2011年6月，ECMAscript 5.1版发布，并且成为ISO国际标准（ISO/IEC 16262:2011）。
-
-
-2013年3月，ECMAScript 6草案冻结，不再添加新功能。新的功能设想将被放到ECMAScript 7。
-
-
-2013年12月，ECMAScript 6草案发布。然后是12个月的讨论期，听取各方反馈。
-
-
-2015年6月17日，ECMAScript 6发布正式版本，即ECMAScript 2015。
-添加类和模块
-
-2016 ECMAScript 7发布正式版本，即ECMAScript 2016。
-增加指数运算符 (**)，增加 Array.prototype.includes
-
-
-2016 ECMAScript 8发布正式版本，即ECMAScript 2017。
-Object.values/Object.entries、字符串填充、Object.getOwnPropertyDescriptor、尾随逗号、异步函数、共享内存和原子等。
-
-
-2016 ECMAScript 9发布正式版本，即ECMAScript 2018。
-
-
-
-
-【ECMAScript 5】
+### ECMAScript 5
 
 
 Object/array literal extensions:
@@ -148,7 +125,7 @@ Strict mode
 
 
 
-【ECMAScript 6(2015)】
+### ECMAScript 6(2015)
 
 Optimisation
     proper tail calls (tail call optimisation)
@@ -217,8 +194,8 @@ Misc
     miscellaneous
 Annex b
     non-strict function semantics
-    __proto__ in object literals
-    Object.prototype.__proto__
+    `__proto__` in object literals
+    `Object.prototype.__proto__`
     String.prototype HTML methods
     RegExp.prototype.compile
     RegExp syntax extensions
@@ -226,11 +203,11 @@ Annex b
 
 
 
-【ECMAScript 2016】
+### ECMAScript 2016
 
 Features
-    exponentiation (**) operator
-    Array.prototype.includes
+    exponentiation (`**`) operator
+    `Array.prototype.includes`
 
 misc
     generator functions can't be used with "new"
@@ -242,7 +219,7 @@ misc
     Proxy internal calls, Array.prototype.includes
 
 
-【ECMAScript 2017】
+### ECMAScript 2017
 
 Features
     Object static methods
@@ -261,7 +238,7 @@ annex b
     assignments allowed in for-in head in non-strict mode
 
 
-【ECMAScript 2018】
+### ECMAScript 2018
 
 Features
     object rest/spread properties
@@ -276,7 +253,7 @@ misc
     template literal revision
 
 
-【ECMAScript 2019】
+### ECMAScript 2019
 
 Features
     Object.fromEntries
@@ -290,7 +267,7 @@ misc
     Well-formed JSON.stringify
 
 
-【ECMAScript 2020】
+### ECMAScript 2020
 
 Features
     String.prototype.matchAll
@@ -301,7 +278,7 @@ Features
     nullish coalescing operator
 
 
-【ECMAScript next】
+### ECMAScript next
 
 Candidate (stage 3)
     WeakReferences
@@ -359,7 +336,7 @@ Pre-strawman
     Metadata reflection API
 
 
-【ECMAScript intl 国际化】
+### ECMAScript intl
 
 Intl object
 Intl.Collator
@@ -376,7 +353,7 @@ Date.prototype.toLocaleDateString
 Date.prototype.toLocaleTimeString
 
 
-【ECMAScript non-standard】
+### ECMAScript non-standard
 
 SIMD (Single Instruction, Multiple Data)
 
@@ -389,9 +366,9 @@ function "arguments" property
 Function.prototype.isGenerator
 
 class extends null
-__count__
-__parent__
-__noSuchMethod__
+`__count__`
+`__parent__`
+`__noSuchMethod__`
 Array generics
 String generics
 
@@ -403,7 +380,7 @@ ECMAScript for XML (E4X)
 Sharp variables
 
 Iterator
-__iterator__
+`__iterator__`
 Generators (JS 1.8)
 Generator comprehensions (JS 1.8 style)
 Generator comprehensions (ES draft style)
@@ -435,8 +412,8 @@ Proxy "ownKeys" handler, duplicate keys for non-extensible targets (ES 2017 sema
 
 
 参考文档
-https://github.com/mdn/browser-compat-data
-https://caniuse.com
-http://kangax.github.io/compat-table/es6/
+<https://github.com/mdn/browser-compat-data>
+<https://caniuse.com>
+<http://kangax.github.io/compat-table/es6/>
 
 

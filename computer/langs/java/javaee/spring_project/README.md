@@ -144,9 +144,9 @@ EJB(Enterprise JavaBean): 我认为它是一组”功能”JavaBean的集合。�
 
 Java Persistence API（JPA）是一项标准技术，可让您将对象映射到关系数据库。spring-boot-starter-data-jpa POM 提供了一个快速起步的方法。它提供了以下关键依赖：
 
-- Hibernate  ——  最受欢迎的 JPA 实现之一。
-- Spring Data JPA ——  可以轻松地实现基于 JPA 的资源库。
-- Spring ORM  ——  Spring Framework 的核心 ORM 支持
+- Hibernate —— 最受欢迎的 JPA 实现之一。
+- Spring Data JPA —— 可以轻松地实现基于 JPA 的资源库。
+- Spring ORM —— Spring Framework 的核心 ORM 支持
 
 
 ##### MybatisPlus 主键策略
@@ -266,7 +266,7 @@ SpringFactoriesLoader属于Spring框架私有的一种扩展方案，其主要�
 
 #### 主要流程
 
-1） 如果使用的是SpringApplication的静态run方法，那么，这个方法里面首先要创建一个SpringApplication对象实例，然后调用这个创建好的SpringApplication的实例方法。在SpringApplication实例初始化的时候，它会提前做几件事情：
+1） 如果使用的是SpringApplication的静态run方法，那么，这个方法里面首先要创建一个SpringApplication对象实例，然后调用这个创建好的SpringApplication的实例方法。在SpringApplication实例初始化的时候，它会做几件事情：
 
 - 根据classpath里面是否存在某个特征类org.springframework.web.context.ConfigurableWebApplicationContext来决定是否应该创建一个为Web应用使用的ApplicationContext类型。
 - 使用SpringFactoriesLoader在应用的classpath中查找并加载所有可用的ApplicationContextInitializer。
